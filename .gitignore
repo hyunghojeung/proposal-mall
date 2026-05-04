@@ -39,6 +39,7 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# Claude Code local settings (optional — keep out of repo)
+# Claude Code local settings & runtime artifacts
 .claude/settings.local.json
+.claude/*.lock
 

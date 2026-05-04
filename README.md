@@ -30,7 +30,12 @@ npx prisma generate
 #   b) DATABASE_URL이 설정되어 있다면:
 npx prisma db push
 
-# 5. 개발 서버 시작
+# 5. 시드 데이터 (상품/단가표/FAQ/공지) — 둘 중 하나
+#   a) Supabase SQL Editor에 prisma/seed.sql 붙여넣고 Run
+#   b) DATABASE_URL이 설정되어 있다면:
+npx prisma db seed
+
+# 6. 개발 서버 시작
 npm run dev
 ```
 
