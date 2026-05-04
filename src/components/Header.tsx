@@ -59,6 +59,25 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+          <Link
+            href="/admin"
+            aria-label="관리자"
+            title="관리자"
+            className="ml-1 flex h-8 w-8 items-center justify-center rounded-full border border-line text-ink-sub transition-colors hover:border-brand hover:text-brand"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </Link>
         </nav>
       </div>
     </header>
