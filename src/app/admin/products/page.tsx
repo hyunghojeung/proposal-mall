@@ -1,0 +1,102 @@
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { ProductCategory } from "@prisma/client";
+import { isAdminAuthenticated } from "@/lib/auth";
+import { AdminShell } from "@/components/AdminShell";
+import { ProductRowActions } from "@/components/ProductRowActions";
+import { prisma } from "@/lib/prisma";
+
+export const metadata = { title: "상품 관리 | 관리자" };
+export const dynamic = "force-dynamic";
+
+const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  CARRIER_BOX: "캐리어박스",
+  MAGNETIC_BOX: "자석박스",
+  BINDING_3_RING: "3공바인더",
+  BINDING_PT: "PT용바인더",
+  BINDING_HARDCOVER: "하드커버",
+  PAPER_INNER: "내지인쇄",
+};
+
+export default async function AdminProductsPage() {
+  if (!isAdminAuthenticated()) redirect("/admin/login");
+
+  const products = await prisma.product
+    .findMany({
+      orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+      include: { _count: { select: { optionGroups: true, orderItems: true } } },
+    })
+    .catch(() => []);
+
+  return (
+    <AdminShell active="products" title="상품 관리">
+      <div className="mb-4 flex justify-between">
+        <p className="text-[12px] text-ink-sub">
+          총 <b>{products.length}</b>개 · 비활성 상품도 포함
+        </p>
+        <Link
+          href="/admin/products/new"
+          className="rounded-sm bg-brand px-4 py-2 text-[13px] font-bold text-white hover:bg-brand-dark"
+        >
+          + 새 상품
+        </Link>
+      </div>
+
+      {products.length === 0 ? (
+        <p className="rounded border border-line bg-bg px-4 py-12 text-center text-[13px] text-ink-sub">
+          등록된 상품이 없습니다.
+        </p>
+      ) : (
+        <table className="w-full border-collapse text-[13px]">
+          <thead className="border-y border-line bg-bg text-left text-[12px] text-ink-sub">
+            <tr>
+              <th className="px-3 py-2 font-medium">slug</th>
+              <th className="px-3 py-2 font-medium">상품명</th>
+              <th className="px-3 py-2 font-medium">카테고리</th>
+              <th className="px-3 py-2 text-center font-medium">옵션 그룹</th>
+              <th className="px-3 py-2 text-center font-medium">주문 이력</th>
+              <th className="px-3 py-2 text-center font-medium">정렬</th>
+              <th className="px-3 py-2 text-center font-medium">노출</th>
+              <th className="px-3 py-2 text-right font-medium">액션</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((p) => (
+              <tr
+                key={p.id}
+                className={`border-b border-line align-middle ${p.isActive ? "" : "opacity-60"}`}
+              >
+                <td className="px-3 py-2.5 font-mono text-[12px] text-ink-sub">{p.slug}</td>
+                <td className="px-3 py-2.5 font-medium text-ink">
+                  <Link href={`/admin/products/${p.id}`} className="hover:text-brand">
+                    {p.name}
+                  </Link>
+                </td>
+                <td className="px-3 py-2.5 text-ink-sub">{CATEGORY_LABELS[p.category]}</td>
+                <td className="px-3 py-2.5 text-center text-ink-sub">{p._count.optionGroups}</td>
+                <td className="px-3 py-2.5 text-center text-ink-sub">{p._count.orderItems}</td>
+                <td className="px-3 py-2.5 text-center text-ink-sub">{p.sortOrder}</td>
+                <td className="px-3 py-2.5 text-center">
+                  <ProductRowActions
+                    id={p.id}
+                    isActive={p.isActive}
+                    hasOrders={p._count.orderItems > 0}
+                    type="toggle"
+                  />
+                </td>
+                <td className="px-3 py-2.5 text-right">
+                  <ProductRowActions
+                    id={p.id}
+                    isActive={p.isActive}
+                    hasOrders={p._count.orderItems > 0}
+                    type="actions"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </AdminShell>
+  );
+}
