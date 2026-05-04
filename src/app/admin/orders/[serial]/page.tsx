@@ -1,0 +1,160 @@
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { isAdminAuthenticated } from "@/lib/auth";
+import { AdminShell } from "@/components/AdminShell";
+import { OrderAdminActions } from "@/components/OrderAdminActions";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+
+const STATUS_LABEL: Record<string, string> = {
+  PENDING: "결제대기",
+  PAID: "결제완료",
+  IN_PRODUCTION: "제작중",
+  SHIPPING: "배송중",
+  DELIVERED: "배송완료",
+  CANCELLED: "취소",
+};
+
+export default async function AdminOrderDetail({
+  params,
+}: {
+  params: { serial: string };
+}) {
+  if (!isAdminAuthenticated()) redirect("/admin/login");
+
+  const order = await prisma.order
+    .findUnique({
+      where: { serial: params.serial },
+      include: { items: true },
+    })
+    .catch(() => null);
+
+  if (!order) notFound();
+
+  return (
+    <AdminShell active="orders" title={`주문 ${order.serial}`}>
+      <div className="mb-4 flex items-center gap-2 text-[13px]">
+        <Link href="/admin/orders" className="text-ink-sub hover:text-ink">← 목록</Link>
+        <span className="text-ink-del">·</span>
+        <span className="rounded-sm bg-brand-light px-2 py-0.5 text-[11px] font-bold text-brand">
+          {STATUS_LABEL[order.status]}
+        </span>
+        <span className="text-[12px] text-ink-sub">
+          {new Date(order.createdAt).toLocaleString("ko-KR")} 주문
+        </span>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="space-y-6">
+          <Section title="주문 상품">
+            <ul className="divide-y divide-line">
+              {order.items.map((it) => (
+                <li key={it.id} className="flex justify-between gap-3 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-ink">{it.productName}</p>
+                    <p className="mt-0.5 text-[11px] text-ink-sub">
+                      {it.optionsJson && typeof it.optionsJson === "object"
+                        ? Object.entries(it.optionsJson as Record<string, string>)
+                            .map(([k, v]) => `${k}: ${v}`)
+                            .join(" · ")
+                        : ""}
+                      {it.pageCount ? ` · ${it.pageCount}쪽` : ""} · {it.quantity}개 · 단가 {it.unitPrice.toLocaleString()}원
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-[13px] font-bold text-ink">
+                    {it.subtotal.toLocaleString()}원
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Section>
+
+          <Section title="주문자 / 배송">
+            <dl className="grid gap-2 text-[13px]">
+              <Row label="이름" value={order.customerName} />
+              <Row label="연락처" value={order.customerPhone} />
+              <Row label="이메일" value={order.customerEmail} />
+              {order.company && <Row label="회사" value={order.company} />}
+              <Row
+                label="수령 방식"
+                value={order.deliveryMethod === "COURIER" ? "택배 배송" : "직접 방문 수령"}
+              />
+              {order.shippingAddress && <Row label="배송지" value={order.shippingAddress} />}
+            </dl>
+            {order.memo && (
+              <div className="mt-4 rounded border border-line bg-bg p-3 text-[12px]">
+                <p className="mb-1 font-bold text-ink">고객 요청사항</p>
+                <p className="whitespace-pre-wrap text-ink-sub">{order.memo}</p>
+              </div>
+            )}
+          </Section>
+
+          <Section title="결제 / 파일">
+            <dl className="grid gap-2 text-[13px]">
+              <Row label="상품 합계" value={`${(order.totalAmount - order.shippingFee).toLocaleString()}원`} />
+              <Row
+                label="배송비"
+                value={order.shippingFee === 0 ? "무료" : `${order.shippingFee.toLocaleString()}원`}
+              />
+              <Row label="결제 금액" value={`${order.totalAmount.toLocaleString()}원`} bold />
+              {order.paymentTid && <Row label="PG 거래번호" value={order.paymentTid} />}
+              <Row
+                label="파일 업로드"
+                value={
+                  order.fileLink ? (
+                    <a
+                      href={order.fileLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand hover:underline"
+                    >
+                      Dropbox 링크 열기 →
+                    </a>
+                  ) : (
+                    "미생성"
+                  )
+                }
+              />
+            </dl>
+          </Section>
+        </div>
+
+        <aside className="rounded border border-line bg-bg p-5 lg:sticky lg:top-6 lg:h-fit">
+          <h2 className="mb-4 text-[14px] font-bold text-ink">관리자 작업</h2>
+          <OrderAdminActions
+            serial={order.serial}
+            initialStatus={order.status}
+            initialMemo={order.memo}
+          />
+        </aside>
+      </div>
+    </AdminShell>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="rounded border border-line bg-white p-5">
+      <h2 className="mb-3 text-[14px] font-bold text-ink">{title}</h2>
+      {children}
+    </section>
+  );
+}
+
+function Row({
+  label,
+  value,
+  bold,
+}: {
+  label: string;
+  value: React.ReactNode;
+  bold?: boolean;
+}) {
+  return (
+    <div className="flex justify-between gap-3 border-b border-line py-1.5 last:border-b-0">
+      <dt className="text-ink-sub">{label}</dt>
+      <dd className={`text-right ${bold ? "font-bold text-ink" : "text-ink"}`}>{value}</dd>
+    </div>
+  );
+}
