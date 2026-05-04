@@ -61,13 +61,48 @@ export default async function OrderDetailPage({
             <p className="mt-2 text-[13px] leading-relaxed text-ink">
               주문번호 <b>{order.serial}</b> · {order.totalAmount.toLocaleString()}원
               <br />
-              파일은 안내드린 Dropbox 링크에 업로드하시거나{" "}
-              <a href="mailto:blackcopy2@naver.com" className="font-bold text-brand hover:underline">
-                blackcopy2@naver.com
-              </a>{" "}
-              으로 첨부해 주세요.
+              주문 확인 메일이 <b>{order.customerEmail}</b> 로 발송되었습니다.
             </p>
           </div>
+        )}
+
+        {order.status !== "CANCELLED" && (
+          <section className="mb-8 rounded border border-line bg-white p-5">
+            <h2 className="text-[15px] font-bold text-ink">파일 업로드</h2>
+            {order.fileLink ? (
+              <>
+                <p className="mt-2 text-[13px] leading-relaxed text-ink-sub">
+                  아래 버튼으로 인쇄용 파일을 업로드해 주세요. 별도 로그인 없이 드래그·드롭으로 전송됩니다.
+                </p>
+                <a
+                  href={order.fileLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white transition-colors hover:bg-brand-dark"
+                >
+                  파일 업로드 하기
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                </a>
+                <p className="mt-3 text-[12px] text-ink-sub">
+                  또는{" "}
+                  <a href="mailto:blackcopy2@naver.com" className="text-brand hover:underline">
+                    blackcopy2@naver.com
+                  </a>{" "}
+                  으로 첨부해 보내주셔도 됩니다.
+                </p>
+              </>
+            ) : (
+              <p className="mt-2 text-[13px] leading-relaxed text-ink-sub">
+                결제 완료 후 업로드 링크가 자동 생성됩니다. 링크가 보이지 않을 경우{" "}
+                <a href="mailto:blackcopy2@naver.com" className="text-brand hover:underline">
+                  blackcopy2@naver.com
+                </a>{" "}
+                으로 파일을 첨부해 주세요.
+              </p>
+            )}
+          </section>
         )}
 
         <header className="border-b border-line pb-5">
