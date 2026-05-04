@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   type CartItem,
@@ -13,6 +14,7 @@ import {
 import { shippingFee, FREE_SHIPPING_THRESHOLD } from "@/lib/pricing";
 
 export function CartView() {
+  const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [delivery, setDelivery] = useState<"COURIER" | "PICKUP">("COURIER");
@@ -158,14 +160,13 @@ export function CartView() {
 
         <button
           type="button"
-          disabled
-          className="mt-5 w-full rounded-sm bg-brand py-3 text-[14px] font-bold text-white opacity-60"
-          title="결제 단계는 다음 PR에서 구현됩니다 (사이다페이 연동)"
+          onClick={() => router.push("/checkout")}
+          className="mt-5 w-full rounded-sm bg-brand py-3 text-[14px] font-bold text-white transition-colors hover:bg-brand-dark"
         >
-          결제하기 (준비 중)
+          결제하기
         </button>
         <p className="mt-2 text-center text-[11px] text-ink-sub">
-          사이다페이 연동은 다음 단계에서 추가됩니다.
+          다음 단계에서 주문자 정보를 입력하고 결제까지 완료합니다.
         </p>
       </aside>
     </div>
