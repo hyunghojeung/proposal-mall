@@ -4,6 +4,8 @@ import { LogoutButton } from "./LogoutButton";
 const NAV = [
   { href: "/admin", label: "대시보드" },
   { href: "/admin/orders", label: "주문현황" },
+  { href: "/admin/products", label: "상품 관리" },
+  { href: "/admin/pricing", label: "단가표" },
   { href: "/admin/inquiries", label: "고객문의" },
   { href: "/admin/faqs", label: "FAQ" },
   { href: "/admin/notices", label: "공지사항" },
