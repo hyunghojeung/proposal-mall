@@ -1,0 +1,254 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ProductCategory } from "@prisma/client";
+import { addToCart } from "@/lib/cart";
+
+interface OptionGroupClient {
+  id: number;
+  name: string;
+  required: boolean;
+  values: { id: number; label: string }[];
+}
+
+interface Props {
+  product: {
+    id: number;
+    slug: string;
+    name: string;
+    category: ProductCategory;
+    description: string | null;
+    optionGroups: OptionGroupClient[];
+  };
+}
+
+interface QuoteResp {
+  unitPrice: number;
+  subtotal: number;
+  qtyTier: string;
+  breakdown: string;
+  error?: string;
+}
+
+const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  CARRIER_BOX: "제안서캐리어박스",
+  MAGNETIC_BOX: "자석박스",
+  BINDING_3_RING: "3공바인더",
+  BINDING_PT: "PT용바인더",
+  BINDING_HARDCOVER: "하드커버스프링제본",
+  PAPER_INNER: "내지 인쇄",
+};
+
+export function ProductDetailClient({ product }: Props) {
+  const router = useRouter();
+  const isPaper = product.category === ProductCategory.PAPER_INNER;
+
+  const initialOptions = useMemo(() => {
+    const o: Record<string, string> = {};
+    for (const g of product.optionGroups) {
+      if (g.values[0]) o[g.name] = g.values[0].label;
+    }
+    return o;
+  }, [product.optionGroups]);
+
+  const [options, setOptions] = useState<Record<string, string>>(initialOptions);
+  const [quantity, setQuantity] = useState(1);
+  const [pageCount, setPageCount] = useState(isPaper ? 100 : 0);
+  const [quote, setQuote] = useState<QuoteResp | null>(null);
+  const [quoteErr, setQuoteErr] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const reqIdRef = useRef(0);
+
+  // 옵션/수량/페이지 바뀔 때마다 가격 다시 계산
+  useEffect(() => {
+    const reqId = ++reqIdRef.current;
+    setLoading(true);
+    setQuoteErr(null);
+    const payload = {
+      slug: product.slug,
+      options,
+      quantity,
+      ...(isPaper ? { pageCount } : {}),
+    };
+    fetch("/api/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(async (r) => {
+        const data = (await r.json()) as QuoteResp;
+        if (reqId !== reqIdRef.current) return;
+        if (!r.ok) {
+          setQuote(null);
+          setQuoteErr(data.error ?? "가격 계산 실패");
+        } else {
+          setQuote(data);
+        }
+      })
+      .catch(() => {
+        if (reqId !== reqIdRef.current) return;
+        setQuote(null);
+        setQuoteErr("네트워크 오류");
+      })
+      .finally(() => {
+        if (reqId === reqIdRef.current) setLoading(false);
+      });
+  }, [product.slug, options, quantity, pageCount, isPaper]);
+
+  function handleAddToCart() {
+    if (!quote) return;
+    addToCart({
+      productId: product.id,
+      slug: product.slug,
+      productName: product.name,
+      options,
+      quantity,
+      pageCount: isPaper ? pageCount : undefined,
+      unitPrice: quote.unitPrice,
+      subtotal: quote.subtotal,
+    });
+    router.push("/cart");
+  }
+
+  return (
+    <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+      {/* 좌측: 이미지 자리 */}
+      <div className="aspect-[4/5] w-full rounded border border-line bg-bg" />
+
+      {/* 우측: 옵션 + 가격 */}
+      <div>
+        <p className="mb-2 text-[12px] font-medium text-brand">
+          {CATEGORY_LABELS[product.category]}
+        </p>
+        <h1 className="mb-3 text-[24px] font-black tracking-tight text-ink">
+          {product.name}
+        </h1>
+        {product.description && (
+          <p className="text-[13px] leading-relaxed text-ink-sub">
+            {product.description}
+          </p>
+        )}
+
+        <div className="my-6 border-t border-line" />
+
+        {product.optionGroups.map((g) => (
+          <div key={g.id} className="mb-5">
+            <label className="mb-2 block text-[13px] font-bold text-ink">
+              {g.name}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {g.values.map((v) => {
+                const selected = options[g.name] === v.label;
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() =>
+                      setOptions((o) => ({ ...o, [g.name]: v.label }))
+                    }
+                    className={`rounded-sm border px-3 py-2 text-[13px] transition-colors ${
+                      selected
+                        ? "border-brand bg-brand-light font-bold text-brand"
+                        : "border-line text-ink hover:border-ink"
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        {isPaper && (
+          <div className="mb-5">
+            <label className="mb-2 block text-[13px] font-bold text-ink">
+              페이지 수
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={2000}
+              value={pageCount}
+              onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
+              className="w-32 rounded-sm border border-line px-3 py-2 text-[14px] outline-none focus:border-brand"
+            />
+            <p className="mt-1.5 text-[12px] text-ink-sub">
+              50쪽 이하 / 51~100쪽 / 101쪽 이상 구간으로 단가 적용
+            </p>
+          </div>
+        )}
+
+        <div className="mb-6">
+          <label className="mb-2 block text-[13px] font-bold text-ink">수량</label>
+          <div className="flex w-fit items-stretch overflow-hidden rounded-sm border border-line">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              className="px-3 py-2 text-ink hover:bg-bg"
+              aria-label="수량 감소"
+            >
+              −
+            </button>
+            <input
+              type="number"
+              min={1}
+              max={10000}
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+              className="w-20 border-0 text-center text-[14px] outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => q + 1)}
+              className="px-3 py-2 text-ink hover:bg-bg"
+              aria-label="수량 증가"
+            >
+              +
+            </button>
+          </div>
+          <p className="mt-1.5 text-[12px] text-ink-sub">
+            수량 구간 1 / 2-4 / 5-9 / 10+ 에 따라 단가가 자동 적용됩니다.
+          </p>
+        </div>
+
+        <div className="rounded border border-line bg-bg p-5">
+          {loading && !quote ? (
+            <p className="text-[13px] text-ink-sub">계산 중…</p>
+          ) : quoteErr ? (
+            <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
+          ) : quote ? (
+            <>
+              <div className="mb-3 flex items-baseline justify-between">
+                <span className="text-[13px] text-ink-sub">단가</span>
+                <span className="text-[15px] font-medium text-ink">
+                  {quote.unitPrice.toLocaleString()}원
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-[14px] font-bold text-ink">합계</span>
+                <span className="text-[24px] font-black tracking-tight text-brand">
+                  {quote.subtotal.toLocaleString()}원
+                </span>
+              </div>
+              <p className="mt-2 text-[12px] text-ink-sub">{quote.breakdown}</p>
+            </>
+          ) : (
+            <p className="text-[13px] text-ink-sub">옵션을 선택해 주세요.</p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={!quote || loading}
+          className="mt-5 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          장바구니 담기
+        </button>
+      </div>
+    </div>
+  );
+}
