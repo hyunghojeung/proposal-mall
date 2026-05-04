@@ -52,7 +52,10 @@ export function Footer() {
         </div>
 
         <div className="mt-10 border-t border-line pt-6 text-[12px] text-ink-del">
-          © {new Date().getFullYear()} 블랙카피 · 제안서몰. All rights reserved.
+          <Link href="/admin" className="transition-colors hover:text-ink-sub">
+            © {new Date().getFullYear()} 블랙카피
+          </Link>{" "}
+          · 제안서몰. All rights reserved.
         </div>
       </div>
     </footer>
