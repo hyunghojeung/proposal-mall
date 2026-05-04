@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>제안서몰 관리자 패널</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#E8481A;--bg-side:#0F1624;--bg-main:#111827;
+  --bg-card:#1E2D40;--bd:#2D3F5A;
+  --blue:#3B82F6;--green:#22C55E;--yellow:#F59E0B;--red:#EF4444;
+  --text:#E2E8F0;--text-sub:#94A3B8;--text-dim:#64748B;--rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Noto Sans KR',sans-serif;-webkit-font-smoothing:antialiased;font-size:13px}
+body{background:var(--bg-main);color:var(--text)}
+button{cursor:pointer;font-family:inherit;border:none}
+input,select{font-family:inherit}
+#admin-screen{display:flex;height:100vh;flex-direction:column}
+/* 상단바 */
+.topbar{height:46px;background:var(--or);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+.topbar-logo{font-size:15px;font-weight:900;color:#fff;font-style:italic}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{font-size:12px;color:rgba(255,255,255,.85)}
+.topbar-logout{font-size:12px;font-weight:600;color:rgba(255,255,255,.9);background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.3);border-radius:100px;padding:4px 12px}
+/* 레이아웃 */
+.body{display:flex;flex:1;overflow:hidden}
+/* 사이드바 */
+.sidebar{width:160px;background:var(--bg-side);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:18px 16px 14px;font-size:17px;font-weight:900;color:var(--or);font-style:italic;letter-spacing:-.5px;border-bottom:1px solid var(--bd)}
+.sidebar-logo small{font-size:10px;font-weight:500;color:var(--text-dim);display:block;font-style:normal;margin-top:2px}
+.menu-item{padding:13px 16px;font-size:13px;font-weight:600;color:var(--text-sub);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:9px;border-left:3px solid transparent}
+.menu-item:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.menu-item.on{color:#fff;background:rgba(59,130,246,.15);border-left-color:var(--blue);font-weight:700}
+/* 메인 */
+.main{flex:1;overflow-y:auto;padding:24px 28px;background:var(--bg-main)}
+.main::-webkit-scrollbar{width:5px}
+.main::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+/* 페이지 헤더 */
+.page-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:20px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:10px}
+.page-cat{color:var(--blue)}
+.page-actions{display:flex;gap:8px}
+.btn{padding:8px 16px;font-size:12px;font-weight:700;border-radius:var(--rs);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.btn-blue{background:var(--blue);color:#fff;border:none}
+.btn-ghost{background:transparent;color:var(--text-sub);border:1px solid var(--bd)}
+.btn-ghost:hover{color:var(--text)}
+/* 통계 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{background:var(--bg-card);border:1px solid var(--bd);border-radius:var(--rs);padding:18px 20px}
+.stat-lbl{font-size:12px;color:var(--text-sub);margin-bottom:8px}
+.stat-val{font-size:26px;font-weight:900;letter-spacing:-1px}
+.c-blue{color:var(--blue)}.c-green{color:var(--green)}.c-or{color:var(--or)}
+/* 카드 */
+.card{background:var(--bg-card);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd)}
+.card-title{font-size:14px;font-weight:800;color:var(--text)}
+.card-cnt{font-size:12px;color:var(--text-sub);margin-left:6px}
+.card-total{font-size:13px;font-weight:700;color:var(--or)}
+/* 야간 토글 */
+.night-bar{display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.12)}
+.toggle{position:relative;width:40px;height:22px;cursor:pointer;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.tsl{position:absolute;inset:0;background:#374151;border-radius:22px;transition:background .2s}
+.tsl:before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle input:checked+.tsl{background:var(--or)}
+.toggle input:checked+.tsl:before{transform:translateX(18px)}
+.night-st{font-size:12px;font-weight:700}
+.night-st.on{color:var(--or)}.night-st.off{color:var(--text-dim)}
+/* 필터 */
+.filter-bar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bd)}
+.f-input{flex:1;max-width:260px;padding:7px 12px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:12px;outline:none}
+.f-input:focus{border-color:var(--blue)}
+.f-select{padding:7px 10px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text-sub);font-size:12px;outline:none;cursor:pointer}
+/* 테이블 */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:10px 14px;font-size:11.5px;font-weight:700;color:var(--text-dim);text-align:left;background:rgba(0,0,0,.2);border-bottom:1px solid var(--bd);white-space:nowrap}
+tr.dr:hover{background:rgba(59,130,246,.05)}
+tr.dr td{padding:13px 14px;border-bottom:1px solid rgba(45,63,90,.4);vertical-align:middle}
+tr.dr:nth-child(4n+3) td{background:rgba(0,0,0,.05)}
+tr.sr td{padding:7px 14px 12px;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.14);font-size:11.5px;color:var(--text-sub)}
+/* ① 주문번호 */
+.o-no{font-size:13px;font-weight:800;color:var(--blue);letter-spacing:-.3px;white-space:nowrap;font-variant-numeric:tabular-nums}
+/* 고객 */
+.c-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.c-email{font-size:11px;color:var(--text-dim);margin-bottom:1px}
+.c-phone{font-size:11.5px;color:var(--text-sub)}
+/* ② 상품명 */
+.p-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.p-name{font-size:13.5px;font-weight:700;color:var(--text);white-space:nowrap}
+.p-div{font-size:12px;color:var(--bd);flex-shrink:0}
+.p-detail{font-size:12.5px;font-weight:600;color:var(--blue);white-space:nowrap;background:rgba(59,130,246,.1);padding:2px 8px;border-radius:100px}
+/* 배지 */
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap}
+.bg-green{background:rgba(34,197,94,.18);color:var(--green)}
+.bg-blue{background:rgba(59,130,246,.18);color:var(--blue)}
+.bg-yellow{background:rgba(245,158,11,.18);color:var(--yellow)}
+.bg-red{background:rgba(239,68,68,.18);color:var(--red)}
+.bg-gray{background:rgba(100,116,139,.18);color:var(--text-sub)}
+/* 결제수단 */
+.pm{font-size:12px;color:var(--text);margin-bottom:2px}
+.pt{font-size:11px;color:var(--blue)}
+/* 금액 */
+.amt{font-size:13px;font-weight:800;color:var(--text);white-space:nowrap}
+/* 날짜 */
+.dt{font-size:12px;color:var(--text-sub);white-space:nowrap;line-height:1.7}
+/* ③ 관리버튼 */
+.mgmt{display:flex;gap:5px}
+.mb{padding:5px 11px;font-size:11.5px;font-weight:700;border-radius:4px;cursor:pointer;white-space:nowrap}
+.mb:hover{opacity:.82}
+.mb-del{background:var(--red);color:#fff}
+.mb-cancel{background:var(--yellow);color:#fff}
+.mb-doc{background:var(--blue);color:#fff}
+/* 테이블 푸터 */
+.tbl-footer{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--bd)}
+.tbl-info{font-size:12px;color:var(--text-dim)}
+.pg{display:flex;gap:4px}
+.pgb{width:28px;height:28px;border-radius:4px;border:1px solid var(--bd);background:transparent;color:var(--text-sub);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pgb:hover{border-color:var(--blue);color:var(--blue)}
+.pgb.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+/* 단가 input */
+.pi{width:86px;padding:5px 8px;background:var(--bg-side);border:1px solid var(--bd);border-radius:4px;color:var(--text);font-size:12px;outline:none;text-align:right}
+.pi:focus{border-color:var(--blue)}
+.pn{width:100px;padding:5px 8px;background:var(--bg-side);border:1px solid var(--bd);border-radius:4px;color:var(--text-sub);font-size:11px;outline:none}
+
+/* ══ 주문서 모달 ══ */
+.sh-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:900;display:none;align-items:flex-start;justify-content:center;padding:32px 20px;overflow-y:auto}
+.sh-overlay.open{display:flex}
+.sh-box{background:#fff;border-radius:12px;width:100%;max-width:680px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);margin:auto}
+.sh-topbar{background:#E8481A;color:#fff;padding:13px 20px;display:flex;align-items:center;justify-content:space-between}
+.sh-topbar-title{font-size:14px;font-weight:800}
+.sh-btns{display:flex;gap:8px}
+.sh-btn{padding:6px 14px;border-radius:var(--rs);font-size:12px;font-weight:700;cursor:pointer}
+.sh-btn-print{background:#fff;color:#E8481A;border:none}
+.sh-btn-close{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4)}
+/* 주문서 내용 */
+.sheet{padding:28px;color:#1A1A1A;font-family:'Noto Sans KR',sans-serif}
+.sh-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #E8481A}
+.sh-logo{font-size:22px;font-weight:900;color:#E8481A;font-style:italic;letter-spacing:-.5px}
+.sh-logo-sub{font-size:11px;color:#888;margin-top:3px}
+.sh-no-area{text-align:right}
+.sh-no{font-size:18px;font-weight:900;color:#1A1A1A;letter-spacing:-.5px}
+.sh-print-dt{font-size:11px;color:#888;margin-top:3px}
+.sh-sec{margin-bottom:18px}
+.sh-sec-title{font-size:12px;font-weight:800;color:#fff;background:#E8481A;padding:6px 12px;border-radius:4px 4px 0 0;display:flex;align-items:center;gap:6px}
+.sh-tbl{width:100%;border-collapse:collapse}
+.sh-tbl th{background:#F5F5F5;padding:8px 12px;font-size:12px;font-weight:700;color:#555;border:1px solid #E0E0E0;text-align:left;width:110px;white-space:nowrap}
+.sh-tbl td{padding:8px 12px;font-size:13px;color:#1A1A1A;border:1px solid #E0E0E0}
+.sh-tbl td.bold{font-weight:700}
+.sh-tbl td.orange{color:#E8481A;font-weight:800;font-size:15px}
+.sh-foot{display:flex;align-items:flex-end;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid #eee}
+.sh-foot-note{font-size:11px;color:#aaa;line-height:1.7}
+.sh-sign{font-size:11px;color:#888;text-align:right}
+/* 삭제 모달 */
+.del-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:none;align-items:center;justify-content:center}
+.del-overlay.open{display:flex}
+.del-box{background:var(--bg-card);border:1px solid var(--bd);border-radius:12px;padding:28px;width:300px;text-align:center}
+.del-btns{display:flex;gap:8px;margin-top:20px}
+.del-btn{flex:1;padding:10px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer}
+.del-no{background:rgba(255,255,255,.08);border:1px solid var(--bd);color:var(--text-sub)}
+.del-yes{background:var(--red);color:#fff;border:none}
+
+/* ══ 공통 모달 ══ */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:800;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.modal-ov.open{display:flex}
+.modal-wrap{background:var(--bg-card);border:1px solid var(--bd);border-radius:12px;width:100%;margin:auto;overflow:hidden}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.2)}
+.modal-hd-title{font-size:14px;font-weight:800;color:var(--text)}
+.modal-close{font-size:20px;color:var(--text-sub);cursor:pointer;background:none;border:none;line-height:1;padding:0}
+.modal-body{padding:22px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--bd)}
+
+/* 폼 공통 */
+.m-row{margin-bottom:14px}.m-row:last-child{margin-bottom:0}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.m-label{display:block;font-size:11.5px;font-weight:700;color:var(--text-sub);margin-bottom:6px;letter-spacing:.2px}
+.m-input{width:100%;padding:9px 12px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;outline:none;font-family:inherit;transition:border-color .2s}
+.m-input:focus{border-color:var(--blue)}
+.m-textarea{width:100%;padding:9px 12px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;outline:none;resize:vertical;min-height:100px;font-family:inherit;line-height:1.7;transition:border-color .2s}
+.m-textarea:focus{border-color:var(--blue)}
+.m-select{width:100%;padding:9px 12px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;outline:none;cursor:pointer;font-family:inherit}
+.m-select:focus{border-color:var(--blue)}
+.m-info-val{font-size:13.5px;font-weight:700;color:var(--text);padding:9px 0}
+.m-info-sub{font-size:13px;color:var(--text-sub);padding:9px 0}
+
+/* 버튼 추가 */
+.btn-green{background:var(--green);color:#fff;border:none}
+.btn-red{background:var(--red);color:#fff;border:none}
+.btn-cancel{background:rgba(255,255,255,.07);border:1px solid var(--bd);color:var(--text-sub)}
+.btn-cancel:hover{color:var(--text)}
+
+/* 문의 배지 */
+.inq-st{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap}
+.inq-wait{background:rgba(245,158,11,.18);color:var(--yellow)}
+.inq-done{background:rgba(34,197,94,.18);color:var(--green)}
+
+/* 문의 내용 박스 */
+.inq-content-box{background:rgba(0,0,0,.15);border-radius:var(--rs);padding:13px 15px;font-size:13px;color:var(--text);line-height:1.85;margin-bottom:14px}
+.reply-box{background:rgba(59,130,246,.08);border-radius:var(--rs);padding:13px 15px;border-left:3px solid var(--blue);margin-bottom:14px}
+.reply-box-label{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px}
+.reply-box-txt{font-size:13px;color:var(--text);line-height:1.85}
+
+/* FAQ 행 */
+.faq-row{padding:15px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;gap:12px}
+.faq-row:last-child{border-bottom:none}
+.faq-num{font-size:12px;font-weight:700;color:var(--text-dim);min-width:24px;padding-top:2px}
+.faq-content{flex:1;min-width:0}
+.faq-cat{display:inline-block;font-size:10px;font-weight:700;color:var(--or);background:rgba(232,72,26,.12);border:1px solid rgba(232,72,26,.2);border-radius:100px;padding:1px 8px;margin-right:6px}
+.faq-q{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.faq-a{font-size:12px;color:var(--text-sub);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.faq-btns{display:flex;gap:5px;flex-shrink:0;margin-top:2px}
+
+/* 공지 행 */
+.notice-row{padding:15px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:12px}
+.notice-row:last-child{border-bottom:none}
+.notice-active{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap}
+.na-on{background:rgba(34,197,94,.18);color:var(--green)}
+.na-off{background:rgba(100,116,139,.18);color:var(--text-sub)}
+.notice-preview{background:var(--or);border-radius:var(--rs);padding:10px 18px;margin-bottom:14px;font-size:13px;color:#fff;font-weight:500;text-align:center}
+/* 프린트 */
+@media print{
+  body>*{display:none}
+  .sh-overlay{display:block!important;position:static;padding:0;background:none}
+  .sh-box{border-radius:0;box-shadow:none;max-width:100%}
+  .sh-topbar,.sh-btns{display:none!important}
+  .sheet{padding:10px}
+}
+
+/* ══ 공통 모달 ══ */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:800;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.modal-ov.open{display:flex}
+.modal-wrap{background:var(--bg-card);border:1px solid var(--bd);border-radius:12px;width:100%;margin:auto;overflow:hidden}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.2)}
+.modal-hd-title{font-size:14px;font-weight:800;color:var(--text)}
+.modal-close{font-size:20px;color:var(--text-sub);cursor:pointer;background:none;border:none;line-height:1}
+.modal-body{padding:22px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;padding:16px 20px;border-top:1px solid var(--bd)}
+
+/* 폼 */
+.m-row{margin-bottom:14px}
+.m-row:last-child{margin-bottom:0}
+.m-label{display:block;font-size:11.5px;font-weight:700;color:var(--text-sub);margin-bottom:6px;letter-spacing:.2px}
+.m-input{width:100%;padding:9px 12px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;outline:none;font-family:inherit}
+.m-input:focus{border-color:var(--blue)}
+.m-textarea{width:100%;padding:9px 12px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;outline:none;resize:vertical;min-height:100px;font-family:inherit;line-height:1.7}
+.m-textarea:focus{border-color:var(--blue)}
+.m-select{width:100%;padding:9px 12px;background:var(--bg-side);border:1px solid var(--bd);border-radius:var(--rs);color:var(--text);font-size:13px;outline:none;cursor:pointer;font-family:inherit}
+.m-select:focus{border-color:var(--blue)}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+
+/* 버튼 */
+.btn-green{background:#22C55E;color:#fff;border:none}
+.btn-red{background:var(--red);color:#fff;border:none}
+.btn-cancel{background:rgba(255,255,255,.08);border:1px solid var(--bd);color:var(--text-sub)}
+
+/* 문의 상태 배지 */
+.inq-st{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap}
+.inq-wait{background:rgba(245,158,11,.18);color:var(--yellow)}
+.inq-done{background:rgba(34,197,94,.18);color:var(--green)}
+.inq-read{background:rgba(59,130,246,.18);color:var(--blue)}
+
+/* 답변 박스 */
+.reply-box{background:rgba(0,0,0,.15);border-radius:var(--rs);padding:14px;margin-bottom:14px;border-left:3px solid var(--blue)}
+.reply-box-label{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px}
+.reply-box-txt{font-size:13px;color:var(--text);line-height:1.8}
+
+/* FAQ 아이템 */
+.faq-row{padding:16px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:flex-start;gap:12px}
+.faq-row:last-child{border-bottom:none}
+.faq-num{font-size:12px;font-weight:800;color:var(--text-sub);min-width:28px;padding-top:1px}
+.faq-content{flex:1;min-width:0}
+.faq-cat-badge{display:inline-block;font-size:10px;font-weight:700;color:var(--or);background:rgba(232,72,26,.12);border:1px solid rgba(232,72,26,.2);border-radius:100px;padding:1px 8px;margin-right:6px}
+.faq-q-txt{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.faq-a-txt{font-size:12px;color:var(--text-sub);line-height:1.7;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.faq-actions{display:flex;gap:5px;flex-shrink:0;margin-top:2px}
+
+/* 문의 상세 내용 */
+.inq-content-box{background:rgba(0,0,0,.15);border-radius:var(--rs);padding:14px;margin-bottom:14px;font-size:13px;color:var(--text);line-height:1.85}
+</style>
+</head>
+<body>
+<div id="admin-screen">
+  <!-- 상단바 -->
+  <div class="topbar">
+    <div class="topbar-logo">제안서몰 Admin</div>
+    <div class="topbar-right">
+      <span class="topbar-user">👤 관리자</span>
+      <button class="topbar-logout">로그아웃</button>
+    </div>
+  </div>
+  <div class="body">
+    <!-- 사이드바 -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">제안서몰<small>관리자 패널</small></div>
+      <div class="menu-item on" onclick="setMenu(this,'order')">주문현황</div>
+      <div class="menu-item" onclick="setMenu(this,'product')">상품 관리</div>
+      <div class="menu-item" onclick="setMenu(this,'option')">옵션 관리</div>
+      <div class="menu-item" onclick="setMenu(this,'price')">단가표 관리</div>
+      <div class="menu-item" onclick="setMenu(this,'inquiry')">고객문의 관리</div>
+      <div class="menu-item" onclick="setMenu(this,'faq')">FAQ 관리</div>
+      <div class="menu-item" onclick="setMenu(this,'notice')">공지사항 관리</div>
+    </aside>
+    <!-- 메인 -->
+    <main class="main">
+      <!-- ════ 주문현황 ════ -->
+      <div id="panel-order">
+        <div class="page-hd">
+          <div class="page-title">실제주문관리 — <span class="page-cat">주문현황</span></div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" onclick="alert('엑셀 다운로드')">엑셀 다운로드</button>
+            <button class="btn btn-blue" onclick="alert('일괄 출력')">주문서 일괄 출력</button>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="stat-lbl">전체 주문</div><div class="stat-val c-blue" id="st-total">-</div></div>
+          <div class="stat"><div class="stat-lbl">결제 완료</div><div class="stat-val c-green" id="st-paid">-</div></div>
+          <div class="stat"><div class="stat-lbl">발송 완료</div><div class="stat-val c-blue" id="st-sent">-</div></div>
+          <div class="stat"><div class="stat-lbl">총 주문 금액</div><div class="stat-val c-or" id="st-amt">-</div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div><span class="card-title">주문현황 목록</span><span class="card-cnt" id="tbl-cnt"></span></div>
+            <span class="card-total" id="tbl-total"></span>
+          </div>
+          <!-- 야간할증 -->
+          <div class="night-bar">
+            <span style="font-size:12px;color:var(--text-sub)">🌙 야간 할증</span>
+            <label class="toggle"><input type="checkbox" id="nightCk" onchange="toggleNight()"><span class="tsl"></span></label>
+            <span class="night-st off" id="nightSt">OFF</span>
+            <span style="font-size:11px;color:var(--text-dim);margin-left:4px">(활성화 시 주문에 야간 할증 적용)</span>
+          </div>
+          <!-- 필터 -->
+          <div class="filter-bar">
+            <input class="f-input" type="text" placeholder="🔍 주문번호 / 고객명 / 전화번호 검색" oninput="filterKw(this.value)">
+            <select class="f-select" onchange="filterPay(this.value)">
+              <option value="">전체 상태</option>
+              <option>결제완료</option><option>결제대기</option><option>취소</option>
+            </select>
+            <select class="f-select" onchange="filterShip(this.value)">
+              <option value="">전체 배송</option>
+              <option>발송완료</option><option>제작중</option><option>접수대기</option>
+            </select>
+          </div>
+          <!-- 테이블 -->
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr>
+                <th style="width:110px">번호</th>
+                <th style="min-width:155px">고객정보</th>
+                <th style="min-width:155px">상품명</th>
+                <th style="width:88px">결제상태</th>
+                <th style="width:108px">결제수단</th>
+                <th style="width:88px">주문상태</th>
+                <th style="width:100px">결제금액</th>
+                <th style="width:105px">주문일</th>
+                <th style="width:135px">관리</th>
+              </tr></thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+          <div class="tbl-footer">
+            <div class="tbl-info">총 <span id="cnt-txt">0</span>건</div>
+            <div class="pg">
+              <button class="pgb">‹</button>
+              <button class="pgb on">1</button>
+              <button class="pgb">2</button>
+              <button class="pgb">›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ 단가표 관리 ════ -->
+      <div id="panel-price" style="display:none">
+        <div class="page-hd">
+          <div class="page-title">단가표 관리</div>
+          <div class="page-actions">
+            <button class="btn btn-ghost" onclick="downloadExcel()">엑셀 다운로드</button>
+            <label class="btn btn-ghost" style="cursor:pointer" for="excelUpload">엑셀 업로드</label>
+            <input type="file" id="excelUpload" accept=".xlsx,.xls" style="display:none" onchange="uploadExcel(this)">
+            <button class="btn btn-blue" onclick="savePriceTable()">저장하기</button>
+          </div>
+        </div>
+
+        <!-- 업로드 안내 / 드래그존 -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd"><div class="card-title">엑셀 파일로 단가 관리</div></div>
+          <div style="padding:18px 20px;display:flex;gap:16px;align-items:stretch;flex-wrap:wrap">
+            <!-- 업로드 존 -->
+            <div id="dropzone"
+              style="flex:1;min-width:220px;border:1.5px dashed var(--bd);border-radius:var(--rs);padding:24px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(0,0,0,.08)"
+              onclick="document.getElementById('excelUpload').click()"
+              ondragover="event.preventDefault();this.style.borderColor='var(--blue)'"
+              ondragleave="this.style.borderColor='var(--bd)'"
+              ondrop="handleDrop(event)">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 10px;display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">엑셀 파일 업로드</div>
+              <div style="font-size:12px;color:var(--text-dim)">클릭하거나 파일을 드래그하세요<br>.xlsx / .xls 지원</div>
+              <div id="upload-status" style="margin-top:10px;font-size:12px;color:var(--green);font-weight:700;display:none"></div>
+            </div>
+            <!-- 안내 -->
+            <div style="flex:1;min-width:220px;font-size:12.5px;color:var(--text-sub);line-height:2">
+              <div style="font-weight:700;color:var(--text);margin-bottom:8px">엑셀 형식 안내</div>
+              <div>· 먼저 <strong style="color:var(--blue)">엑셀 다운로드</strong>로 양식을 받으세요</div>
+              <div>· 시트 구성: 내지인쇄 / 제본 / 박스</div>
+              <div>· 단가 셀(숫자)만 수정 후 업로드</div>
+              <div>· 업로드 시 아래 표가 즉시 반영됩니다</div>
+              <div>· 반영 후 <strong style="color:var(--or)">저장하기</strong> 버튼으로 최종 저장</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 탭 -->
+        <div style="display:flex;gap:0;border-bottom:1px solid var(--bd);margin-bottom:14px">
+          <div class="price-tab on" onclick="setPriceTab(this,'pt-paper')" style="padding:10px 20px;font-size:13px;font-weight:700;color:var(--text-sub);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s">내지 인쇄</div>
+          <div class="price-tab" onclick="setPriceTab(this,'pt-binding')" style="padding:10px 20px;font-size:13px;font-weight:700;color:var(--text-sub);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s">제본</div>
+          <div class="price-tab" onclick="setPriceTab(this,'pt-box')" style="padding:10px 20px;font-size:13px;font-weight:700;color:var(--text-sub);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s">박스</div>
+        </div>
+
+        <!-- 내지 인쇄 단가표 -->
+        <div id="pt-paper" class="price-panel">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">내지 인쇄 단가표 <span style="font-size:11px;font-weight:400;color:var(--text-dim)">(원/장)</span></div></div>
+            <div style="overflow-x:auto;padding:0">
+              <table class="tbl" id="tbl-paper">
+                <thead><tr>
+                  <th>용지</th><th>인쇄방식</th>
+                  <th>1~9장</th><th>10~49장</th><th>50~99장</th><th>100장↑</th>
+                  <th>비고</th>
+                </tr></thead>
+                <tbody id="tbody-paper"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 제본 단가표 -->
+        <div id="pt-binding" class="price-panel" style="display:none">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">제본 단가표 <span style="font-size:11px;font-weight:400;color:var(--text-dim)">(원/부)</span></div></div>
+            <div style="overflow-x:auto;padding:0">
+              <table class="tbl" id="tbl-binding">
+                <thead><tr>
+                  <th>제본 종류</th>
+                  <th>1부</th><th>2~4부</th><th>5~9부</th><th>10부↑</th>
+                  <th>비고</th>
+                </tr></thead>
+                <tbody id="tbody-binding"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 박스 단가표 -->
+        <div id="pt-box" class="price-panel" style="display:none">
+          <div class="card">
+            <div class="card-hd"><div class="card-title">박스 단가표 <span style="font-size:11px;font-weight:400;color:var(--text-dim)">(원/개)</span></div></div>
+            <div style="overflow-x:auto;padding:0">
+              <table class="tbl" id="tbl-box">
+                <thead><tr>
+                  <th>박스 종류</th>
+                  <th>1개</th><th>2~4개</th><th>5~9개</th><th>10개↑</th>
+                  <th>비고</th>
+                </tr></thead>
+                <tbody id="tbody-box"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ════ 고객문의 관리 ════ -->
+      <div id="panel-inquiry" style="display:none">
+        <div class="page-hd">
+          <div class="page-title">고객문의 관리</div>
+          <div class="page-actions">
+            <select class="f-select" onchange="filterInqStatus(this.value)" style="height:34px">
+              <option value="">전체</option>
+              <option value="답변대기">답변대기</option>
+              <option value="답변완료">답변완료</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div><span class="card-title">문의 목록</span><span class="card-cnt" id="inq-cnt"></span></div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr>
+                <th style="width:55px">번호</th>
+                <th style="min-width:80px">이름</th>
+                <th style="min-width:110px">연락처</th>
+                <th style="min-width:160px">이메일</th>
+                <th style="min-width:200px">제목</th>
+                <th style="width:85px">상태</th>
+                <th style="width:95px">접수일</th>
+                <th style="width:140px">관리</th>
+              </tr></thead>
+              <tbody id="inq-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ FAQ 관리 ════ -->
+      <div id="panel-faq" style="display:none">
+        <div class="page-hd">
+          <div class="page-title">FAQ 관리</div>
+          <div class="page-actions">
+            <button class="btn btn-blue" onclick="openFaqModal(null)">+ 새 FAQ 등록</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div><span class="card-title">FAQ 목록</span><span class="card-cnt" id="faq-cnt"></span></div>
+          </div>
+          <div id="faq-list"></div>
+        </div>
+      </div>
+
+      <!-- ════ 공지사항 관리 ════ -->
+      <div id="panel-notice" style="display:none">
+        <div class="page-hd">
+          <div class="page-title">공지사항 관리</div>
+          <div class="page-actions">
+            <button class="btn btn-blue" onclick="openNoticeModal(null)">+ 새 공지 등록</button>
+          </div>
+        </div>
+        <!-- 상단 공지바 미리보기 -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd"><div class="card-title">현재 활성 공지바 미리보기</div></div>
+          <div style="padding:16px 20px">
+            <div class="notice-preview" id="notice-preview-bar">무첨가 인증 · 납기 확인 후 즉시 제작 · 드롭박스 / 이메일 파일 접수 가능</div>
+            <div style="font-size:12px;color:var(--text-sub)">위 공지바는 홈페이지 상단에 표시됩니다. 목록에서 활성(ON) 상태인 공지 중 최상단 항목이 노출됩니다.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div><span class="card-title">공지사항 목록</span><span class="card-cnt" id="notice-cnt"></span></div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr>
+                <th style="width:55px">번호</th>
+                <th style="min-width:300px">공지 내용</th>
+                <th style="width:80px">링크 버튼</th>
+                <th style="width:80px">활성 여부</th>
+                <th style="width:95px">등록일</th>
+                <th style="width:120px">관리</th>
+              </tr></thead>
+              <tbody id="notice-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ 상품 관리 ════ -->
+      <div id="panel-product" style="display:none">
+        <div class="page-hd">
+          <div class="page-title">상품 관리</div>
+          <div class="page-actions">
+            <button class="btn btn-blue" onclick="openProductModal(null)">+ 새 상품 등록</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <div><span class="card-title">상품 목록</span><span class="card-cnt" id="prod-cnt"></span></div>
+            <div style="display:flex;gap:8px">
+              <select class="f-select" onchange="filterProducts(this.value)" style="height:34px">
+                <option value="">전체 카테고리</option>
+                <option value="내지인쇄">내지인쇄</option>
+                <option value="제본">제본</option>
+                <option value="박스">박스</option>
+              </select>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <thead><tr>
+                <th style="width:55px">번호</th>
+                <th style="min-width:180px">상품명</th>
+                <th style="width:90px">카테고리</th>
+                <th style="min-width:220px">설명</th>
+                <th style="width:80px">노출여부</th>
+                <th style="width:90px">등록일</th>
+                <th style="width:150px">관리</th>
+              </tr></thead>
+              <tbody id="prod-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ 옵션 관리 ════ -->
+      <div id="panel-option" style="display:none">
+        <div class="page-hd">
+          <div class="page-title">옵션 관리</div>
+        </div>
+        <!-- 상품 선택 -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd"><div class="card-title">상품 선택</div></div>
+          <div style="padding:16px 20px;display:flex;align-items:center;gap:12px">
+            <select class="f-select" id="opt-prod-select" onchange="selectOptionProduct(this.value)" style="max-width:280px;height:36px">
+              <option value="">-- 상품을 선택하세요 --</option>
+            </select>
+            <span style="font-size:12px;color:var(--text-dim)">상품을 선택하면 해당 상품의 옵션 그룹을 관리할 수 있습니다</span>
+          </div>
+        </div>
+
+        <!-- 옵션 그룹 + 옵션 값 (상품 선택 후 표시) -->
+        <div id="opt-content" style="display:none">
+          <div style="display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start">
+
+            <!-- 좌: 옵션 그룹 목록 -->
+            <div class="card">
+              <div class="card-hd">
+                <div class="card-title">옵션 그룹</div>
+                <button class="btn btn-blue" style="padding:5px 12px;font-size:11.5px" onclick="openGroupModal(null)">+ 추가</button>
+              </div>
+              <div id="group-list"></div>
+            </div>
+
+            <!-- 우: 선택된 그룹의 옵션 값 -->
+            <div class="card">
+              <div class="card-hd">
+                <div class="card-title">옵션 값 <span id="group-name-label" style="color:var(--blue);font-size:12px;font-weight:600;margin-left:6px"></span></div>
+                <button class="btn btn-blue" style="padding:5px 12px;font-size:11.5px" onclick="openValueModal(null)" id="add-value-btn">+ 값 추가</button>
+              </div>
+              <div id="value-list">
+                <div style="text-align:center;padding:32px;color:var(--text-dim);font-size:13px">
+                  좌측에서 옵션 그룹을 선택해 주세요
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ③ 주문서 모달 -->
+<div class="sh-overlay" id="shModal">
+  <div class="sh-box">
+    <div class="sh-topbar">
+      <div class="sh-topbar-title">주문서 출력</div>
+      <div class="sh-btns">
+        <button class="sh-btn sh-btn-print" onclick="window.print()">인쇄하기</button>
+        <button class="sh-btn sh-btn-close" onclick="document.getElementById('shModal').classList.remove('open')">닫기</button>
+      </div>
+    </div>
+    <div class="sheet" id="shContent"></div>
+  </div>
+</div>
+<!-- 삭제 모달 -->
+<div class="del-overlay" id="delModal">
+  <div class="del-box">
+    <div style="font-size:15px;font-weight:800;color:var(--text);margin-bottom:8px">삭제하시겠습니까?</div>
+    <div style="font-size:12.5px;color:var(--text-sub);line-height:1.6">삭제된 데이터는 복구할 수 없습니다.</div>
+    <div class="del-btns">
+      <button class="del-btn del-no" onclick="document.getElementById('delModal').classList.remove('open')">취소</button>
+      <button class="del-btn del-yes" onclick="confirmDel()">삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 상품 등록/수정 모달 -->
+<div class="modal-ov" id="productModal">
+  <div class="modal-wrap" style="max-width:560px">
+    <div class="modal-hd">
+      <div class="modal-hd-title" id="prod-modal-title">상품 등록</div>
+      <button class="modal-close" onclick="closeModalEl('productModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-grid">
+        <div>
+          <label class="m-label">카테고리 *</label>
+          <select class="m-select" id="prod-cat">
+            <option value="내지인쇄">내지인쇄</option>
+            <option value="제본">제본</option>
+            <option value="박스">박스</option>
+          </select>
+        </div>
+        <div>
+          <label class="m-label">노출 여부</label>
+          <select class="m-select" id="prod-active">
+            <option value="1">노출 (ON)</option>
+            <option value="0">숨김 (OFF)</option>
+          </select>
+        </div>
+      </div>
+      <div class="m-row">
+        <label class="m-label">상품명 *</label>
+        <input class="m-input" type="text" id="prod-name" placeholder="예: PT바인더 인쇄형">
+      </div>
+      <div class="m-row">
+        <label class="m-label">상품 설명</label>
+        <textarea class="m-textarea" id="prod-desc" placeholder="상품 설명을 입력해 주세요" style="min-height:80px"></textarea>
+      </div>
+      <div class="m-row">
+        <label class="m-label">대표 이미지 URL</label>
+        <input class="m-input" type="text" id="prod-img" placeholder="이미지 URL">
+      </div>
+      <div class="m-row">
+        <label class="m-label">가격 산출 방식</label>
+        <select class="m-select" id="prod-price-type">
+          <option value="paper">내지 단가표 (장당)</option>
+          <option value="binding">제본 단가표 (부당)</option>
+          <option value="box">박스 단가표 (개당)</option>
+          <option value="custom">별도 견적</option>
+        </select>
+      </div>
+      <div class="m-row">
+        <label class="m-label">정렬 순서</label>
+        <input class="m-input" type="number" id="prod-sort" value="0" style="max-width:100px">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeModalEl('productModal')">취소</button>
+      <button class="btn btn-blue" onclick="saveProduct()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 옵션 그룹 모달 -->
+<div class="modal-ov" id="groupModal">
+  <div class="modal-wrap" style="max-width:440px">
+    <div class="modal-hd">
+      <div class="modal-hd-title" id="group-modal-title">옵션 그룹 추가</div>
+      <button class="modal-close" onclick="closeModalEl('groupModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-row">
+        <label class="m-label">그룹명 * <span style="color:var(--text-dim);font-weight:400">(고객에게 보이는 옵션 제목)</span></label>
+        <input class="m-input" type="text" id="group-name" placeholder="예: 용지 종류, 인쇄 방식, 수량">
+      </div>
+      <div class="m-grid">
+        <div>
+          <label class="m-label">필수 여부</label>
+          <select class="m-select" id="group-required">
+            <option value="1">필수 선택</option>
+            <option value="0">선택사항</option>
+          </select>
+        </div>
+        <div>
+          <label class="m-label">정렬 순서</label>
+          <input class="m-input" type="number" id="group-sort" value="0">
+        </div>
+      </div>
+      <div class="m-row">
+        <label class="m-label">단가 연동</label>
+        <select class="m-select" id="group-price-link">
+          <option value="none">단가 연동 없음</option>
+          <option value="paper_name">내지 — 용지종류 기준</option>
+          <option value="paper_type">내지 — 인쇄방식 기준</option>
+          <option value="paper_qty">내지 — 수량 구간 기준</option>
+          <option value="binding_name">제본 — 제본종류 기준</option>
+          <option value="binding_qty">제본 — 수량 구간 기준</option>
+          <option value="box_name">박스 — 박스종류 기준</option>
+          <option value="box_qty">박스 — 수량 구간 기준</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeModalEl('groupModal')">취소</button>
+      <button class="btn btn-blue" onclick="saveGroup()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 옵션 값 모달 -->
+<div class="modal-ov" id="valueModal">
+  <div class="modal-wrap" style="max-width:400px">
+    <div class="modal-hd">
+      <div class="modal-hd-title" id="value-modal-title">옵션 값 추가</div>
+      <button class="modal-close" onclick="closeModalEl('valueModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-row">
+        <label class="m-label">옵션 값 * <span style="color:var(--text-dim);font-weight:400">(고객에게 보이는 선택지)</span></label>
+        <input class="m-input" type="text" id="val-name" placeholder="예: 스노우지 100g, 컬러양면, 10부">
+      </div>
+      <div class="m-row">
+        <label class="m-label">추가 금액 (원)</label>
+        <input class="m-input" type="number" id="val-price" value="0">
+        <div style="font-size:11.5px;color:var(--text-dim);margin-top:5px">단가표 연동 그룹은 자동 계산됩니다.</div>
+      </div>
+      <div class="m-grid">
+        <div>
+          <label class="m-label">노출 여부</label>
+          <select class="m-select" id="val-active">
+            <option value="1">노출</option>
+            <option value="0">숨김</option>
+          </select>
+        </div>
+        <div>
+          <label class="m-label">정렬 순서</label>
+          <input class="m-input" type="number" id="val-sort" value="0">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeModalEl('valueModal')">취소</button>
+      <button class="btn btn-blue" onclick="saveValue()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 문의 상세/답변 모달 -->
+<div class="modal-ov" id="inqModal">
+  <div class="modal-wrap" style="max-width:620px">
+    <div class="modal-hd">
+      <div class="modal-hd-title">문의 상세 · 답변</div>
+      <button class="modal-close" onclick="closeModalEl('inqModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-grid">
+        <div><div class="m-label">이름</div><div class="m-info-val" id="id-name"></div></div>
+        <div><div class="m-label">연락처</div><div class="m-info-sub" id="id-phone"></div></div>
+      </div>
+      <div class="m-row"><div class="m-label">이메일</div><div class="m-info-sub" id="id-email"></div></div>
+      <div class="m-row"><div class="m-label">제목</div><div class="m-info-val" id="id-title"></div></div>
+      <div class="m-row"><div class="m-label">문의 내용</div><div class="inq-content-box" id="id-content"></div></div>
+      <div class="reply-box" id="id-reply-wrap" style="display:none">
+        <div class="reply-box-label">기존 답변</div>
+        <div class="reply-box-txt" id="id-reply-txt"></div>
+      </div>
+      <div class="m-row">
+        <div class="m-label">답변 작성 <span style="font-weight:400;color:var(--text-dim)">(저장 시 답변완료로 변경)</span></div>
+        <textarea class="m-textarea" id="id-reply-input" placeholder="답변 내용을 입력해 주세요" style="min-height:120px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-red" onclick="deleteInqFromModal()">삭제</button>
+      <button class="btn btn-cancel" onclick="closeModalEl('inqModal')">닫기</button>
+      <button class="btn btn-green" onclick="saveReply()">답변 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ 등록/수정 모달 -->
+<div class="modal-ov" id="faqModal">
+  <div class="modal-wrap" style="max-width:540px">
+    <div class="modal-hd">
+      <div class="modal-hd-title" id="faq-modal-title">FAQ 등록</div>
+      <button class="modal-close" onclick="closeModalEl('faqModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-row">
+        <label class="m-label">카테고리</label>
+        <select class="m-select" id="faq-cat">
+          <option value="납기">납기</option><option value="파일">파일</option>
+          <option value="결제">결제</option><option value="배송">배송</option>
+          <option value="제본">제본</option><option value="주문">주문</option>
+          <option value="취소">취소</option><option value="기타">기타</option>
+        </select>
+      </div>
+      <div class="m-row">
+        <label class="m-label">질문</label>
+        <input class="m-input" type="text" id="faq-q" placeholder="자주 묻는 질문을 입력해 주세요">
+      </div>
+      <div class="m-row">
+        <label class="m-label">답변</label>
+        <textarea class="m-textarea" id="faq-a" placeholder="답변 내용을 입력해 주세요" style="min-height:140px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeModalEl('faqModal')">취소</button>
+      <button class="btn btn-blue" onclick="saveFaq()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 공지사항 등록/수정 모달 -->
+<div class="modal-ov" id="noticeModal">
+  <div class="modal-wrap" style="max-width:520px">
+    <div class="modal-hd">
+      <div class="modal-hd-title" id="notice-modal-title">공지 등록</div>
+      <button class="modal-close" onclick="closeModalEl('noticeModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-row">
+        <label class="m-label">공지 내용 (상단 공지바에 표시)</label>
+        <input class="m-input" type="text" id="notice-txt" placeholder="예: 설 연휴 휴무 안내 (1/28~1/30)" oninput="previewNotice()">
+      </div>
+      <div class="m-row">
+        <label class="m-label">버튼 텍스트 (없으면 비워두세요)</label>
+        <input class="m-input" type="text" id="notice-btn-txt" placeholder="예: 자세히 →" oninput="previewNotice()">
+      </div>
+      <div class="m-row">
+        <label class="m-label">버튼 링크 URL</label>
+        <input class="m-input" type="text" id="notice-btn-url" placeholder="예: /notice/1">
+      </div>
+      <div class="m-row">
+        <label class="m-label">활성 여부</label>
+        <select class="m-select" id="notice-active">
+          <option value="1">활성 (ON) — 공지바에 표시</option>
+          <option value="0">비활성 (OFF) — 숨김</option>
+        </select>
+      </div>
+      <div class="m-row">
+        <label class="m-label">미리보기</label>
+        <div class="notice-preview" id="notice-preview-modal">공지 내용을 입력하면 미리볼 수 있습니다</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeModalEl('noticeModal')">취소</button>
+      <button class="btn btn-blue" onclick="saveNotice()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ═══ 주문 데이터 ═══ */
+let ORDERS=[
+  {no:'Pro-0001',name:'탁남현',email:'dus7405@naver.com',phone:'010-4155-8643',product:'PT바인더 인쇄형',detail:'포크로스 / 10개',pages:80,payStatus:'결제완료',payMethod:'무통장입금',tid:'',shipStatus:'발송완료',amount:742500,date:'2026/04/20 14:38',addr:'경북 울진군 북면 꼭리3길 6-32 (이름)',zip:'36312',note:'납기 급함',night:false},
+  {no:'Pro-0002',name:'전예원',email:'cyw020212@naver.com',phone:'010-2168-8053',product:'PT바인더 인쇄형',detail:'모시동이 / 1개',pages:120,payStatus:'결제완료',payMethod:'카드결제',tid:'11213309',shipStatus:'발송완료',amount:88000,date:'2026/04/12 18:03',addr:'경기 하남시 아리수로 499 (망월동, 미사강변 루나리움) (504동 702호)',zip:'12948',note:'',night:false},
+  {no:'Pro-0003',name:'정희수',email:'jhesu94@naver.com',phone:'010-6230-2492',product:'PT바인더 인쇄형',detail:'엔젤클로스 / 1개',pages:60,payStatus:'결제완료',payMethod:'무통장입금',tid:'',shipStatus:'발송완료',amount:44000,date:'2026/04/03 17:38',addr:'경기 시흥시 정왕신길로49번길 21 (서해아파트 205동 902호)',zip:'15091',note:'',night:false},
+  {no:'Pro-0004',name:'김민지',email:'minji.kim@gmail.com',phone:'010-9988-1234',product:'PT바인더 원단형',detail:'하드커버 / 5개',pages:100,payStatus:'결제완료',payMethod:'카드결제',tid:'22334455',shipStatus:'제작중',amount:330000,date:'2026/04/01 10:22',addr:'서울 강남구 테헤란로 123 OO빌딩 301호',zip:'06130',note:'표지: 네이비',night:false},
+  {no:'Pro-0005',name:'이준호',email:'junho.lee@naver.com',phone:'010-7766-5544',product:'하드커버 인쇄형',detail:'패브릭 / 3개',pages:90,payStatus:'결제대기',payMethod:'무통장입금',tid:'',shipStatus:'접수대기',amount:198000,date:'2026/03/29 09:15',addr:'경기 성남시 분당구 판교로 100 5층',zip:'13487',note:'',night:true},
+  {no:'Pro-0006',name:'박서연',email:'seoyeon.park@kakao.com',phone:'010-5544-3322',product:'3공바인더 인쇄형',detail:'포크로스 / 2개',pages:50,payStatus:'결제완료',payMethod:'카드결제',tid:'33445566',shipStatus:'발송완료',amount:88000,date:'2026/03/25 16:44',addr:'인천 연수구 인천타워대로 323 OO아파트 2동 502호',zip:'21999',note:'',night:false},
+  {no:'Pro-0007',name:'최우진',email:'woojin.choi@daum.net',phone:'010-3322-1100',product:'하드커버 원단형',detail:'하드커버 / 1개',pages:200,payStatus:'결제완료',payMethod:'무통장입금',tid:'',shipStatus:'발송완료',amount:55000,date:'2026/03/20 11:30',addr:'부산 해운대구 센텀중앙로 55 OO타워 1201호',zip:'48058',note:'방문수령',night:false},
+  {no:'Pro-0008',name:'한지수',email:'jisu.han@naver.com',phone:'010-1122-3344',product:'3공바인더 원단형',detail:'모시동이 / 8개',pages:70,payStatus:'취소',payMethod:'카드결제',tid:'44556677',shipStatus:'취소',amount:0,date:'2026/03/15 14:00',addr:'대전 유성구 대학로 99 OO연구소',zip:'34141',note:'',night:false},
+];
+let filtered=[...ORDERS],delTarget=null;
+
+function setMenu(el,p){
+  document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('on'));
+  el.classList.add('on');
+  ['order','product','option','price','inquiry','faq','notice'].forEach(id=>{
+    const el = document.getElementById('panel-'+id);
+    if(el) el.style.display = p===id?'block':'none';
+  });
+  if(p==='inquiry') renderInquiries(INQUIRIES);
+  if(p==='faq')     renderFAQs();
+  if(p==='notice')  renderNotices();
+  if(p==='product') renderProducts(PRODUCTS);
+  if(p==='option')  initOptionPanel();
+}
+function toggleNight(){const on=document.getElementById('nightCk').checked;const s=document.getElementById('nightSt');s.textContent=on?'ON':'OFF';s.className='night-st '+(on?'on':'off')}
+
+function bdg(t){
+  const m={결제완료:'bg-green',결제대기:'bg-yellow',발송완료:'bg-blue',제작중:'bg-yellow',접수대기:'bg-gray',취소:'bg-red'};
+  return `<span class="badge ${m[t]||'bg-gray'}">${t}</span>`;
+}
+
+function updateStats(list){
+  const total=list.length;
+  const paid=list.filter(o=>o.payStatus==='결제완료').length;
+  const sent=list.filter(o=>o.shipStatus==='발송완료').length;
+  const amt=list.reduce((s,o)=>s+o.amount,0);
+  document.getElementById('st-total').textContent=total+'건';
+  document.getElementById('st-paid').textContent=paid+'건';
+  document.getElementById('st-sent').textContent=sent+'건';
+  document.getElementById('st-amt').textContent='₩'+amt.toLocaleString();
+  document.getElementById('tbl-cnt').textContent=`(${total}건)`;
+  document.getElementById('tbl-total').textContent='총 주문 금액: ₩'+amt.toLocaleString();
+  document.getElementById('cnt-txt').textContent=total;
+}
+
+function render(list){
+  updateStats(list);
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  if(!list.length){tbody.innerHTML='<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-dim)">검색 결과가 없습니다</td></tr>';return;}
+  list.forEach(o=>{
+    const tid=o.tid?`<div class="pt">✓ ${o.tid}</div>`:'';
+    const amt=o.amount>0?'₩'+o.amount.toLocaleString():'-';
+    // ① 주문번호 행
+    const tr=document.createElement('tr');tr.className='dr';
+    tr.innerHTML=`
+      <td><div class="o-no">${o.no}</div></td>
+      <td><div class="c-name">${o.name}</div><div class="c-email">${o.email}</div><div class="c-phone">${o.phone}</div></td>
+      <td><div class="p-wrap"><span class="p-name">${o.product}</span><span class="p-div">|</span><span class="p-detail">${o.detail}</span></div></td>
+      <td>${bdg(o.payStatus)}</td>
+      <td><div class="pm">${o.payMethod}</div>${tid}</td>
+      <td>${bdg(o.shipStatus)}</td>
+      <td><div class="amt">${amt}</div></td>
+      <td><div class="dt">${o.date.replace(' ','<br>')}</div></td>
+      <td><div class="mgmt">
+        <button class="mb mb-del" onclick="openDel('${o.no}',event)">🗑️</button>
+        <button class="mb mb-cancel" onclick="doCancel('${o.no}',event)">취소</button>
+        <button class="mb mb-doc" onclick="openSheet('${o.no}',event)">주문서</button>
+      </div></td>`;
+    tbody.appendChild(tr);
+    // 배송 행
+    const ts=document.createElement('tr');ts.className='sr';
+    ts.innerHTML=`<td colspan="9">🚚 배송: ${o.name} | ${o.phone} | ${o.addr}</td>`;
+    tbody.appendChild(ts);
+  });
+}
+
+function filterKw(v){const k=v.toLowerCase();filtered=ORDERS.filter(o=>o.no.toLowerCase().includes(k)||o.name.includes(k)||o.phone.includes(k)||o.email.toLowerCase().includes(k));render(filtered)}
+function filterPay(v){filtered=v?ORDERS.filter(o=>o.payStatus===v):[...ORDERS];render(filtered)}
+function filterShip(v){filtered=v?ORDERS.filter(o=>o.shipStatus===v):[...ORDERS];render(filtered)}
+
+function openDel(no,e){e.stopPropagation();delTarget=no;document.getElementById('delModal').classList.add('open')}
+function confirmDel(){
+  if(!delTarget){document.getElementById('delModal').classList.remove('open');return;}
+  if(delTarget.startsWith('inq-')){
+    const id=parseInt(delTarget.replace('inq-',''));
+    const i=INQUIRIES.findIndex(x=>x.id===id);if(i!==-1)INQUIRIES.splice(i,1);
+    renderInquiries(INQUIRIES);
+  } else if(delTarget.startsWith('faq-')){
+    const id=parseInt(delTarget.replace('faq-',''));
+    const i=FAQS.findIndex(x=>x.id===id);if(i!==-1)FAQS.splice(i,1);
+    renderFAQs();
+  } else if(delTarget.startsWith('notice-')){
+    const id=parseInt(delTarget.replace('notice-',''));
+    const i=NOTICES.findIndex(x=>x.id===id);if(i!==-1)NOTICES.splice(i,1);
+    renderNotices();
+  } else if(delTarget.startsWith('prod-')){
+    const id=parseInt(delTarget.replace('prod-',''));
+    const i=PRODUCTS.findIndex(x=>x.id===id);if(i!==-1)PRODUCTS.splice(i,1);
+    renderProducts(PRODUCTS);
+  } else if(delTarget.startsWith('group-')){
+    const id=parseInt(delTarget.replace('group-',''));
+    const i=OPTION_GROUPS.findIndex(x=>x.id===id);if(i!==-1)OPTION_GROUPS.splice(i,1);
+    if(currentGroupId===id){
+      currentGroupId=null;
+      document.getElementById('group-name-label').textContent='';
+      document.getElementById('value-list').innerHTML='<div style="text-align:center;padding:32px;color:var(--text-dim);font-size:13px">좌측에서 옵션 그룹을 선택해 주세요</div>';
+    }
+    renderGroups();
+  } else if(delTarget.startsWith('value-')){
+    const id=parseInt(delTarget.replace('value-',''));
+    const i=OPTION_VALUES.findIndex(x=>x.id===id);if(i!==-1)OPTION_VALUES.splice(i,1);
+    renderValues();
+  } else {
+    const i=ORDERS.findIndex(o=>o.no===delTarget);if(i!==-1)ORDERS.splice(i,1);
+    filtered=[...ORDERS];render(filtered);
+  }
+  delTarget=null;
+  document.getElementById('delModal').classList.remove('open');
+}
+function doCancel(no,e){e.stopPropagation();if(confirm(`주문 ${no}을 취소 처리하시겠습니까?`)){const o=ORDERS.find(x=>x.no===no);if(o){o.payStatus='취소';o.shipStatus='취소';}render(filtered)}}
+
+/* ③ 주문서 출력 */
+function openSheet(no,e){
+  e.stopPropagation();
+  const o=ORDERS.find(x=>x.no===no);if(!o)return;
+  const now=new Date().toLocaleString('ko-KR');
+  const amt=o.amount>0?'₩'+o.amount.toLocaleString():'미정(단가표 확인 후 안내)';
+  const nightTxt=o.night?'<span style="color:#E8481A;font-weight:700">야간할증 적용</span>':'없음';
+  const shipType=o.note==='방문수령'?'직접 방문 수령':'택배 배송 (롤플레이스)';
+  const payColor=o.payStatus==='결제완료'?'#16A34A':o.payStatus==='결제대기'?'#D97706':'#EF4444';
+  const shipColor=o.shipStatus==='발송완료'?'#2563EB':o.shipStatus==='제작중'?'#D97706':o.shipStatus==='취소'?'#EF4444':'#6B7280';
+
+  document.getElementById('shContent').innerHTML=`
+    <div class="sh-hd">
+      <div>
+        <div class="sh-logo">제안서몰</div>
+        <div class="sh-logo-sub">B2B 제안서 전문 인쇄 · 제본 · 박스</div>
+      </div>
+      <div class="sh-no-area">
+        <div class="sh-no">${o.no}</div>
+        <div class="sh-print-dt">출력일시 : ${now}</div>
+      </div>
+    </div>
+
+    <div class="sh-sec">
+      <div class="sh-sec-title">👤 주문자 정보</div>
+      <table class="sh-tbl">
+        <tr><th>주문자명</th><td class="bold">${o.name}</td><th>연락처</th><td>${o.phone}</td></tr>
+        <tr><th>이메일</th><td colspan="3">${o.email}</td></tr>
+      </table>
+    </div>
+
+    <div class="sh-sec">
+      <div class="sh-sec-title">📦 배송 정보</div>
+      <table class="sh-tbl">
+        <tr><th>수령인</th><td class="bold">${o.name}</td><th>연락처</th><td>${o.phone}</td></tr>
+        <tr><th>배송방법</th><td>${shipType}</td><th>우편번호</th><td>${o.zip||'-'}</td></tr>
+        <tr><th>배송 주소</th><td colspan="3" class="bold">${o.addr}</td></tr>
+        ${o.note&&o.note!=='방문수령'?`<tr><th>배송 메모</th><td colspan="3" style="color:#E8481A;font-weight:600">${o.note}</td></tr>`:''}
+      </table>
+    </div>
+
+    <div class="sh-sec">
+      <div class="sh-sec-title">🖨️ 상품 정보</div>
+      <table class="sh-tbl">
+        <tr><th>상품명</th><td class="bold" colspan="3">${o.product}</td></tr>
+        <tr><th>사양 / 수량</th><td colspan="3">${o.detail}</td></tr>
+        <tr><th>페이지 수</th><td>${o.pages}P</td><th>야간할증</th><td>${nightTxt}</td></tr>
+      </table>
+    </div>
+
+    <div class="sh-sec">
+      <div class="sh-sec-title">💳 결제 정보</div>
+      <table class="sh-tbl">
+        <tr><th>결제수단</th><td class="bold">${o.payMethod}</td><th>결제상태</th><td style="color:${payColor};font-weight:700">${o.payStatus}</td></tr>
+        ${o.tid?`<tr><th>거래번호</th><td colspan="3" style="color:#2563EB">${o.tid}</td></tr>`:''}
+        <tr><th>결제금액</th><td class="orange" colspan="3">${amt}</td></tr>
+        <tr><th>주문일시</th><td colspan="3">${o.date}</td></tr>
+        <tr><th>주문상태</th><td colspan="3" style="font-weight:700;color:${shipColor}">${o.shipStatus}</td></tr>
+      </table>
+    </div>
+
+    <div class="sh-foot">
+      <div class="sh-foot-note">
+        ※ 본 주문서는 제안서몰 관리시스템에서 자동 생성된 문서입니다.<br>
+        ※ 문의: 02-000-0000 &nbsp;|&nbsp; order@제안서몰.co.kr
+      </div>
+      <div class="sh-sign">
+        담당자 확인 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;___________<br>
+        <span style="font-size:10px;color:#ccc;margin-top:4px;display:block">제안서몰</span>
+      </div>
+    </div>`;
+  document.getElementById('shModal').classList.add('open');
+}
+
+/* ═══ 고객문의 데이터 ═══ */
+let INQUIRIES = [
+  {id:3,name:'이준호',phone:'010-7766-5544',email:'junho.lee@naver.com',title:'납기 급행 처리 가능한가요?',content:'안녕하세요. 이번 주 금요일까지 PT바인더 5부가 필요한데 납기 급행 처리가 가능한지 문의드립니다.',status:'답변완료',reply:'안녕하세요. 수요일 오전까지 파일 접수 시 금요일 발송 가능합니다. 감사합니다.',date:'2026/04/20'},
+  {id:2,name:'김민지',phone:'010-9988-1234',email:'minji.kim@gmail.com',title:'세금계산서 발행 방법 문의',content:'법인카드로 결제했는데 세금계산서 발행이 가능한지요? 사업자번호는 123-45-67890입니다.',status:'답변완료',reply:'네, 가능합니다. 이메일로 사업자등록증 사본을 보내주시면 처리해드리겠습니다.',date:'2026/04/15'},
+  {id:1,name:'박서연',phone:'010-5544-3322',email:'seoyeon.park@kakao.com',title:'드롭박스 파일 전달 문의',content:'결제는 했는데 드롭박스 링크가 이메일로 오지 않았어요. 확인 부탁드립니다.',status:'답변대기',reply:'',date:'2026/04/22'},
+];
+let currentInqId = null;
+
+function renderInquiries(list){
+  document.getElementById('inq-cnt').textContent = `(${list.length}건)`;
+  document.getElementById('inq-tbody').innerHTML = list.length ? list.map(q=>`
+    <tr class="dr">
+      <td style="color:var(--text-dim)">${q.id}</td>
+      <td><div class="c-name">${q.name}</div></td>
+      <td><div style="font-size:12px;color:var(--text-sub)">${q.phone}</div></td>
+      <td><div style="font-size:12px;color:var(--text-sub)">${q.email}</div></td>
+      <td style="cursor:pointer;font-weight:600" onclick="openInqModal(${q.id})">${q.title}</td>
+      <td><span class="inq-st ${q.status==='답변완료'?'inq-done':'inq-wait'}">${q.status}</span></td>
+      <td><div class="dt">${q.date}</div></td>
+      <td><div class="mgmt">
+        <button class="mb mb-doc" onclick="openInqModal(${q.id})">답변</button>
+        <button class="mb mb-del" onclick="deleteInq(${q.id},event)">삭제</button>
+      </div></td>
+    </tr>`).join('') :
+    `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-dim)">문의 내역이 없습니다</td></tr>`;
+}
+function filterInqStatus(v){
+  renderInquiries(v?INQUIRIES.filter(q=>q.status===v):[...INQUIRIES]);
+}
+function openInqModal(id){
+  const q = INQUIRIES.find(x=>x.id===id);if(!q)return;
+  currentInqId = id;
+  document.getElementById('id-name').textContent    = q.name;
+  document.getElementById('id-phone').textContent   = q.phone;
+  document.getElementById('id-email').textContent   = q.email;
+  document.getElementById('id-title').textContent   = q.title;
+  document.getElementById('id-content').textContent = q.content;
+  document.getElementById('id-reply-input').value   = q.reply||'';
+  const rw = document.getElementById('id-reply-wrap');
+  const rt = document.getElementById('id-reply-txt');
+  if(q.reply){rw.style.display='block';rt.textContent=q.reply;}
+  else rw.style.display='none';
+  document.getElementById('inqModal').classList.add('open');
+}
+function saveReply(){
+  const q = INQUIRIES.find(x=>x.id===currentInqId);if(!q)return;
+  const txt = document.getElementById('id-reply-input').value.trim();
+  if(!txt){alert('답변 내용을 입력해 주세요.');return;}
+  q.reply = txt; q.status='답변완료';
+  closeModalEl('inqModal');
+  renderInquiries(INQUIRIES);
+  alert('답변이 저장되었습니다.');
+}
+function deleteInq(id,e){if(e)e.stopPropagation();delTarget='inq-'+id;document.getElementById('delModal').classList.add('open');}
+function deleteInqFromModal(){
+  const id=currentInqId;
+  delTarget='inq-'+id;
+  closeModalEl('inqModal');
+  document.getElementById('delModal').classList.add('open');
+}
+
+/* ═══ FAQ 데이터 ═══ */
+let FAQS = [
+  {id:1,cat:'납기',q:'납기는 얼마나 걸리나요?',a:'파일 접수 및 담당자 확인 후 납기를 개별 안내드립니다. 영업일 기준 1~3일 내 완료되며, 당일 오전 접수 시 당일 작업도 가능합니다.'},
+  {id:2,cat:'파일',q:'어떤 방식으로 인쇄 파일을 전달하나요?',a:'드롭박스 링크 또는 이메일(order@제안서몰.co.kr)로 전달 가능합니다. 결제 완료 후 드롭박스 업로드 링크가 자동 발송됩니다.'},
+  {id:3,cat:'결제',q:'결제 방법은 어떻게 되나요?',a:'신용카드·체크카드 및 무통장 입금(계좌이체)이 가능합니다. 무통장 입금의 경우 입금 확인 후 작업이 시작됩니다.'},
+  {id:4,cat:'결제',q:'세금계산서 발행이 가능한가요?',a:'가능합니다. 주문 시 세금계산서 발행 요청을 체크하시고 사업자번호를 입력해 주시면 발행 처리해드립니다.'},
+  {id:5,cat:'배송',q:'배송 방법은 어떻게 되나요?',a:'택배 배송(2,500원 / 3만원 이상 무료)과 직접 방문 수령 중 선택 가능합니다.'},
+];
+let editFaqId = null;
+
+function renderFAQs(){
+  document.getElementById('faq-cnt').textContent = `(${FAQS.length}건)`;
+  document.getElementById('faq-list').innerHTML = FAQS.length ? FAQS.map((f,i)=>`
+    <div class="faq-row">
+      <div class="faq-num">${i+1}</div>
+      <div class="faq-content">
+        <div class="faq-q"><span class="faq-cat">${f.cat}</span>${f.q}</div>
+        <div class="faq-a">${f.a}</div>
+      </div>
+      <div class="faq-btns">
+        <button class="mb mb-doc" onclick="openFaqModal(${f.id})">수정</button>
+        <button class="mb mb-del" onclick="deleteFaq(${f.id})">삭제</button>
+      </div>
+    </div>`).join('') :
+    `<div style="text-align:center;padding:32px;color:var(--text-dim)">등록된 FAQ가 없습니다</div>`;
+}
+function openFaqModal(id){
+  editFaqId = id;
+  const f = id ? FAQS.find(x=>x.id===id) : null;
+  document.getElementById('faq-modal-title').textContent = id ? 'FAQ 수정' : 'FAQ 등록';
+  document.getElementById('faq-cat').value = f ? f.cat : '납기';
+  document.getElementById('faq-q').value   = f ? f.q   : '';
+  document.getElementById('faq-a').value   = f ? f.a   : '';
+  document.getElementById('faqModal').classList.add('open');
+}
+function saveFaq(){
+  const cat = document.getElementById('faq-cat').value;
+  const q   = document.getElementById('faq-q').value.trim();
+  const a   = document.getElementById('faq-a').value.trim();
+  if(!q||!a){alert('질문과 답변을 모두 입력해 주세요.');return;}
+  if(editFaqId){
+    const f=FAQS.find(x=>x.id===editFaqId);if(f){f.cat=cat;f.q=q;f.a=a;}
+  } else {
+    const newId = FAQS.length ? Math.max(...FAQS.map(x=>x.id))+1 : 1;
+    FAQS.push({id:newId,cat,q,a});
+  }
+  closeModalEl('faqModal');
+  renderFAQs();
+  alert(editFaqId?'FAQ가 수정되었습니다.':'FAQ가 등록되었습니다.');
+}
+function deleteFaq(id){
+  delTarget='faq-'+id;
+  document.getElementById('delModal').classList.add('open');
+}
+
+/* ═══ 공지사항 데이터 ═══ */
+let NOTICES = [
+  {id:1,txt:'무첨가 인증 · 납기 확인 후 즉시 제작 · 드롭박스 / 이메일 파일 접수 가능',btnTxt:'자세히 →',btnUrl:'#',active:true,date:'2026/01/01'},
+  {id:2,txt:'설 연휴 휴무 안내 (1/28~1/30) — 연휴 기간 중 접수 주문은 1/31부터 순차 처리됩니다',btnTxt:'',btnUrl:'',active:false,date:'2026/01/20'},
+];
+let editNoticeId = null;
+
+function renderNotices(){
+  document.getElementById('notice-cnt').textContent = `(${NOTICES.length}건)`;
+  // 상단 공지바 미리보기 — 활성 중 첫번째
+  const active = NOTICES.find(n=>n.active);
+  if(active) document.getElementById('notice-preview-bar').textContent = active.txt + (active.btnTxt?' · '+active.btnTxt:'');
+  document.getElementById('notice-tbody').innerHTML = NOTICES.length ? NOTICES.map(n=>`
+    <tr class="dr">
+      <td style="color:var(--text-dim)">${n.id}</td>
+      <td style="font-size:12.5px;color:var(--text)">${n.txt}</td>
+      <td style="font-size:12px;color:var(--text-sub)">${n.btnTxt||'—'}</td>
+      <td>
+        <span class="notice-active ${n.active?'na-on':'na-off'}" style="cursor:pointer" onclick="toggleNotice(${n.id})">
+          ${n.active?'ON':'OFF'}
+        </span>
+      </td>
+      <td><div class="dt">${n.date}</div></td>
+      <td><div class="mgmt">
+        <button class="mb mb-doc" onclick="openNoticeModal(${n.id})">수정</button>
+        <button class="mb mb-del" onclick="deleteNotice(${n.id})">삭제</button>
+      </div></td>
+    </tr>`).join('') :
+    `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-dim)">등록된 공지가 없습니다</td></tr>`;
+}
+function toggleNotice(id){
+  const n=NOTICES.find(x=>x.id===id);if(!n)return;
+  n.active=!n.active;renderNotices();
+}
+function openNoticeModal(id){
+  editNoticeId = id;
+  const n = id ? NOTICES.find(x=>x.id===id) : null;
+  document.getElementById('notice-modal-title').textContent = id ? '공지 수정' : '공지 등록';
+  document.getElementById('notice-txt').value     = n ? n.txt    : '';
+  document.getElementById('notice-btn-txt').value = n ? n.btnTxt : '';
+  document.getElementById('notice-btn-url').value = n ? n.btnUrl : '';
+  document.getElementById('notice-active').value  = n ? (n.active?'1':'0') : '1';
+  document.getElementById('notice-preview-modal').textContent = n ? n.txt : '공지 내용을 입력하면 미리볼 수 있습니다';
+  document.getElementById('noticeModal').classList.add('open');
+}
+function previewNotice(){
+  const txt = document.getElementById('notice-txt').value;
+  const btn = document.getElementById('notice-btn-txt').value;
+  document.getElementById('notice-preview-modal').textContent = txt + (btn?' · '+btn:'') || '공지 내용을 입력하면 미리볼 수 있습니다';
+}
+function saveNotice(){
+  const txt    = document.getElementById('notice-txt').value.trim();
+  const btnTxt = document.getElementById('notice-btn-txt').value.trim();
+  const btnUrl = document.getElementById('notice-btn-url').value.trim();
+  const active = document.getElementById('notice-active').value === '1';
+  if(!txt){alert('공지 내용을 입력해 주세요.');return;}
+  const today = new Date().toLocaleDateString('ko-KR').replace(/\. /g,'/').replace('.','');
+  if(editNoticeId){
+    const n=NOTICES.find(x=>x.id===editNoticeId);
+    if(n){n.txt=txt;n.btnTxt=btnTxt;n.btnUrl=btnUrl;n.active=active;}
+  } else {
+    const newId = NOTICES.length ? Math.max(...NOTICES.map(x=>x.id))+1 : 1;
+    NOTICES.push({id:newId,txt,btnTxt,btnUrl,active,date:today});
+  }
+  closeModalEl('noticeModal');
+  renderNotices();
+  alert(editNoticeId?'공지가 수정되었습니다.':'공지가 등록되었습니다.');
+}
+function deleteNotice(id){delTarget='notice-'+id;document.getElementById('delModal').classList.add('open');}
+
+/* 공통 모달 닫기 */
+function closeModalEl(id){document.getElementById(id).classList.remove('open')}
+
+/* ═══ 단가표 데이터 ═══ */
+let PRICE_DATA = {
+  paper: [
+    {name:'스노우지 100g', type:'컬러양면', p1:280, p2:230, p3:190, p4:160, note:'A4 기준'},
+    {name:'스노우지 100g', type:'흑백양면', p1:80,  p2:65,  p3:55,  p4:45,  note:''},
+    {name:'아트지 150g',   type:'컬러양면', p1:320, p2:270, p3:220, p4:190, note:''},
+    {name:'모조지 80g',    type:'컬러양면', p1:200, p2:160, p3:130, p4:110, note:''},
+    {name:'수입지',        type:'컬러단면', p1:500, p2:420, p3:360, p4:300, note:'별도문의'},
+    {name:'질감용지',      type:'컬러단면', p1:600, p2:500, p3:430, p4:370, note:'별도문의'},
+  ],
+  binding: [
+    {name:'3공바인더 인쇄형', p1:35000, p2:32000, p3:28000, p4:25000, note:''},
+    {name:'3공바인더 원단형', p1:45000, p2:42000, p3:38000, p4:34000, note:''},
+    {name:'PT바인더 인쇄형',  p1:40000, p2:36000, p3:32000, p4:28000, note:''},
+    {name:'PT바인더 원단형',  p1:55000, p2:50000, p3:44000, p4:39000, note:''},
+    {name:'하드커버 인쇄형',  p1:48000, p2:44000, p3:39000, p4:34000, note:''},
+    {name:'하드커버 원단형',  p1:65000, p2:60000, p3:54000, p4:48000, note:''},
+  ],
+  box: [
+    {name:'캐리어박스 (A4)', p1:85000, p2:78000, p3:70000, p4:63000, note:'맞춤제작'},
+    {name:'자석박스 (A4)',   p1:72000, p2:66000, p3:59000, p4:53000, note:'맞춤제작'},
+  ]
+};
+
+/* 단가표 탭 */
+function setPriceTab(el, id){
+  document.querySelectorAll('.price-tab').forEach(t=>{
+    t.style.color='var(--text-sub)';
+    t.style.borderBottomColor='transparent';
+  });
+  el.style.color='var(--text)';
+  el.style.borderBottomColor='var(--or)';
+  document.querySelectorAll('.price-panel').forEach(p=>p.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+/* 단가표 렌더링 */
+function renderPriceTables(){
+  // 내지
+  document.getElementById('tbody-paper').innerHTML = PRICE_DATA.paper.map((r,i)=>`
+    <tr class="dr">
+      <td>${r.name}</td><td>${r.type}</td>
+      <td><input class="pi" value="${r.p1}" onchange="PRICE_DATA.paper[${i}].p1=+this.value"></td>
+      <td><input class="pi" value="${r.p2}" onchange="PRICE_DATA.paper[${i}].p2=+this.value"></td>
+      <td><input class="pi" value="${r.p3}" onchange="PRICE_DATA.paper[${i}].p3=+this.value"></td>
+      <td><input class="pi" value="${r.p4}" onchange="PRICE_DATA.paper[${i}].p4=+this.value"></td>
+      <td><input class="pn" value="${r.note}" onchange="PRICE_DATA.paper[${i}].note=this.value"></td>
+    </tr>`).join('');
+  // 제본
+  document.getElementById('tbody-binding').innerHTML = PRICE_DATA.binding.map((r,i)=>`
+    <tr class="dr">
+      <td>${r.name}</td>
+      <td><input class="pi" value="${r.p1}" onchange="PRICE_DATA.binding[${i}].p1=+this.value"></td>
+      <td><input class="pi" value="${r.p2}" onchange="PRICE_DATA.binding[${i}].p2=+this.value"></td>
+      <td><input class="pi" value="${r.p3}" onchange="PRICE_DATA.binding[${i}].p3=+this.value"></td>
+      <td><input class="pi" value="${r.p4}" onchange="PRICE_DATA.binding[${i}].p4=+this.value"></td>
+      <td><input class="pn" value="${r.note}" onchange="PRICE_DATA.binding[${i}].note=this.value"></td>
+    </tr>`).join('');
+  // 박스
+  document.getElementById('tbody-box').innerHTML = PRICE_DATA.box.map((r,i)=>`
+    <tr class="dr">
+      <td>${r.name}</td>
+      <td><input class="pi" value="${r.p1}" onchange="PRICE_DATA.box[${i}].p1=+this.value"></td>
+      <td><input class="pi" value="${r.p2}" onchange="PRICE_DATA.box[${i}].p2=+this.value"></td>
+      <td><input class="pi" value="${r.p3}" onchange="PRICE_DATA.box[${i}].p3=+this.value"></td>
+      <td><input class="pi" value="${r.p4}" onchange="PRICE_DATA.box[${i}].p4=+this.value"></td>
+      <td><input class="pn" value="${r.note}" onchange="PRICE_DATA.box[${i}].note=this.value"></td>
+    </tr>`).join('');
+}
+
+/* 엑셀 다운로드 */
+function downloadExcel(){
+  if(typeof XLSX === 'undefined'){alert('라이브러리 로딩 중입니다. 잠시 후 다시 시도해 주세요.');return;}
+  const wb = XLSX.utils.book_new();
+
+  // 내지 시트
+  const paperData = [
+    ['용지','인쇄방식','1~9장','10~49장','50~99장','100장↑','비고'],
+    ...PRICE_DATA.paper.map(r=>[r.name,r.type,r.p1,r.p2,r.p3,r.p4,r.note])
+  ];
+  const ws1 = XLSX.utils.aoa_to_sheet(paperData);
+  ws1['!cols'] = [{wch:16},{wch:12},{wch:10},{wch:10},{wch:10},{wch:10},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws1, '내지인쇄');
+
+  // 제본 시트
+  const bindData = [
+    ['제본 종류','1부','2~4부','5~9부','10부↑','비고'],
+    ...PRICE_DATA.binding.map(r=>[r.name,r.p1,r.p2,r.p3,r.p4,r.note])
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(bindData);
+  ws2['!cols'] = [{wch:18},{wch:10},{wch:10},{wch:10},{wch:10},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws2, '제본');
+
+  // 박스 시트
+  const boxData = [
+    ['박스 종류','1개','2~4개','5~9개','10개↑','비고'],
+    ...PRICE_DATA.box.map(r=>[r.name,r.p1,r.p2,r.p3,r.p4,r.note])
+  ];
+  const ws3 = XLSX.utils.aoa_to_sheet(boxData);
+  ws3['!cols'] = [{wch:18},{wch:10},{wch:10},{wch:10},{wch:10},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws3, '박스');
+
+  const today = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `제안서몰_단가표_${today}.xlsx`);
+}
+
+/* 엑셀 업로드 */
+function uploadExcel(input){
+  const file = input.files[0];
+  if(!file) return;
+  readExcelFile(file);
+  input.value = '';
+}
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('dropzone').style.borderColor='var(--bd)';
+  const file = e.dataTransfer.files[0];
+  if(file && (file.name.endsWith('.xlsx')||file.name.endsWith('.xls'))){
+    readExcelFile(file);
+  } else {
+    alert('.xlsx 또는 .xls 파일만 업로드 가능합니다.');
+  }
+}
+function readExcelFile(file){
+  if(typeof XLSX === 'undefined'){alert('라이브러리 로딩 중입니다. 잠시 후 다시 시도해 주세요.');return;}
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const wb = XLSX.read(e.target.result, {type:'binary'});
+
+      // 내지인쇄 시트
+      const ws1 = wb.Sheets['내지인쇄'];
+      if(ws1){
+        const rows = XLSX.utils.sheet_to_json(ws1, {header:1});
+        PRICE_DATA.paper = rows.slice(1).filter(r=>r.length>=6).map(r=>({
+          name:String(r[0]||''), type:String(r[1]||''),
+          p1:+r[2]||0, p2:+r[3]||0, p3:+r[4]||0, p4:+r[5]||0,
+          note:String(r[6]||'')
+        }));
+      }
+      // 제본 시트
+      const ws2 = wb.Sheets['제본'];
+      if(ws2){
+        const rows = XLSX.utils.sheet_to_json(ws2, {header:1});
+        PRICE_DATA.binding = rows.slice(1).filter(r=>r.length>=5).map(r=>({
+          name:String(r[0]||''),
+          p1:+r[1]||0, p2:+r[2]||0, p3:+r[3]||0, p4:+r[4]||0,
+          note:String(r[5]||'')
+        }));
+      }
+      // 박스 시트
+      const ws3 = wb.Sheets['박스'];
+      if(ws3){
+        const rows = XLSX.utils.sheet_to_json(ws3, {header:1});
+        PRICE_DATA.box = rows.slice(1).filter(r=>r.length>=5).map(r=>({
+          name:String(r[0]||''),
+          p1:+r[1]||0, p2:+r[2]||0, p3:+r[3]||0, p4:+r[4]||0,
+          note:String(r[5]||'')
+        }));
+      }
+
+      renderPriceTables();
+      const st = document.getElementById('upload-status');
+      st.style.display='block';
+      st.textContent = `✓ "${file.name}" 업로드 완료`;
+      setTimeout(()=>st.style.display='none', 4000);
+      alert(`✅ 단가표가 업로드되었습니다.\n\n파일: ${file.name}\n내지: ${PRICE_DATA.paper.length}행 / 제본: ${PRICE_DATA.binding.length}행 / 박스: ${PRICE_DATA.box.length}행\n\n[저장하기] 버튼을 눌러 최종 저장해 주세요.`);
+    } catch(err){
+      alert('파일을 읽는 중 오류가 발생했습니다.\n엑셀 형식을 확인해 주세요.\n\n오류: '+err.message);
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function savePriceTable(){
+  alert('✅ 단가표가 저장되었습니다.\n실제 배포 시 서버 DB에 반영됩니다.');
+}
+
+/* ═══ 상품 데이터 ═══ */
+let PRODUCTS = [
+  {id:1,name:'하드커버 스프링제본 인쇄형',cat:'제본',desc:'인쇄 표지 + 스프링 제본. 발표용 고급 제본.',img:'',priceType:'binding',active:true,sort:1,date:'2026/01/01'},
+  {id:2,name:'PT바인더 인쇄형',cat:'제본',desc:'PT용 인쇄형 바인더. D링 / O링 선택.',img:'',priceType:'binding',active:true,sort:2,date:'2026/01/01'},
+  {id:3,name:'PT바인더 원단형',cat:'제본',desc:'원단 표지 PT바인더. 고급 소재.',img:'',priceType:'binding',active:true,sort:3,date:'2026/01/01'},
+  {id:4,name:'3공바인더 인쇄형',cat:'제본',desc:'3공 인쇄형 바인더.',img:'',priceType:'binding',active:true,sort:4,date:'2026/01/01'},
+  {id:5,name:'3공바인더 원단형',cat:'제본',desc:'3공 원단형 바인더.',img:'',priceType:'binding',active:true,sort:5,date:'2026/01/01'},
+  {id:6,name:'내지 인쇄 — 스노우지 100g',cat:'내지인쇄',desc:'고품질 스노우지 내지 인쇄.',img:'',priceType:'paper',active:true,sort:6,date:'2026/01/01'},
+  {id:7,name:'내지 인쇄 — 아트지 150g',cat:'내지인쇄',desc:'유광 아트지 내지 인쇄.',img:'',priceType:'paper',active:true,sort:7,date:'2026/01/01'},
+  {id:8,name:'제안서 캐리어박스',cat:'박스',desc:'이동 편리한 핸들형 전용 박스.',img:'',priceType:'box',active:true,sort:8,date:'2026/01/01'},
+  {id:9,name:'자석박스 (A4)',cat:'박스',desc:'프리미엄 자석 개폐 박스.',img:'',priceType:'box',active:true,sort:9,date:'2026/01/01'},
+];
+let editProdId = null;
+const PRICE_TYPE_LABEL = {paper:'내지 단가표(장당)',binding:'제본 단가표(부당)',box:'박스 단가표(개당)',custom:'별도 견적'};
+
+function renderProducts(list){
+  document.getElementById('prod-cnt').textContent = `(${list.length}건)`;
+  document.getElementById('prod-tbody').innerHTML = list.length ? list.map((p,i)=>`
+    <tr class="dr">
+      <td style="color:var(--text-dim)">${p.id}</td>
+      <td style="font-weight:700;color:var(--text)">${p.name}</td>
+      <td><span class="badge ${p.cat==='제본'?'bg-blue':p.cat==='내지인쇄'?'bg-green':'bg-yellow'}">${p.cat}</span></td>
+      <td style="font-size:12px;color:var(--text-sub)">${p.desc||'—'}</td>
+      <td>
+        <span class="inq-st ${p.active?'inq-done':'inq-wait'}" style="cursor:pointer" onclick="toggleProduct(${p.id})">
+          ${p.active?'노출':'숨김'}
+        </span>
+      </td>
+      <td><div class="dt">${p.date}</div></td>
+      <td><div class="mgmt">
+        <button class="mb mb-doc" onclick="openProductModal(${p.id})">수정</button>
+        <button class="mb" style="background:var(--blue);color:#fff" onclick="goToOption(${p.id},'${p.name}')">옵션</button>
+        <button class="mb mb-del" onclick="deleteProduct(${p.id})">삭제</button>
+      </div></td>
+    </tr>`).join('') :
+    `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-dim)">등록된 상품이 없습니다</td></tr>`;
+}
+function filterProducts(cat){
+  renderProducts(cat ? PRODUCTS.filter(p=>p.cat===cat) : [...PRODUCTS]);
+}
+function toggleProduct(id){
+  const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
+  p.active=!p.active; renderProducts(PRODUCTS);
+}
+function openProductModal(id){
+  editProdId=id;
+  const p=id?PRODUCTS.find(x=>x.id===id):null;
+  document.getElementById('prod-modal-title').textContent = id?'상품 수정':'상품 등록';
+  document.getElementById('prod-cat').value       = p?p.cat:'제본';
+  document.getElementById('prod-active').value    = p?(p.active?'1':'0'):'1';
+  document.getElementById('prod-name').value      = p?p.name:'';
+  document.getElementById('prod-desc').value      = p?p.desc:'';
+  document.getElementById('prod-img').value       = p?p.img:'';
+  document.getElementById('prod-price-type').value= p?p.priceType:'binding';
+  document.getElementById('prod-sort').value      = p?p.sort:PRODUCTS.length+1;
+  document.getElementById('productModal').classList.add('open');
+}
+function saveProduct(){
+  const name = document.getElementById('prod-name').value.trim();
+  if(!name){alert('상품명을 입력해 주세요.');return;}
+  const data = {
+    name, cat:document.getElementById('prod-cat').value,
+    active:document.getElementById('prod-active').value==='1',
+    desc:document.getElementById('prod-desc').value.trim(),
+    img:document.getElementById('prod-img').value.trim(),
+    priceType:document.getElementById('prod-price-type').value,
+    sort:+document.getElementById('prod-sort').value||0,
+    date:new Date().toLocaleDateString('ko-KR').replace(/\. /g,'/').replace('.','')
+  };
+  if(editProdId){
+    const p=PRODUCTS.find(x=>x.id===editProdId);
+    if(p) Object.assign(p,data);
+  } else {
+    data.id = PRODUCTS.length?Math.max(...PRODUCTS.map(x=>x.id))+1:1;
+    PRODUCTS.push(data);
+  }
+  closeModalEl('productModal');
+  renderProducts(PRODUCTS);
+  alert(editProdId?'상품이 수정되었습니다.':'상품이 등록되었습니다.');
+}
+function deleteProduct(id){delTarget='prod-'+id;document.getElementById('delModal').classList.add('open');}
+
+/* ═══ 옵션 데이터 ═══ */
+let OPTION_GROUPS = [
+  {id:1,prodId:1,name:'제본 종류',required:true,priceLink:'binding_name',sort:1},
+  {id:2,prodId:1,name:'사이즈',required:true,priceLink:'none',sort:2},
+  {id:3,prodId:1,name:'방향',required:true,priceLink:'none',sort:3},
+  {id:4,prodId:1,name:'수량',required:true,priceLink:'binding_qty',sort:4},
+  {id:5,prodId:2,name:'표지 소재',required:true,priceLink:'binding_name',sort:1},
+  {id:6,prodId:2,name:'사이즈',required:true,priceLink:'none',sort:2},
+  {id:7,prodId:2,name:'수량',required:true,priceLink:'binding_qty',sort:3},
+];
+let OPTION_VALUES = [
+  {id:1,groupId:1,name:'하드커버 스프링제본',price:0,active:true,sort:1},
+  {id:2,groupId:2,name:'A4',price:0,active:true,sort:1},
+  {id:3,groupId:2,name:'A5',price:0,active:true,sort:2},
+  {id:4,groupId:3,name:'세로형',price:0,active:true,sort:1},
+  {id:5,groupId:3,name:'가로형',price:0,active:true,sort:2},
+  {id:6,groupId:4,name:'1부',price:0,active:true,sort:1},
+  {id:7,groupId:4,name:'2~4부',price:0,active:true,sort:2},
+  {id:8,groupId:4,name:'5~9부',price:0,active:true,sort:3},
+  {id:9,groupId:4,name:'10부 이상',price:0,active:true,sort:4},
+  {id:10,groupId:5,name:'포크로스',price:0,active:true,sort:1},
+  {id:11,groupId:5,name:'모시동이',price:0,active:true,sort:2},
+  {id:12,groupId:5,name:'엔젤클로스',price:0,active:true,sort:3},
+  {id:13,groupId:6,name:'A4',price:0,active:true,sort:1},
+  {id:14,groupId:7,name:'1부',price:0,active:true,sort:1},
+  {id:15,groupId:7,name:'2~4부',price:0,active:true,sort:2},
+  {id:16,groupId:7,name:'5~9부',price:0,active:true,sort:3},
+  {id:17,groupId:7,name:'10부 이상',price:0,active:true,sort:4},
+];
+let currentProdId=null, currentGroupId=null, editGroupId=null, editValueId=null;
+const PRICE_LINK_LABEL={'none':'연동없음','paper_name':'내지-용지종류','paper_type':'내지-인쇄방식','paper_qty':'내지-수량구간','binding_name':'제본-제본종류','binding_qty':'제본-수량구간','box_name':'박스-종류','box_qty':'박스-수량구간'};
+
+function initOptionPanel(){
+  const sel = document.getElementById('opt-prod-select');
+  sel.innerHTML = '<option value="">-- 상품을 선택하세요 --</option>' +
+    PRODUCTS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  document.getElementById('opt-content').style.display='none';
+  document.getElementById('group-list').innerHTML='';
+  document.getElementById('value-list').innerHTML='<div style="text-align:center;padding:32px;color:var(--text-dim);font-size:13px">좌측에서 옵션 그룹을 선택해 주세요</div>';
+}
+function goToOption(prodId, prodName){
+  document.querySelectorAll('.menu-item').forEach(m=>m.classList.remove('on'));
+  document.querySelectorAll('.menu-item').forEach(m=>{ if(m.getAttribute('onclick')&&m.getAttribute('onclick').includes("'option'")) m.classList.add('on'); });
+  ['order','product','option','price','inquiry','faq','notice'].forEach(id=>{
+    const el=document.getElementById('panel-'+id);
+    if(el) el.style.display=id==='option'?'block':'none';
+  });
+  initOptionPanel();
+  setTimeout(()=>{
+    const sel=document.getElementById('opt-prod-select');
+    sel.value=prodId;
+    selectOptionProduct(prodId);
+  },50);
+}
+function selectOptionProduct(id){
+  currentProdId=+id;
+  if(!id){document.getElementById('opt-content').style.display='none';return;}
+  document.getElementById('opt-content').style.display='block';
+  renderGroups();
+  document.getElementById('value-list').innerHTML='<div style="text-align:center;padding:32px;color:var(--text-dim);font-size:13px">좌측에서 옵션 그룹을 선택해 주세요</div>';
+  document.getElementById('group-name-label').textContent='';
+  currentGroupId=null;
+}
+function renderGroups(){
+  const groups = OPTION_GROUPS.filter(g=>g.prodId===currentProdId);
+  document.getElementById('group-list').innerHTML = groups.length ? groups.map(g=>`
+    <div style="padding:13px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;cursor:pointer;transition:background .12s;${currentGroupId===g.id?'background:rgba(59,130,246,.12);border-left:3px solid var(--blue);':''}"
+      onclick="selectGroup(${g.id})">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px">${g.name}</div>
+        <div style="font-size:11px;color:var(--text-dim)">${g.required?'필수':'선택'} · ${PRICE_LINK_LABEL[g.priceLink]||'연동없음'}</div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="mb mb-doc" onclick="event.stopPropagation();openGroupModal(${g.id})">수정</button>
+        <button class="mb mb-del" onclick="event.stopPropagation();deleteGroup(${g.id})">삭제</button>
+      </div>
+    </div>`).join('') :
+    `<div style="text-align:center;padding:28px;color:var(--text-dim);font-size:13px">옵션 그룹이 없습니다<br>+ 추가 버튼으로 등록하세요</div>`;
+}
+function selectGroup(id){
+  currentGroupId=id;
+  const g=OPTION_GROUPS.find(x=>x.id===id);
+  if(!g)return;
+  document.getElementById('group-name-label').textContent='— '+g.name;
+  renderGroups();
+  renderValues();
+}
+function renderValues(){
+  if(!currentGroupId){return;}
+  const vals = OPTION_VALUES.filter(v=>v.groupId===currentGroupId);
+  document.getElementById('value-list').innerHTML = vals.length ? vals.map(v=>`
+    <div style="padding:12px 16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px">${v.name}</div>
+        <div style="font-size:11.5px;color:var(--text-dim)">${v.price>0?'+₩'+v.price.toLocaleString():'단가표 자동 계산'} · ${v.active?'노출':'숨김'}</div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="mb mb-doc" onclick="openValueModal(${v.id})">수정</button>
+        <button class="mb mb-del" onclick="deleteValue(${v.id})">삭제</button>
+      </div>
+    </div>`).join('') :
+    `<div style="text-align:center;padding:28px;color:var(--text-dim);font-size:13px">옵션 값이 없습니다<br>+ 값 추가 버튼으로 등록하세요</div>`;
+}
+function openGroupModal(id){
+  editGroupId=id;
+  const g=id?OPTION_GROUPS.find(x=>x.id===id):null;
+  document.getElementById('group-modal-title').textContent=id?'옵션 그룹 수정':'옵션 그룹 추가';
+  document.getElementById('group-name').value=g?g.name:'';
+  document.getElementById('group-required').value=g?(g.required?'1':'0'):'1';
+  document.getElementById('group-sort').value=g?g.sort:OPTION_GROUPS.filter(x=>x.prodId===currentProdId).length+1;
+  document.getElementById('group-price-link').value=g?g.priceLink:'none';
+  document.getElementById('groupModal').classList.add('open');
+}
+function saveGroup(){
+  const name=document.getElementById('group-name').value.trim();
+  if(!name){alert('그룹명을 입력해 주세요.');return;}
+  const data={
+    prodId:currentProdId,name,
+    required:document.getElementById('group-required').value==='1',
+    sort:+document.getElementById('group-sort').value||0,
+    priceLink:document.getElementById('group-price-link').value,
+  };
+  if(editGroupId){
+    const g=OPTION_GROUPS.find(x=>x.id===editGroupId);if(g)Object.assign(g,data);
+  } else {
+    data.id=OPTION_GROUPS.length?Math.max(...OPTION_GROUPS.map(x=>x.id))+1:1;
+    OPTION_GROUPS.push(data);
+  }
+  closeModalEl('groupModal');
+  renderGroups();
+  alert(editGroupId?'옵션 그룹이 수정되었습니다.':'옵션 그룹이 추가되었습니다.');
+}
+function deleteGroup(id){delTarget='group-'+id;document.getElementById('delModal').classList.add('open');}
+
+function openValueModal(id){
+  editValueId=id;
+  const v=id?OPTION_VALUES.find(x=>x.id===id):null;
+  document.getElementById('value-modal-title').textContent=id?'옵션 값 수정':'옵션 값 추가';
+  document.getElementById('val-name').value=v?v.name:'';
+  document.getElementById('val-price').value=v?v.price:0;
+  document.getElementById('val-active').value=v?(v.active?'1':'0'):'1';
+  document.getElementById('val-sort').value=v?v.sort:OPTION_VALUES.filter(x=>x.groupId===currentGroupId).length+1;
+  document.getElementById('valueModal').classList.add('open');
+}
+function saveValue(){
+  if(!currentGroupId){alert('옵션 그룹을 먼저 선택해 주세요.');return;}
+  const name=document.getElementById('val-name').value.trim();
+  if(!name){alert('옵션 값을 입력해 주세요.');return;}
+  const data={
+    groupId:currentGroupId,name,
+    price:+document.getElementById('val-price').value||0,
+    active:document.getElementById('val-active').value==='1',
+    sort:+document.getElementById('val-sort').value||0,
+  };
+  if(editValueId){
+    const v=OPTION_VALUES.find(x=>x.id===editValueId);if(v)Object.assign(v,data);
+  } else {
+    data.id=OPTION_VALUES.length?Math.max(...OPTION_VALUES.map(x=>x.id))+1:1;
+    OPTION_VALUES.push(data);
+  }
+  closeModalEl('valueModal');
+  renderValues();
+  alert(editValueId?'옵션 값이 수정되었습니다.':'옵션 값이 추가되었습니다.');
+}
+function deleteValue(id){delTarget='value-'+id;document.getElementById('delModal').classList.add('open');}
+
+render(ORDERS);
+renderPriceTables();
+</script>
+</body>
+</html>

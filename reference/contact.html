@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>제안서몰 — 고객문의</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#E8481A;--or-dk:#C93A10;--or-lt:#FFF1EC;
+  --bg:#F5F5F5;--white:#fff;
+  --text:#1A1A1A;--sub:#888;--del:#AAAAAA;
+  --bd:#E5E5E5;--bd2:#CCCCCC;
+  --green:#16A34A;--green-lt:#F0FDF4;
+  --blue:#2563EB;--blue-lt:#EFF6FF;
+  --rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--white);-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.5}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;background:none}
+input,select,textarea{font-family:inherit;outline:none}
+
+/* ══ 공지배너 ══ */
+.notice{background:var(--or);display:flex;align-items:center;justify-content:center;gap:24px;padding:10px 24px}
+.n-txt{font-size:13px;font-weight:500;color:#fff;flex:1;text-align:center}
+.n-btn{font-size:12px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:100px;padding:4px 14px;cursor:pointer}
+
+/* ══ GNB ══ */
+.gnb{background:var(--white);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:200}
+.gnb-in{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;gap:20px}
+.logo{font-size:22px;font-weight:900;color:var(--or);letter-spacing:-1px;font-style:italic;flex-shrink:0}
+.srch{display:flex;align-items:center;border:1.5px solid var(--or);border-radius:100px;overflow:hidden;flex:1;max-width:280px}
+.srch input{flex:1;border:none;padding:9px 16px;font-size:13px;color:var(--text);background:transparent}
+.srch-btn{background:var(--or);color:#fff;padding:9px 14px;border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center}
+.srch-btn svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round}
+.gnb-nav{display:flex;gap:2px;margin-left:auto}
+.gnb-a{padding:8px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;white-space:nowrap;transition:color .15s}
+.gnb-a:hover{color:var(--or)}
+.gnb-a.on{color:var(--or)}
+
+/* ══ 페이지 헤더 ══ */
+.page-hd{text-align:center;padding:40px 24px 0}
+.page-hd h1{font-size:26px;font-weight:900;color:var(--text);letter-spacing:-.5px}
+
+/* ══ 탭 ══ */
+.tabs{display:flex;justify-content:center;border-bottom:1px solid var(--bd);margin:20px 0 0}
+.tab{padding:13px 28px;font-size:14px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.on{color:var(--text);border-bottom-color:var(--text)}
+
+/* ══ 메인 ══ */
+.wrap{max-width:1200px;margin:0 auto;padding:36px 24px 80px}
+
+/* ══ 고객센터 안내 바 ══ */
+.cs-bar{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;margin-bottom:32px;
+}
+.cs-item{
+  background:var(--white);border:1px solid var(--bd);
+  border-radius:var(--rs);padding:22px 24px;
+  transition:border-color .2s;cursor:pointer;
+}
+.cs-item:hover{border-color:var(--or)}
+.cs-item-label{font-size:12px;color:var(--sub);margin-bottom:8px;font-weight:500}
+.cs-item-val{font-size:20px;font-weight:900;color:var(--text);letter-spacing:-.5px;margin-bottom:4px}
+.cs-item-desc{font-size:12.5px;color:var(--sub);line-height:1.8}
+.cs-item-link{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:12px;font-size:13px;font-weight:700;color:var(--or);
+  border:1px solid var(--or);border-radius:var(--rs);
+  padding:7px 14px;transition:all .15s;
+}
+.cs-item-link:hover{background:var(--or-lt)}
+
+/* ══ 2컬럼 레이아웃 ══ */
+.grid{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+
+/* ══ 공통 카드 ══ */
+.card{background:var(--white);border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden;margin-bottom:14px}
+.card-hd{padding:15px 20px;border-bottom:1px solid var(--bd);background:var(--bg);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:14px;font-weight:800;color:var(--text)}
+.card-sub{font-size:12px;color:var(--sub)}
+.card-body{padding:24px}
+
+/* ══ 문의 작성 폼 ══ */
+.form-row{margin-bottom:18px}
+.form-row:last-child{margin-bottom:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.f-label{display:block;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:8px}
+.f-req{color:var(--or);margin-left:2px}
+.f-input{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  font-size:13.5px;color:var(--text);transition:border-color .2s;
+  background:var(--white);
+}
+.f-input:focus{border-color:var(--or)}
+.f-input::placeholder{color:var(--del);font-size:13px}
+.f-select{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  font-size:13.5px;color:var(--text);
+  background:var(--white);cursor:pointer;
+}
+.f-select:focus{border-color:var(--or)}
+.f-textarea{
+  width:100%;padding:12px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  font-size:13.5px;color:var(--text);
+  resize:vertical;min-height:160px;
+  transition:border-color .2s;line-height:1.7;
+}
+.f-textarea:focus{border-color:var(--or)}
+.f-textarea::placeholder{color:var(--del);font-size:13px}
+/* 파일 첨부 */
+.f-file-wrap{
+  border:1.5px dashed var(--bd2);border-radius:var(--rs);
+  padding:24px;text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--bg);
+}
+.f-file-wrap:hover{border-color:var(--or);background:var(--or-lt)}
+.f-file-wrap input{display:none}
+.f-file-title{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:4px}
+.f-file-sub{font-size:12px;color:var(--sub)}
+/* 개인정보 동의 */
+.agree-row{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:14px;background:var(--bg);border-radius:var(--rs);
+}
+.agree-row input{width:15px;height:15px;accent-color:var(--or);cursor:pointer;flex-shrink:0;margin-top:1px}
+.agree-row label{font-size:12.5px;color:var(--sub);line-height:1.7;cursor:pointer}
+.agree-row label a{color:var(--or)}
+/* 제출 버튼 */
+.submit-btn{
+  width:100%;height:50px;background:var(--or);color:#fff;
+  font-size:15px;font-weight:800;border-radius:var(--rs);
+  border:none;cursor:pointer;font-family:inherit;
+  margin-top:18px;transition:background .2s;
+}
+.submit-btn:hover{background:var(--or-dk)}
+
+/* ══ FAQ ══ */
+.faq-item{border-bottom:1px solid var(--bd)}
+.faq-item:last-child{border-bottom:none}
+.faq-q{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;cursor:pointer;transition:background .15s;gap:12px;
+}
+.faq-q:hover{background:#FAFAFA}
+.faq-q-txt{font-size:13.5px;font-weight:600;color:var(--text);flex:1;line-height:1.5}
+.faq-q-cat{
+  font-size:11px;font-weight:700;color:var(--or);
+  background:var(--or-lt);border:1px solid rgba(232,72,26,.2);
+  border-radius:100px;padding:2px 9px;white-space:nowrap;flex-shrink:0;
+}
+.faq-arr{
+  width:18px;height:18px;flex-shrink:0;
+  fill:none;stroke:var(--sub);stroke-width:2;stroke-linecap:round;
+  transition:transform .2s;
+}
+.faq-arr.open{transform:rotate(180deg)}
+.faq-a{
+  display:none;padding:16px 20px 20px;
+  font-size:13px;color:var(--sub);line-height:1.85;
+  background:var(--bg);border-top:1px solid var(--bd);
+}
+.faq-a.open{display:block}
+.faq-a strong{color:var(--text);font-weight:700}
+
+/* ══ 문의 내역 테이블 ══ */
+.inq-table{width:100%;border-collapse:collapse}
+.inq-table th{
+  padding:11px 14px;font-size:12px;font-weight:700;
+  color:var(--sub);text-align:left;
+  background:var(--bg);border-bottom:1px solid var(--bd);
+  white-space:nowrap;
+}
+.inq-table td{
+  padding:14px;font-size:13px;color:var(--text);
+  border-bottom:1px solid var(--bd);vertical-align:middle;
+}
+.inq-table tr:last-child td{border-bottom:none}
+.inq-table tr:hover td{background:#FAFAFA}
+.inq-status{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap}
+.is-done{background:var(--green-lt);color:var(--green);border:1px solid rgba(22,163,74,.2)}
+.is-wait{background:var(--bg);color:var(--sub);border:1px solid var(--bd)}
+.inq-empty{text-align:center;padding:40px;color:var(--sub);font-size:13.5px}
+
+/* ══ 우측 사이드 ══ */
+.side{display:flex;flex-direction:column;gap:14px}
+
+/* 빠른 문의 채널 */
+.channel-item{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 20px;border-bottom:1px solid var(--bd);
+  cursor:pointer;transition:background .12s;
+}
+.channel-item:last-child{border-bottom:none}
+.channel-item:hover{background:#FAFAFA}
+.ch-icon{
+  width:40px;height:40px;border-radius:var(--rs);
+  background:var(--bg);border:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.ch-icon svg{width:18px;height:18px;fill:none;stroke:var(--sub);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ch-info{flex:1}
+.ch-name{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:2px}
+.ch-desc{font-size:12px;color:var(--sub)}
+.ch-arr{
+  width:16px;height:16px;fill:none;
+  stroke:var(--del);stroke-width:2;stroke-linecap:round;
+}
+
+/* 공지사항 */
+.notice-item{
+  padding:14px 20px;border-bottom:1px solid var(--bd);
+  cursor:pointer;transition:background .12s;
+}
+.notice-item:last-child{border-bottom:none}
+.notice-item:hover{background:#FAFAFA}
+.notice-badge{
+  display:inline-block;font-size:10px;font-weight:700;
+  color:var(--or);border:1px solid rgba(232,72,26,.3);
+  border-radius:2px;padding:1px 6px;margin-right:6px;
+}
+.notice-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4}
+.notice-date{font-size:11.5px;color:var(--del)}
+
+/* ══ 운영시간 카드 ══ */
+.hours-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rs);padding:20px}
+.hours-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:14px}
+.hours-row{display:flex;justify-content:space-between;margin-bottom:7px;font-size:13px}
+.hours-lbl{color:var(--sub)}
+.hours-val{font-weight:700;color:var(--text)}
+.hours-divider{border:none;border-top:1px solid var(--bd);margin:10px 0}
+.hours-note{font-size:12px;color:var(--del);line-height:1.7}
+
+/* ══ 성공 메시지 ══ */
+.success-box{
+  display:none;text-align:center;padding:40px 20px;
+}
+.success-box.show{display:block}
+.success-icon{
+  width:52px;height:52px;border-radius:50%;
+  background:var(--green-lt);border:1.5px solid rgba(22,163,74,.3);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+}
+.success-icon svg{width:24px;height:24px;fill:none;stroke:var(--green);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.success-title{font-size:16px;font-weight:800;color:var(--text);margin-bottom:8px}
+.success-desc{font-size:13.5px;color:var(--sub);line-height:1.7}
+
+/* ══ 푸터 ══ */
+.footer{background:var(--text);padding:40px 24px 24px}
+.footer-in{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;gap:40px;margin-bottom:24px}
+.ft-logo{font-size:20px;font-weight:900;color:var(--or);font-style:italic;margin-bottom:12px}
+.ft-info{font-size:11.5px;color:rgba(255,255,255,.35);line-height:2.1}
+.ft-links{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.ft-links a{font-size:12px;color:rgba(255,255,255,.4)}
+.ft-links a.em{color:rgba(255,255,255,.7);font-weight:700}
+.ft-cs-num{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+.ft-cs-info{font-size:12px;color:rgba(255,255,255,.38);line-height:2}
+.ft-copy{border-top:1px solid rgba(255,255,255,.07);padding-top:16px;font-size:11.5px;color:rgba(255,255,255,.2);text-align:center;max-width:1200px;margin:0 auto}
+</style>
+</head>
+<body>
+
+<!-- 공지배너 -->
+<div class="notice">
+  <div class="n-txt">무첨가 인증 · 납기 확인 후 즉시 제작 · 드롭박스 / 이메일 파일 접수 가능</div>
+  <div class="n-btn">자세히 →</div>
+</div>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="gnb-in">
+    <div class="logo">제안서몰</div>
+    <div class="srch">
+      <input type="text" placeholder="상품명으로 검색">
+      <button class="srch-btn">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      </button>
+    </div>
+    <nav class="gnb-nav">
+      <div class="gnb-a">전체상품</div>
+      <div class="gnb-a">주문현황</div>
+      <div class="gnb-a">장바구니</div>
+      <div class="gnb-a on">고객문의</div>
+    </nav>
+  </div>
+</header>
+
+<!-- 페이지 헤더 -->
+<div class="page-hd">
+  <h1>고객문의</h1>
+</div>
+
+<!-- 탭 -->
+<div class="tabs">
+  <div class="tab on" onclick="setTab(this,'tab-inquiry')">1:1 문의</div>
+  <div class="tab" onclick="setTab(this,'tab-faq')">자주 묻는 질문</div>
+  <div class="tab" onclick="setTab(this,'tab-history')">문의 내역</div>
+</div>
+
+<!-- 메인 -->
+<div class="wrap">
+
+  <!-- 고객센터 안내 바 -->
+  <div class="cs-bar">
+    <div class="cs-item">
+      <div class="cs-item-label">대표 전화</div>
+      <div class="cs-item-val">02-000-0000</div>
+      <div class="cs-item-desc">평일 09:00 ~ 18:00<br>점심 12:00 ~ 13:00</div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-item-label">카카오채널</div>
+      <div class="cs-item-val">@제안서몰</div>
+      <div class="cs-item-desc">채팅 상담 가능<br>평일 09:00 ~ 18:00</div>
+      <div class="cs-item-link">채널 바로가기 →</div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-item-label">이메일</div>
+      <div class="cs-item-val" style="font-size:15px">order@제안서몰.co.kr</div>
+      <div class="cs-item-desc">24시간 접수<br>평일 내 순차 처리</div>
+    </div>
+  </div>
+
+  <!-- 2컬럼 -->
+  <div class="grid">
+
+    <!-- 좌측 -->
+    <div>
+
+      <!-- ① 1:1 문의 탭 -->
+      <div id="tab-inquiry">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">1:1 문의 작성</div>
+            <div class="card-sub">평일 09:00 ~ 18:00 순차 처리</div>
+          </div>
+          <div class="card-body" id="formWrap">
+            <div class="form-grid">
+              <div>
+                <label class="f-label">이름<span class="f-req">*</span></label>
+                <input class="f-input" type="text" id="inqName" placeholder="홍길동">
+              </div>
+              <div>
+                <label class="f-label">연락처<span class="f-req">*</span></label>
+                <input class="f-input" type="tel" id="inqPhone" placeholder="010-0000-0000">
+              </div>
+            </div>
+            <div class="form-row">
+              <label class="f-label">이메일<span class="f-req">*</span></label>
+              <input class="f-input" type="email" id="inqEmail" placeholder="example@email.com">
+            </div>
+
+            <div class="form-row">
+              <label class="f-label">문의 제목<span class="f-req">*</span></label>
+              <input class="f-input" type="text" id="inqTitle" placeholder="문의 제목을 입력해 주세요">
+            </div>
+            <div class="form-row">
+              <label class="f-label">문의 내용<span class="f-req">*</span></label>
+              <textarea class="f-textarea" id="inqContent" placeholder="문의 내용을 자세히 입력해 주세요&#10;&#10;· 주문번호 / 상품명 / 수량 등을 함께 기재해 주시면 빠른 처리가 가능합니다."></textarea>
+            </div>
+            <div class="form-row">
+              <label class="f-label">파일 첨부</label>
+              <div class="f-file-wrap" onclick="document.getElementById('inqFile').click()">
+                <input type="file" id="inqFile" multiple>
+                <div class="f-file-title">파일을 드래그하거나 클릭하여 첨부</div>
+                <div class="f-file-sub">이미지, PDF 등 · 최대 10MB</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="agree-row">
+                <input type="checkbox" id="agreePrivacy">
+                <label for="agreePrivacy">
+                  <a href="#">개인정보 수집 및 이용</a>에 동의합니다. (필수)<br>
+                  수집 항목: 이름, 연락처, 이메일 · 보유 기간: 문의 처리 완료 후 1년
+                </label>
+              </div>
+            </div>
+            <button class="submit-btn" onclick="submitInquiry()">문의 접수하기</button>
+          </div>
+          <!-- 제출 완료 메시지 -->
+          <div class="success-box" id="successBox">
+            <div class="success-icon">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="success-title">문의가 접수되었습니다</div>
+            <div class="success-desc">
+              입력하신 이메일로 접수 확인 메일이 발송되었습니다.<br>
+              평일 09:00 ~ 18:00 내 순차적으로 답변드리겠습니다.<br><br>
+              <span style="color:var(--or);font-weight:700">빠른 상담이 필요하신 경우 02-000-0000으로 연락주세요.</span>
+            </div>
+            <button onclick="resetForm()" style="margin-top:20px;padding:10px 24px;border:1.5px solid var(--bd2);border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text)">새 문의 작성</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ② FAQ 탭 -->
+      <div id="tab-faq" style="display:none">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">자주 묻는 질문</div>
+          </div>
+          <div id="faqList"></div>
+        </div>
+      </div>
+
+      <!-- ③ 문의 내역 탭 -->
+      <div id="tab-history" style="display:none">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title">문의 내역</div>
+            <div class="card-sub">최근 3개월 내역</div>
+          </div>
+          <table class="inq-table">
+            <thead>
+              <tr>
+                <th style="width:60px">번호</th>
+                <th>제목</th>
+                <th style="width:100px">유형</th>
+                <th style="width:90px">상태</th>
+                <th style="width:100px">작성일</th>
+              </tr>
+            </thead>
+            <tbody id="historyList"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 우측 사이드 -->
+    <div class="side">
+
+      <!-- 빠른 문의 채널 -->
+      <div class="card">
+        <div class="card-hd"><div class="card-title">빠른 상담 채널</div></div>
+        <div class="channel-item" onclick="location.href='tel:02-000-0000'">
+          <div class="ch-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.84a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"/></svg>
+          </div>
+          <div class="ch-info">
+            <div class="ch-name">전화 상담</div>
+            <div class="ch-desc">02-000-0000 · 평일 09~18시</div>
+          </div>
+          <svg class="ch-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="channel-item">
+          <div class="ch-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="ch-info">
+            <div class="ch-name">카카오채널 채팅</div>
+            <div class="ch-desc">@제안서몰 · 평일 09~18시</div>
+          </div>
+          <svg class="ch-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <div class="channel-item">
+          <div class="ch-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div class="ch-info">
+            <div class="ch-name">이메일</div>
+            <div class="ch-desc">order@제안서몰.co.kr</div>
+          </div>
+          <svg class="ch-arr" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <!-- 운영시간 -->
+      <div class="hours-card">
+        <div class="hours-title">운영 안내</div>
+        <div class="hours-row"><span class="hours-lbl">평일</span><span class="hours-val">09:00 ~ 18:00</span></div>
+        <div class="hours-row"><span class="hours-lbl">점심</span><span class="hours-val">12:00 ~ 13:00</span></div>
+        <div class="hours-row"><span class="hours-lbl">토 · 일 · 공휴일</span><span class="hours-val">휴무</span></div>
+        <div class="hours-divider"></div>
+        <div class="hours-note">
+          야간·주말에 접수된 문의는<br>
+          다음 영업일 순차 처리됩니다.<br>
+          급행 납기 문의는 전화로 연락주세요.
+        </div>
+      </div>
+
+      <!-- 공지사항 -->
+      <div class="card">
+        <div class="card-hd"><div class="card-title">공지사항</div></div>
+        <div class="notice-item">
+          <div class="notice-title"><span class="notice-badge">공지</span>설 연휴 휴무 안내 (1/28~1/30)</div>
+          <div class="notice-date">2026. 01. 20</div>
+        </div>
+        <div class="notice-item">
+          <div class="notice-title"><span class="notice-badge">안내</span>단가표 업데이트 안내 (2026년 1분기)</div>
+          <div class="notice-date">2026. 01. 02</div>
+        </div>
+        <div class="notice-item">
+          <div class="notice-title"><span class="notice-badge">공지</span>드롭박스 파일 전달 방식 변경 안내</div>
+          <div class="notice-date">2025. 12. 10</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 푸터 -->
+<footer class="footer">
+  <div class="footer-in">
+    <div>
+      <div class="ft-logo">제안서몰</div>
+      <div class="ft-info">
+        대표: ○○○ &nbsp;|&nbsp; 사업자번호: 000-00-00000<br>
+        통신판매업신고: 제0000-서울○○-0000호<br>
+        주소: 서울특별시 ○○구 ○○로 00
+      </div>
+      <div class="ft-links">
+        <a href="#">회사소개</a>
+        <a href="#" class="em">개인정보처리방침</a>
+        <a href="#">이용약관</a>
+        <a href="#">고객문의</a>
+      </div>
+    </div>
+    <div>
+      <div class="ft-cs-info" style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:6px">고객센터</div>
+      <div class="ft-cs-num">02-000-0000</div>
+      <div class="ft-cs-info">평일: 09:00 ~ 18:00<br>점심: 12:00 ~ 13:00<br>주말 및 공휴일 휴무</div>
+    </div>
+    <div>
+      <div class="ft-cs-info" style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:6px">입금 계좌안내</div>
+      <div class="ft-cs-info">농협 351-0000-0000<br>예금주: (주)○○○</div>
+    </div>
+  </div>
+  <div class="ft-copy">© 제안서몰. All Rights Reserved.</div>
+</footer>
+
+<script>
+/* ══ 탭 전환 ══ */
+const TAB_IDS = ['tab-inquiry','tab-faq','tab-history'];
+function setTab(el, id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  TAB_IDS.forEach(t=>document.getElementById(t).style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+/* ══ FAQ 데이터 ══ */
+const FAQS = [
+  {cat:'납기',q:'납기는 얼마나 걸리나요?',a:'파일 접수 및 담당자 확인 후 납기를 개별 안내드립니다. 일반적으로 <strong>영업일 기준 1~3일</strong> 내 완료되며, 당일 오전 접수 시 당일 작업도 가능합니다. 급행 납기가 필요하신 경우 전화로 먼저 문의해 주세요.'},
+  {cat:'파일',q:'어떤 방식으로 인쇄 파일을 전달하나요?',a:'두 가지 방법이 있습니다.<br><strong>① 드롭박스</strong>: 결제 완료 후 업로드 링크가 이메일로 자동 발송됩니다. 해당 링크에 파일을 업로드해 주세요.<br><strong>② 이메일</strong>: order@제안서몰.co.kr로 주문번호와 함께 파일을 발송해 주세요.<br>지원 형식: PDF, AI, PSD, ZIP (최대 2GB)'},
+  {cat:'결제',q:'결제 방법은 어떻게 되나요?',a:'사이다페이를 통해 <strong>신용카드·체크카드</strong> 및 <strong>무통장 입금(계좌이체)</strong>이 가능합니다. 무통장 입금의 경우 입금 확인 후 작업이 시작되며, 입금 후 전화로 알려주시면 보다 빠른 처리가 가능합니다.'},
+  {cat:'결제',q:'세금계산서 발행이 가능한가요?',a:'가능합니다. 주문 시 세금계산서 발행 요청을 체크하시고 사업자번호와 사업자명을 입력해 주시면 됩니다. 결제 완료 후 영업일 기준 1~2일 내 발행됩니다. 발행 관련 문의는 이메일 또는 전화로 연락주세요.'},
+  {cat:'배송',q:'배송 방법은 어떻게 되나요?',a:'<strong>택배 배송</strong>과 <strong>직접 방문 수령</strong> 중 선택하실 수 있습니다.<br>택배 배송비: 2,500원 (3만원 이상 주문 시 무료)<br>방문 수령: 무료 (사전 연락 후 방문 필요, 평일 09~18시)'},
+  {cat:'제본',q:'용지는 어떤 종류를 선택할 수 있나요?',a:'<strong>스노우지 100g</strong> (고품질 무광), <strong>아트지 150g</strong> (유광), <strong>모조지 80g</strong> (경제적), <strong>수입지</strong>, <strong>질감용지</strong> 중 선택 가능합니다. 각 용지별 단가는 단가표를 참조해 주세요.'},
+  {cat:'주문',q:'비회원도 주문할 수 있나요?',a:'네, <strong>회원가입 없이 바로 주문</strong>하실 수 있습니다. 주문 번호와 연락처로 주문 현황을 확인하실 수 있습니다.'},
+  {cat:'취소',q:'주문 취소 및 환불은 어떻게 되나요?',a:'제작 특성상 <strong>파일 접수 및 작업 시작 이후에는 취소 및 환불이 불가</strong>합니다. 결제 완료 후 파일 접수 전에는 취소 가능하오니, 취소가 필요하신 경우 즉시 전화로 연락주세요.'},
+];
+
+function renderFAQ(){
+  const el = document.getElementById('faqList');
+  el.innerHTML = FAQS.map((f,i)=>`
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFAQ(${i})">
+        <div class="faq-q-txt">Q. ${f.q}</div>
+        <span class="faq-q-cat">${f.cat}</span>
+        <svg class="faq-arr" id="farr-${i}" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="faq-a" id="fans-${i}">A. ${f.a}</div>
+    </div>`).join('');
+}
+function toggleFAQ(i){
+  const ans = document.getElementById('fans-'+i);
+  const arr = document.getElementById('farr-'+i);
+  const isOpen = ans.classList.toggle('open');
+  arr.classList.toggle('open', isOpen);
+}
+
+/* ══ 문의 내역 ══ */
+const HISTORY = [
+  {no:3,title:'납기 관련 문의드립니다',type:'납기·제작',status:'답변완료',date:'2026.04.20'},
+  {no:2,title:'세금계산서 발행 요청',type:'세금계산서',status:'답변완료',date:'2026.03.15'},
+  {no:1,title:'단가표 견적 문의',type:'단가·견적',status:'답변완료',date:'2026.02.28'},
+];
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  el.innerHTML = HISTORY.length ? HISTORY.map(h=>`
+    <tr>
+      <td style="color:var(--sub)">${h.no}</td>
+      <td style="cursor:pointer;font-weight:500">${h.title}</td>
+      <td style="color:var(--sub)">${h.type}</td>
+      <td><span class="inq-status is-done">${h.status}</span></td>
+      <td style="color:var(--sub)">${h.date}</td>
+    </tr>`).join('') :
+    `<tr><td colspan="5" class="inq-empty">문의 내역이 없습니다</td></tr>`;
+}
+
+/* ══ 문의 제출 ══ */
+function submitInquiry(){
+  const name  = document.getElementById('inqName').value.trim();
+  const phone = document.getElementById('inqPhone').value.trim();
+  const email = document.getElementById('inqEmail').value.trim();
+  const title = document.getElementById('inqTitle').value.trim();
+  const content = document.getElementById('inqContent').value.trim();
+  const agree = document.getElementById('agreePrivacy').checked;
+  if(!name||!phone||!email||!title||!content){
+    alert('필수 항목을 모두 입력해 주세요.'); return;
+  }
+  if(!agree){ alert('개인정보 수집 및 이용에 동의해 주세요.'); return; }
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('successBox').classList.add('show');
+}
+function resetForm(){
+  document.getElementById('formWrap').style.display = 'block';
+  document.getElementById('successBox').classList.remove('show');
+  ['inqName','inqPhone','inqEmail','inqTitle','inqContent'].forEach(id=>{
+    document.getElementById(id).value='';
+  });
+  document.getElementById('agreePrivacy').checked=false;
+}
+
+/* 초기화 */
+renderFAQ();
+renderHistory();
+</script>
+</body>
+</html>

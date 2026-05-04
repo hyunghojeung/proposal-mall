@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>제안서몰 — 제안서 제작 전문 쇼핑몰</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#E8481A; --or-dk:#C93A10; --or-lt:#FFF1EC;
+  --bg:#F5F5F5; --white:#fff;
+  --text:#1A1A1A; --sub:#888; --del:#AAA;
+  --bd:#E5E5E5; --bd2:#CCC;
+  --r:10px; --rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;color:var(--text);background:var(--white);-webkit-font-smoothing:antialiased;font-size:14px}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:inherit;border:none;background:none}
+
+/* ══ 공지배너 ══════════════════════ */
+.notice{background:var(--or);display:flex;align-items:center;justify-content:center;gap:24px;padding:10px 24px}
+.n-txt{font-size:13px;font-weight:500;color:#fff;text-align:center;flex:1}
+.n-btn{font-size:12px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.55);border-radius:100px;padding:3px 13px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s}
+.n-btn:hover{background:rgba(255,255,255,.2)}
+
+/* ══ GNB (아이콘 없음 유지) ══════ */
+.gnb{background:var(--white);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:500}
+.gnb-in{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;gap:24px}
+.logo{font-size:22px;font-weight:900;color:var(--or);letter-spacing:-1px;font-style:italic;flex-shrink:0}
+.srch{display:flex;align-items:center;border:1.5px solid var(--or);border-radius:100px;overflow:hidden;flex:1;max-width:280px}
+.srch input{flex:1;border:none;padding:9px 14px;font-size:13px;font-family:inherit;color:var(--text);outline:none;min-width:0}
+.srch-btn{background:var(--or);color:#fff;padding:9px 14px;font-size:15px;display:flex;align-items:center;flex-shrink:0;cursor:pointer;border:none;transition:background .15s}
+.srch-btn:hover{background:var(--or-dk)}
+.gnb-nav{display:flex;gap:4px;margin-left:auto;align-items:center;position:relative}
+/* 메가메뉴 트리거 */
+.mega-trigger{padding:8px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;white-space:nowrap;transition:color .15s;user-select:none;display:flex;align-items:center;gap:3px;border-radius:var(--rs)}
+.mega-trigger:hover,.mega-trigger.on{color:var(--or)}
+.mega-trigger sup{color:var(--or);font-size:9px;font-weight:700}
+/* 메가패널 */
+.mega-panel{position:absolute;top:calc(100%+10px);left:0;background:var(--white);border:1px solid rgba(0,0,0,.08);border-radius:var(--r);box-shadow:0 8px 40px rgba(0,0,0,.12);display:none;z-index:600;min-width:580px;overflow:hidden}
+.mega-panel.open{display:flex}
+.mega-col{display:flex;flex-direction:column;padding:12px 0;min-width:190px}
+.mega-col:not(:last-child){border-right:1px solid var(--bd)}
+.m-item{padding:10px 22px;font-size:13.5px;font-weight:500;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:color .12s;white-space:nowrap}
+.m-item:hover,.m-item.active{color:var(--or);font-weight:700}
+.m-arr{font-size:12px;color:var(--sub);flex-shrink:0;transition:color .12s}
+.m-item:hover .m-arr,.m-item.active .m-arr{color:var(--or)}
+.m-item-sm{padding:9px 22px;font-size:13px;font-weight:400;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:color .12s;white-space:nowrap}
+.m-item-sm:hover{color:var(--or);font-weight:600}
+.m-item-end{padding:9px 22px;font-size:13px;font-weight:400;color:var(--text);cursor:pointer;transition:color .12s;white-space:nowrap}
+.m-item-end:hover{color:var(--or);font-weight:600}
+.m-divider{height:1px;background:var(--bd);margin:6px 16px}
+.gnb-a{padding:8px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;white-space:nowrap;transition:color .15s;border-radius:var(--rs)}
+.gnb-a:hover,.gnb-a.on{color:var(--or)}
+
+/* ══ 히어로 (제목 변경) ═════════════ */
+.hero{position:relative;min-height:520px;background:var(--bg);overflow:hidden;display:flex;align-items:center}
+.hero-imgbg{position:absolute;right:0;top:0;bottom:0;width:68%;background:linear-gradient(145deg,#ddd8d3,#c8c0b8);display:flex;align-items:center;justify-content:center}
+.hero-imgbg-inner{text-align:center;opacity:.15}
+.hero-imgbg-ico{font-size:90px;display:block;margin-bottom:8px}
+.hero-imgbg-txt{font-size:13px;color:#000}
+.hero-fade{position:absolute;inset:0;background:linear-gradient(to right,#F5F5F5 0%,#F5F5F5 28%,rgba(245,245,245,.95) 38%,rgba(245,245,245,.7) 50%,rgba(245,245,245,.2) 65%,transparent 80%)}
+.hero-body{position:relative;z-index:2;max-width:1200px;width:100%;margin:0 auto;padding:80px 24px}
+/* ★ 메인 카피 타이틀 변경 */
+.hero-kicker{font-size:13px;font-weight:500;color:var(--or);margin-bottom:12px;letter-spacing:.3px}
+.hero-h1{font-size:42px;font-weight:900;color:var(--text);line-height:1.2;letter-spacing:-1.5px;margin-bottom:14px}
+.hero-h1 .hl{color:var(--or)}
+.hero-desc{font-size:14px;color:var(--sub);line-height:1.9;margin-bottom:28px}
+.hero-cta{display:inline-flex;align-items:center;gap:6px;background:var(--or);color:#fff;font-size:15px;font-weight:700;font-family:inherit;padding:13px 26px;border-radius:var(--rs);border:none;cursor:pointer;transition:all .2s}
+.hero-cta:hover{background:var(--or-dk);transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,72,26,.3)}
+
+/* ══ 서브카테고리 페이지 (CARBX 완전 동일) ══ */
+.subcat-sec{background:var(--white);padding:24px 0 60px}
+.subcat-in{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* 브레드크럼 (CARBX 동일) */
+.breadcrumb{
+  display:flex;align-items:center;gap:0;
+  padding:18px 0;font-size:13px;color:var(--sub);
+  flex-wrap:wrap;
+}
+.bc-item{color:var(--sub);cursor:pointer;white-space:nowrap;transition:color .15s}
+.bc-item:hover{color:var(--text)}
+.bc-arrow{margin:0 8px;color:var(--del);font-size:11px}
+.bc-item.active{color:var(--text);font-weight:500}
+
+/* 총 상품수 + 정렬 */
+.list-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 0 20px;border-top:1px solid var(--bd);
+}
+.list-cnt{font-size:13px;color:var(--sub)}
+.list-cnt b{font-weight:700;color:var(--text)}
+.sort-btn{
+  border:1px solid var(--bd2);border-radius:var(--rs);
+  padding:7px 14px;font-size:13px;color:var(--text);
+  background:var(--white);cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  transition:border-color .15s;
+}
+.sort-btn:hover{border-color:var(--or)}
+
+/* ══ 상품 카드 그리드 (CARBX 완전 동일) ══ */
+.prod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+
+/* 카드 */
+.pcard{
+  cursor:pointer;
+  transition:all .2s;
+  position:relative;/* 팝업 뱃지 위치 기준 */
+}
+.pcard:hover .pimg-box{box-shadow:0 6px 20px rgba(0,0,0,.09)}
+
+/* 이미지 박스 (CARBX 동일: 연회색 배경, 정사각형) */
+.pimg-box{
+  width:100%;aspect-ratio:1;
+  background:#F8F8F8;
+  border-radius:var(--rs);
+  overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  transition:box-shadow .2s;
+  margin-bottom:14px;
+}
+/* 실제 제품 사진 자리 (큰 이모지로 표현, 실사 교체 예정) */
+.pimg-ph{
+  font-size:80px;
+  opacity:.28;
+  filter:grayscale(20%);
+}
+
+/* 팝업 뱃지 — 카드 위에 floating (CARBX 동일) */
+.popup-badge{
+  position:absolute;
+  bottom:-10px;left:12px;
+  background:var(--white);
+  border-radius:var(--r);
+  padding:10px 14px;
+  box-shadow:0 4px 16px rgba(0,0,0,.14);
+  display:flex;align-items:flex-start;gap:8px;
+  z-index:10;min-width:160px;
+}
+.popup-badge-ico{font-size:18px;flex-shrink:0;margin-top:1px}
+.popup-badge-txt{}
+.popup-badge-title{font-size:13px;font-weight:700;color:var(--or);line-height:1.3;margin-bottom:2px}
+.popup-badge-sub{font-size:11px;color:var(--sub)}
+
+/* 상품명 */
+.pname{
+  font-size:15px;font-weight:700;
+  color:var(--text);margin-bottom:5px;
+  line-height:1.4;
+}
+/* 상품 설명 */
+.pdesc{
+  font-size:13px;color:var(--sub);
+  margin-bottom:10px;line-height:1.4;
+}
+/* 원가 (취소선) */
+.poriginal{
+  font-size:13px;color:var(--del);
+  text-decoration:line-through;
+  margin-bottom:5px;display:block;
+}
+/* 할인율 + 가격 */
+.pprice-row{
+  display:flex;align-items:baseline;
+  gap:7px;margin-bottom:7px;
+}
+.pdisc-pct{
+  font-size:15px;font-weight:800;color:var(--or);
+}
+.pprice{
+  font-size:17px;font-weight:800;color:var(--text);
+}
+/* 최대 혜택가 */
+.pbenefit{
+  display:flex;align-items:center;gap:5px;
+  font-size:12.5px;color:var(--sub);
+}
+.pbenefit-ico{font-size:12px;color:var(--sub)}
+.pbenefit-price{font-weight:700;color:var(--sub)}
+
+/* ══ 지표 ═════════════════════════ */
+.met-sec{background:var(--white);padding:44px 24px;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+.met-in{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.met{text-align:center;padding:0 16px;border-right:1px solid var(--bd)}
+.met:last-child{border-right:none}
+.met-n{font-size:28px;font-weight:900;color:var(--or);letter-spacing:-1px;margin-bottom:6px}
+.met-l{font-size:13px;color:var(--sub)}
+
+/* ══ 프로세스 ═══════════════════════ */
+.proc-sec{background:var(--bg);padding:56px 24px}
+.proc-in{max-width:1200px;margin:0 auto}
+.sec-title{font-size:22px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.5px}
+.sec-sub{font-size:14px;color:var(--sub);margin-bottom:32px}
+.proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.proc-card{background:var(--white);border-radius:var(--r);padding:28px 20px;text-align:center}
+.proc-ico{font-size:32px;margin-bottom:12px}
+.proc-step{font-size:11px;font-weight:700;color:var(--or);margin-bottom:5px;letter-spacing:.5px}
+.proc-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+.proc-desc{font-size:13px;color:var(--sub);line-height:1.7}
+
+/* ══ 서비스바 ═══════════════════════ */
+.svc-sec{background:var(--white);border-top:1px solid var(--bd);padding:40px 24px}
+.svc-in{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
+.sv{padding:0 24px;border-right:1px solid var(--bd)}
+.sv:first-child{padding-left:0}.sv:last-child{border-right:none}
+.sv-h{font-size:14px;font-weight:800;color:var(--text);margin-bottom:10px}
+.sv-num{font-size:22px;font-weight:900;color:var(--or);margin-bottom:6px}
+.sv-info{font-size:12px;color:var(--sub);line-height:2}
+.sv-icons{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.sv-ico{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:var(--rs);cursor:pointer;transition:background .15s}
+.sv-ico:hover{background:var(--bg)}
+.sv-ico-s{font-size:20px}
+.sv-ico span{font-size:10px;color:var(--sub);font-weight:500}
+.sv-acct{font-size:13px;font-weight:700;color:var(--text);margin-top:4px;line-height:1.7}
+.sv-acct-s{font-size:11px;color:var(--sub);margin-top:2px;line-height:1.7}
+.sv-steps{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.sv-step{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--sub);line-height:1.5}
+.sv-step-n{width:18px;height:18px;border-radius:50%;background:var(--or);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+/* ══ 상품 상세 ═════════════════════ */
+.detail-sec{background:var(--white);padding:40px 0 80px;border-top:8px solid var(--bg)}
+.detail-in{max-width:1200px;margin:0 auto;padding:0 24px}
+.detail-hd{font-size:20px;font-weight:800;color:var(--text);margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--bd)}
+.detail-wrap{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:flex-start}
+.detail-main-img{width:100%;aspect-ratio:1;background:#F8F8F8;border-radius:var(--r);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;margin-bottom:12px}
+.detail-main-img-ico{font-size:110px;opacity:.3}
+.viewing-badge{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.95);border-radius:100px;padding:7px 16px;font-size:13px;font-weight:500;color:var(--text);box-shadow:0 2px 12px rgba(0,0,0,.12);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.viewing-badge .xb{color:var(--del);font-size:14px;cursor:pointer;border:none;background:none;padding:0}
+.detail-thumbs{display:flex;gap:8px}
+.thumb{width:64px;height:64px;border-radius:var(--rs);background:#F8F8F8;border:1.5px solid var(--bd);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:border-color .15s}
+.thumb.on,.thumb:hover{border-color:var(--or)}
+.buy-count{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--sub);margin-bottom:14px}
+.detail-name{font-size:24px;font-weight:900;color:var(--text);line-height:1.3;margin-bottom:16px;letter-spacing:-.5px}
+.detail-checks{display:flex;flex-direction:column;gap:7px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--bd)}
+.dc{font-size:13.5px;color:var(--text);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.dc .hl{color:var(--or);font-weight:700}
+.detail-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.d-disc{font-size:22px;font-weight:900;color:var(--or)}
+.d-price{font-size:26px;font-weight:900;color:var(--text)}
+.d-ori{font-size:14px;color:var(--del);text-decoration:line-through}
+.benefit-box{background:var(--bg);border-radius:var(--rs);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.benefit-price{font-size:16px;font-weight:800;color:var(--or)}
+.benefit-label{font-size:13px;color:var(--sub)}
+.benefit-btn{background:var(--white);border:1px solid var(--or);color:var(--or);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s;font-family:inherit;display:flex;align-items:center;gap:4px}
+.benefit-btn:hover{background:var(--or-lt)}
+.ship-sec{padding:16px 0;border-top:1px solid var(--bd)}
+.ship-row{display:flex;gap:20px;margin-bottom:8px}
+.ship-lbl{font-size:13px;color:var(--sub);min-width:36px;flex-shrink:0;padding-top:1px}
+.ship-val{font-size:13px;color:var(--text)}
+.ship-val .ship-date{font-weight:700}
+.ship-val .ship-sub{display:block;font-size:12px;color:var(--sub);margin-top:3px}
+.opt-sec{border:1px solid var(--bd);border-radius:var(--r);margin-top:16px;overflow:hidden}
+.opt-hd{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;font-weight:700;color:var(--text);background:var(--white);transition:background .15s}
+.opt-hd:hover{background:var(--bg)}
+.opt-arr{font-size:14px;color:var(--sub);transition:transform .2s}
+.opt-body{padding:0 18px;border-top:1px solid var(--bd)}
+.opt-item{padding:16px 0;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.opt-item:last-child{border-bottom:none}
+.opt-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:3px}
+.opt-price{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.opt-unit{font-size:12px;color:var(--sub)}
+.free-badge{background:var(--or-lt);border:1px solid rgba(232,72,26,.3);color:var(--or);border-radius:100px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+.total-row{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-top:1px solid var(--bd);margin-top:16px}
+.total-lbl{font-size:15px;font-weight:700;color:var(--text)}
+.total-val{font-size:20px;font-weight:900;color:var(--text)}
+.total-val span{font-size:13px;font-weight:400;color:var(--sub);margin-left:4px}
+.buy-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.btn-cart{height:52px;border:1.5px solid var(--bd2);background:var(--white);color:var(--text);font-size:15px;font-weight:700;border-radius:var(--rs);cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-cart:hover{border-color:var(--text)}
+.btn-buy{height:52px;background:var(--or);color:#fff;font-size:15px;font-weight:700;border-radius:var(--rs);cursor:pointer;font-family:inherit;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-buy:hover{background:var(--or-dk)}
+.detail-tabs{display:flex;border-bottom:2px solid var(--bd);margin-top:40px}
+.d-tab{padding:12px 20px;font-size:14px;font-weight:500;color:var(--sub);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .15s}
+.d-tab.on{color:var(--text);font-weight:700;border-bottom-color:var(--or)}
+
+/* ══ 푸터 ══════════════════════════ */
+.footer{background:#1A1A1A;padding:38px 24px 20px}
+.footer-in{max-width:1200px;margin:0 auto}
+.ft-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;gap:40px}
+.ft-logo{font-size:20px;font-weight:900;color:var(--or);letter-spacing:-1px;font-style:italic;margin-bottom:12px}
+.ft-info{font-size:11px;color:rgba(255,255,255,.35);line-height:2.1}
+.ft-links{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+.ft-links a{font-size:11.5px;color:rgba(255,255,255,.4);transition:color .15s}
+.ft-links a:hover{color:rgba(255,255,255,.85)}
+.ft-links a.em{font-weight:700;color:rgba(255,255,255,.65)}
+.ft-certs{display:flex;gap:8px;flex-shrink:0}
+.ft-cert{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rs);padding:10px 14px;text-align:center}
+.ft-cert-i{font-size:18px;margin-bottom:3px}
+.ft-cert span{font-size:9px;color:rgba(255,255,255,.3);display:block;line-height:1.4}
+.ft-copy{border-top:1px solid rgba(255,255,255,.07);padding-top:16px;font-size:11px;color:rgba(255,255,255,.2);text-align:center}
+
+/* ══ 플로팅 ═════════════════════════ */
+.float{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:8px;z-index:200}
+.fb{width:50px;height:50px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.15);transition:all .18s}
+.fb:hover{transform:translateX(-4px)}
+.fb .fi{font-size:17px}
+.fb .fl{font-size:9px;font-weight:700}
+.fb-or{background:var(--or);color:#fff}
+.fb-kk{background:#FEE500;color:#181600}
+.fb-wh{background:#fff;color:var(--text);border:1.5px solid var(--bd)}
+</style>
+</head>
+<body>
+
+<!-- 공지배너 -->
+<div class="notice">
+  <div class="n-txt">무첨가 인증 · 납기 확인 후 즉시 제작 · 드롭박스 / 이메일 파일 접수 가능</div>
+  <div class="n-btn">자세히 →</div>
+</div>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="gnb-in">
+    <div class="logo">제안서몰</div>
+    <div class="srch">
+      <input type="text" placeholder="상품명으로 검색">
+      <button class="srch-btn">🔍</button>
+    </div>
+    <nav class="gnb-nav">
+      <div style="position:relative" id="megaRoot" onmouseenter="openMega()" onmouseleave="closeMega()">
+        <div class="mega-trigger" id="megaTrigger">전체상품<sup>*</sup></div>
+        <div class="mega-panel" id="megaPanel">
+          <div class="mega-col" style="min-width:190px">
+            <div class="m-item" onmouseenter="showCol2('박스')" onclick="location.href='#subcat'">제안서캐리어박스</div>
+            <div class="m-item" onmouseenter="showCol2('자석')" onclick="location.href='#subcat'">자석박스</div>
+            <div class="m-divider"></div>
+            <div class="m-item" onmouseenter="showCol2('제본')" id="m-bind">제안서 제본 <span class="m-arr">›</span></div>
+            <div class="m-item" onmouseenter="showCol2('내지')" id="m-paper">내지 인쇄 <span class="m-arr">›</span></div>
+          </div>
+          <div class="mega-col" id="col2-제본" style="min-width:230px">
+            <div class="m-item-sm" onclick="location.href='#subcat'">3공바인더 인쇄형</div>
+            <div class="m-item-sm" onclick="location.href='#subcat'">3공바인더 원단형</div>
+            <div class="m-item-sm" onclick="location.href='#subcat'">PT용바인더 인쇄형</div>
+            <div class="m-item-sm" onclick="location.href='#subcat'">PT용 바인더 원단형</div>
+            <div class="m-item-sm" onclick="location.href='#subcat'">하드커버스프링제본 인쇄형</div>
+            <div class="m-item-sm" onclick="location.href='#subcat'">하드커버 스프링제본 원단형</div>
+          </div>
+          <div class="mega-col" id="col2-내지" style="min-width:140px;display:none">
+            <div class="m-item-end" onclick="location.href='#subcat'">모조지</div>
+            <div class="m-item-end" onclick="location.href='#subcat'">스노우지</div>
+            <div class="m-item-end" onclick="location.href='#subcat'">아트지</div>
+            <div class="m-item-end" onclick="location.href='#subcat'">수입지</div>
+            <div class="m-item-end" onclick="location.href='#subcat'">질감용지</div>
+          </div>
+          <div class="mega-col" id="col2-박스" style="display:none;min-width:10px"></div>
+          <div class="mega-col" id="col2-자석" style="display:none;min-width:10px"></div>
+        </div>
+      </div>
+      <div class="gnb-a" onclick="setNav(this)">주문현황</div>
+      <div class="gnb-a" onclick="setNav(this)">장바구니</div>
+      <div class="gnb-a" onclick="setNav(this)">고객문의</div>
+    </nav>
+  </div>
+</header>
+
+<!-- ★ 히어로 — 메인 카피 "제안서 제작 전문 쇼핑몰" -->
+<section class="hero">
+  <div class="hero-imgbg"></div>
+  <div class="hero-fade"></div>
+  <div class="hero-body">
+    <div class="hero-kicker">B2B 제안서 인쇄 · 제본 · 박스 전문</div>
+    <h1 class="hero-h1">제안서 제작<br><span class="hl">전문 쇼핑몰</span></h1>
+    <p class="hero-desc">
+      스노우지·아트지·모조지·수입지 내지 인쇄부터<br>
+      무선·스프링·PT바인더·하드커버 제본과 전용 박스까지.<br>
+      회원가입 없이 즉시 주문 가능합니다.
+    </p>
+    <button class="hero-cta">전체상품 보러가기 →</button>
+  </div>
+</section>
+
+<!-- ★ 서브카테고리 페이지 (CARBX 완전 동일) -->
+<section class="subcat-sec" id="subcat">
+  <div class="subcat-in">
+
+    <!-- 브레드크럼 -->
+    <div class="breadcrumb">
+      <span class="bc-item" onclick="location.href='#'">제안서캐리어박스</span>
+      <span class="bc-arrow">›</span>
+      <span class="bc-item" onclick="location.href='#'">자석박스</span>
+      <span class="bc-arrow">›</span>
+      <span class="bc-item" onclick="location.href='#'">제안서 제본</span>
+      <span class="bc-arrow">›</span>
+      <span class="bc-item" onclick="location.href='#'">내지 인쇄</span>
+      <span class="bc-arrow">›</span>
+      <span class="bc-item active">전체상품</span>
+    </div>
+
+    <!-- 총 상품수 + 정렬 -->
+    <div class="list-top">
+      <div class="list-cnt">총 <b>9</b>개의 상품이 있습니다.</div>
+      <button class="sort-btn">- 정렬방식 - ▾</button>
+    </div>
+
+    <!-- 상품 그리드 (CARBX 완전 동일 스타일) -->
+    <div class="prod-grid">
+
+      <!-- 카드 1: 제안서 캐리어박스 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box">
+          <div class="pimg-ph">🧳</div>
+        </div>
+        <div class="pname">제안서 캐리어박스</div>
+        <div class="pdesc">이동 편리한 핸들형 전용 박스</div>
+        <span class="poriginal">맞춤 제작 기준가</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">견적 문의</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 2: 자석박스 (팝업 뱃지 있음) -->
+      <div class="pcard" onclick="location.href='#detail'" style="padding-bottom:30px">
+        <div class="pimg-box">
+          <div class="pimg-ph">📦</div>
+          <!-- 팝업 뱃지 (CARBX 동일) -->
+          <div class="popup-badge">
+            <span class="popup-badge-ico">🔥</span>
+            <div class="popup-badge-txt">
+              <div class="popup-badge-title">방금 판매완료!</div>
+              <div class="popup-badge-sub">오늘 69명이 구매했어요</div>
+            </div>
+          </div>
+        </div>
+        <div class="pname">자석박스 (A4 맞춤)</div>
+        <div class="pdesc">자석 개폐 프리미엄 제안서 박스</div>
+        <span class="poriginal">맞춤 제작 기준가</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">견적 문의</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 3: 3공바인더 인쇄형 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box"><div class="pimg-ph">🗂️</div></div>
+        <div class="pname">3공바인더 — 인쇄형</div>
+        <div class="pdesc">표지 컬러 인쇄 3공 바인더 제본</div>
+        <span class="poriginal">단가표 기준</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">단가표 제공</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 4: 3공바인더 원단형 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box"><div class="pimg-ph">📁</div></div>
+        <div class="pname">3공바인더 — 원단형</div>
+        <div class="pdesc">패브릭 원단 커버 3공 바인더</div>
+        <span class="poriginal">단가표 기준</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">단가표 제공</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 5: PT바인더 인쇄형 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box"><div class="pimg-ph">📋</div></div>
+        <div class="pname">PT용 바인더 — 인쇄형</div>
+        <div class="pdesc">발표용 표지 인쇄 PT 바인더</div>
+        <span class="poriginal">단가표 기준</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">단가표 제공</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 6: PT바인더 원단형 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box"><div class="pimg-ph">📂</div></div>
+        <div class="pname">PT용 바인더 — 원단형</div>
+        <div class="pdesc">원단 커버 고급 PT 바인더</div>
+        <span class="poriginal">단가표 기준</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">단가표 제공</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 7: 하드커버 인쇄형 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box"><div class="pimg-ph">📚</div></div>
+        <div class="pname">하드커버 스프링제본 — 인쇄형</div>
+        <div class="pdesc">컬러 인쇄 하드커버 스프링제본</div>
+        <span class="poriginal">단가표 기준</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">단가표 제공</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 8: 하드커버 원단형 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box"><div class="pimg-ph">📖</div></div>
+        <div class="pname">하드커버 스프링제본 — 원단형</div>
+        <div class="pdesc">원단 커버 하드커버 스프링제본</div>
+        <span class="poriginal">단가표 기준</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">단가표 제공</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+      <!-- 카드 9: 내지 인쇄 -->
+      <div class="pcard" onclick="location.href='#detail'">
+        <div class="pimg-box"><div class="pimg-ph">🖨️</div></div>
+        <div class="pname">내지 인쇄 (용지 선택)</div>
+        <div class="pdesc">모조지·스노우지·아트지·수입지·질감용지</div>
+        <span class="poriginal">단가표 기준</span>
+        <div class="pprice-row">
+          <span class="pdisc-pct">수량할인</span>
+          <span class="pprice">단가표 제공</span>
+        </div>
+        <div class="pbenefit">
+          <span class="pbenefit-ico">🏷️</span>
+          최대 혜택가 <span class="pbenefit-price">문의 요망</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 지표 -->
+<div class="met-sec">
+  <div class="met-in">
+    <div class="met"><div class="met-n">5,000+</div><div class="met-l">누적 제안서 제작</div></div>
+    <div class="met"><div class="met-n">100%</div><div class="met-l">세금계산서 발행</div></div>
+    <div class="met"><div class="met-n">당일</div><div class="met-l">급행 작업 가능</div></div>
+    <div class="met"><div class="met-n">전국</div><div class="met-l">택배·방문 배송</div></div>
+  </div>
+</div>
+
+<!-- 상품 상세 -->
+<section class="detail-sec" id="detail">
+  <div class="detail-in">
+    <div class="detail-hd">상품 상세</div>
+    <div class="detail-wrap">
+      <div>
+        <div class="detail-main-img">
+          <div class="detail-main-img-ico">📚</div>
+          <div class="viewing-badge">
+            <span>👁 <strong>67</strong>명이 지금 보는 중</span>
+            <button class="xb">✕</button>
+          </div>
+        </div>
+        <div class="detail-thumbs">
+          <div class="thumb on">📚</div>
+          <div class="thumb">📋</div>
+          <div class="thumb">🗂️</div>
+          <div class="thumb">📦</div>
+        </div>
+      </div>
+      <div>
+        <div class="buy-count">118명이 오늘 구매했어요.</div>
+        <div class="detail-name">하드커버 스프링제본 — 인쇄형</div>
+        <div class="detail-checks">
+          <div class="dc">✓ 탄산물 걱정 없는 <span class="hl">고품질 제본</span>, 인쇄물 100% 확인 후 제작</div>
+          <div class="dc">✓ 풀림·접착제 무첨가, <span class="hl">내구성</span> 검증 완료</div>
+          <div class="dc">✓ 담당자가 직접 설계한 <span class="hl">제안서 전용 제본 레시피</span></div>
+        </div>
+        <div class="detail-price-row">
+          <span class="d-disc">수량할인</span>
+          <span class="d-price">단가표 기준</span>
+          <span class="d-ori">개별 주문가</span>
+        </div>
+        <div class="benefit-box">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="benefit-price">최대 혜택가</span>
+            <span class="benefit-label">수량별 단가 문의</span>
+          </div>
+          <button class="benefit-btn">단가표 받기 ▾</button>
+        </div>
+        <div class="ship-sec">
+          <div class="ship-row">
+            <span class="ship-lbl">배송</span>
+            <div class="ship-val">
+              <span class="ship-date">납기 확인 후 제작 착수</span>
+              <span class="ship-sub">담당자 확인 후 납기 SMS 통보<br>배송비 2,500원 (30,000원 이상 무료)</span>
+            </div>
+          </div>
+          <div class="ship-row">
+            <span class="ship-lbl">수령</span>
+            <div class="ship-val">택배 또는 직접 방문 수령 선택 가능</div>
+          </div>
+          <div class="ship-row">
+            <span class="ship-lbl">파일</span>
+            <div class="ship-val">드롭박스 링크 전송 또는 이메일 접수</div>
+          </div>
+        </div>
+        <div class="opt-sec">
+          <div class="opt-hd" onclick="toggleOpt()">
+            <span>옵션 선택</span>
+            <span class="opt-arr" id="optArr">∧</span>
+          </div>
+          <div class="opt-body" id="optBody">
+            <div class="opt-item">
+              <div>
+                <div class="opt-name">[최대할인] 10부 이상 주문</div>
+                <div class="opt-price">단가표 기준 <span class="opt-unit">(1부당 단가표)</span></div>
+              </div>
+              <span class="free-badge">무료배송</span>
+            </div>
+            <div class="opt-item">
+              <div>
+                <div class="opt-name">5부 주문</div>
+                <div class="opt-price">단가표 기준 <span class="opt-unit">(1부당 단가표)</span></div>
+              </div>
+            </div>
+            <div class="opt-item">
+              <div>
+                <div class="opt-name">1부 주문</div>
+                <div class="opt-price">단가표 기준 <span class="opt-unit">(1부당 단가표)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="total-row">
+          <span class="total-lbl">총 구매 금액</span>
+          <span class="total-val">0 <span>(0개)</span></span>
+        </div>
+        <div class="buy-btns">
+          <button class="btn-cart">장바구니</button>
+          <button class="btn-buy">구매하기 ▾</button>
+        </div>
+        <div class="detail-tabs">
+          <div class="d-tab on" onclick="setDTab(this)">상품정보</div>
+          <div class="d-tab" onclick="setDTab(this)">상세설명</div>
+          <div class="d-tab" onclick="setDTab(this)">주문·배송</div>
+          <div class="d-tab" onclick="setDTab(this)">교환·반품</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 프로세스 -->
+<div class="proc-sec">
+  <div class="proc-in">
+    <div class="sec-title">주문 진행 안내</div>
+    <div class="sec-sub">회원가입 없이 4단계로 간편하게 주문하세요</div>
+    <div class="proc-grid">
+      <div class="proc-card"><div class="proc-ico">🛒</div><div class="proc-step">STEP 01</div><div class="proc-name">옵션 선택</div><div class="proc-desc">용지·제본·수량·페이지수 선택 후 장바구니 담기</div></div>
+      <div class="proc-card"><div class="proc-ico">💳</div><div class="proc-step">STEP 02</div><div class="proc-name">결제</div><div class="proc-desc">사이다페이로 카드·계좌이체 안전하게 결제</div></div>
+      <div class="proc-card"><div class="proc-ico">📁</div><div class="proc-step">STEP 03</div><div class="proc-name">파일 전달</div><div class="proc-desc">드롭박스 링크 또는 이메일로 파일 발송</div></div>
+      <div class="proc-card"><div class="proc-ico">🚚</div><div class="proc-step">STEP 04</div><div class="proc-name">제작·납품</div><div class="proc-desc">담당자 확인 후 납기 SMS 통보 후 제작·배송</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 서비스바 -->
+<div class="svc-sec">
+  <div class="svc-in">
+    <div class="sv">
+      <div class="sv-h">고객센터</div>
+      <div class="sv-num">02-000-0000</div>
+      <div class="sv-info">평일 09:00 ~ 18:00<br>점심 12:00 ~ 13:00<br>주말·공휴일 휴무</div>
+    </div>
+    <div class="sv">
+      <div class="sv-h">고객서비스</div>
+      <div class="sv-icons">
+        <div class="sv-ico"><div class="sv-ico-s">📞</div><span>고객센터</span></div>
+        <div class="sv-ico"><div class="sv-ico-s">💬</div><span>카카오상담</span></div>
+        <div class="sv-ico"><div class="sv-ico-s">🔍</div><span>주문현황</span></div>
+        <div class="sv-ico"><div class="sv-ico-s">📖</div><span>이용안내</span></div>
+      </div>
+    </div>
+    <div class="sv">
+      <div class="sv-h">입금계좌</div>
+      <div class="sv-acct">농협 351-0000-0000</div>
+      <div class="sv-acct-s">예금주 : (주)○○○<br>입금 후 전화 주시면 빠른 작업 가능</div>
+    </div>
+    <div class="sv">
+      <div class="sv-h">주문 진행 안내</div>
+      <div class="sv-steps">
+        <div class="sv-step"><div class="sv-step-n">1</div>옵션 선택 → 결제</div>
+        <div class="sv-step"><div class="sv-step-n">2</div>드롭박스/이메일 파일 전달</div>
+        <div class="sv-step"><div class="sv-step-n">3</div>담당자 확인 후 납기 통보</div>
+        <div class="sv-step"><div class="sv-step-n">4</div>제작 완료 → 택배·방문 수령</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 푸터 -->
+<footer class="footer">
+  <div class="footer-in">
+    <div class="ft-top">
+      <div>
+        <div class="ft-logo">제안서몰</div>
+        <div class="ft-info">대표 : ○○○ &nbsp;|&nbsp; 사업자번호 : 000-00-00000 &nbsp;|&nbsp; 통신판매업신고 : 제0000-서울○○-0000호<br>주소 : 서울특별시 ○○구 ○○로 00 &nbsp;|&nbsp; TEL : 02-000-0000 &nbsp;|&nbsp; E-MAIL : order@제안서몰.co.kr</div>
+        <div class="ft-links">
+          <a href="#">회사소개</a><a href="#">이용약관</a>
+          <a href="#" class="em">개인정보처리방침</a>
+          <a href="#">고객문의</a><a href="#">주문현황</a>
+        </div>
+      </div>
+      <div class="ft-certs">
+        <div class="ft-cert"><div class="ft-cert-i">🛡️</div><span>공정거래<br>위원회</span></div>
+        <div class="ft-cert"><div class="ft-cert-i">💳</div><span>사이다<br>페이</span></div>
+      </div>
+    </div>
+    <div class="ft-copy">Copyright ⓒ 제안서몰. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- 플로팅 -->
+<div class="float">
+  <div class="fb fb-or"><div class="fi">🔍</div><div class="fl">주문현황</div></div>
+  <div class="fb fb-kk"><div class="fi">💬</div><div class="fl">카카오톡</div></div>
+  <div class="fb fb-wh"><div class="fi">🌙</div><div class="fl">야간할증</div></div>
+  <div class="fb fb-wh"><div class="fi">📸</div><div class="fl">샘플보기</div></div>
+</div>
+
+<script>
+function setNav(el){document.querySelectorAll('.gnb-a').forEach(x=>x.classList.remove('on'));el.classList.add('on')}
+function setDTab(el){document.querySelectorAll('.d-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on')}
+function openMega(){document.getElementById('megaPanel').classList.add('open');document.getElementById('megaTrigger').classList.add('on')}
+function closeMega(){document.getElementById('megaPanel').classList.remove('open');document.getElementById('megaTrigger').classList.remove('on')}
+const col2Ids=['col2-박스','col2-자석','col2-제본','col2-내지'];
+function showCol2(key){col2Ids.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none'});const t=document.getElementById('col2-'+key);if(t)t.style.display='flex';document.querySelectorAll('.m-item').forEach(x=>x.classList.remove('active'))}
+document.querySelectorAll('.m-item').forEach(el=>{el.addEventListener('mouseenter',function(){document.querySelectorAll('.m-item').forEach(x=>x.classList.remove('active'));this.classList.add('active')})});
+document.getElementById('col2-제본').style.display='flex';
+let optOpen=true;
+function toggleOpt(){optOpen=!optOpen;document.getElementById('optBody').style.display=optOpen?'block':'none';document.getElementById('optArr').textContent=optOpen?'∧':'∨'}
+</script>
+</body>
+</html>

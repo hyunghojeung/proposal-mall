@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>제안서몰 — 주문현황</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#E8481A;--or-dk:#C93A10;--or-lt:#FFF1EC;
+  --bg:#F5F5F5;--white:#fff;
+  --text:#1A1A1A;--sub:#888;--del:#AAAAAA;
+  --bd:#E5E5E5;--bd2:#CCCCCC;
+  --green:#16A34A;--green-lt:#F0FDF4;
+  --blue:#2563EB;--blue-lt:#EFF6FF;
+  --yellow:#D97706;--yellow-lt:#FFFBEB;
+  --rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  color:var(--text);background:var(--white);
+  -webkit-font-smoothing:antialiased;font-size:14px;
+}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;background:none}
+input{font-family:inherit;outline:none}
+
+/* ══ 공지배너 ══ */
+.notice{
+  background:var(--or);display:flex;align-items:center;
+  justify-content:center;gap:24px;padding:10px 24px;
+}
+.n-txt{font-size:13px;font-weight:500;color:#fff;flex:1;text-align:center}
+.n-btn{font-size:12px;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.5);border-radius:100px;padding:4px 14px;cursor:pointer}
+
+/* ══ GNB ══ */
+.gnb{background:var(--white);border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:200}
+.gnb-in{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;gap:20px}
+.logo{font-size:22px;font-weight:900;color:var(--or);letter-spacing:-1px;font-style:italic;flex-shrink:0}
+.srch{display:flex;align-items:center;border:1.5px solid var(--or);border-radius:100px;overflow:hidden;flex:1;max-width:280px}
+.srch input{flex:1;border:none;padding:9px 16px;font-size:13px;color:var(--text);background:transparent}
+.srch-btn{background:var(--or);color:#fff;padding:9px 14px;border:none;cursor:pointer;flex-shrink:0;display:flex;align-items:center}
+.srch-btn svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round}
+.gnb-nav{display:flex;gap:2px;margin-left:auto}
+.gnb-a{padding:8px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;white-space:nowrap;transition:color .15s}
+.gnb-a:hover{color:var(--or)}
+.gnb-a.on{color:var(--or)}
+
+/* ══ 페이지 헤더 ══ */
+.page-hd{text-align:center;padding:40px 24px 0}
+.page-hd h1{font-size:26px;font-weight:900;color:var(--text);letter-spacing:-.5px}
+/* 라이브 인디케이터 */
+.live-wrap{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;margin-bottom:0}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live-txt{font-size:13px;color:var(--sub)}
+
+/* ══ 메인 래퍼 ══ */
+.wrap{max-width:1200px;margin:0 auto;padding:28px 24px 80px}
+
+/* ══ 통계 카드 4개 ══ */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat{
+  background:var(--white);border:1px solid var(--bd);
+  border-radius:var(--rs);padding:22px 20px;
+  transition:border-color .2s;
+}
+.stat:hover{border-color:var(--or)}
+.stat-lbl{font-size:12.5px;color:var(--sub);margin-bottom:10px;font-weight:500}
+.stat-val{font-size:28px;font-weight:900;color:var(--text);letter-spacing:-1px;line-height:1}
+.stat-val.or{color:var(--or)}
+.stat-val.green{color:var(--green)}
+.stat-val.blue{color:var(--blue)}
+.stat-sub{font-size:12px;color:var(--del);margin-top:6px}
+.stat-sub .up{color:var(--green);font-weight:700}
+
+/* ══ 제작 단계 현황 바 ══ */
+.stage-bar{
+  background:var(--white);border:1px solid var(--bd);
+  border-radius:var(--rs);padding:22px 24px;
+  margin-bottom:24px;
+}
+.stage-bar-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:18px}
+.stages{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.stages::before{
+  content:'';position:absolute;top:18px;left:12.5%;width:75%;
+  height:1px;background:var(--bd);z-index:0;
+}
+.stage{text-align:center;position:relative;z-index:1}
+.stage-circle{
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--bd);background:var(--white);
+  margin:0 auto 10px;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.stage-circle svg{width:16px;height:16px;fill:none;stroke:var(--del);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.stage.active .stage-circle{border-color:var(--or);box-shadow:0 0 0 4px rgba(232,72,26,.1)}
+.stage.active .stage-circle svg{stroke:var(--or)}
+.stage-name{font-size:12.5px;color:var(--sub)}
+.stage-cnt{font-size:20px;font-weight:900;color:var(--text);margin-top:4px}
+.stage.active .stage-name{color:var(--or);font-weight:700}
+.stage.active .stage-cnt{color:var(--or)}
+
+/* ══ 메인 2컬럼 ══ */
+.grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+
+/* ══ 공통 카드 ══ */
+.card{background:var(--white);border:1px solid var(--bd);border-radius:var(--rs);overflow:hidden;margin-bottom:14px}
+.card-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px;border-bottom:1px solid var(--bd);background:var(--bg);
+}
+.card-hd-title{font-size:14px;font-weight:800;color:var(--text)}
+.card-hd-sub{font-size:12px;color:var(--sub)}
+
+/* ══ 주문 아이템 ══ */
+.order-item{
+  padding:18px 20px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:flex-start;gap:14px;
+  transition:background .12s;
+}
+.order-item:last-child{border-bottom:none}
+.order-item:hover{background:#FAFAFA}
+
+/* 아바타 (이니셜) */
+.avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--bg);border:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:var(--sub);
+  flex-shrink:0;letter-spacing:0;
+}
+.avatar.or{background:var(--or-lt);border-color:rgba(232,72,26,.2);color:var(--or)}
+.avatar.blue{background:var(--blue-lt);border-color:rgba(37,99,235,.2);color:var(--blue)}
+.avatar.green{background:var(--green-lt);border-color:rgba(22,163,74,.2);color:var(--green)}
+
+/* 주문 정보 */
+.oi-info{flex:1;min-width:0}
+.oi-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.oi-name{font-size:13.5px;font-weight:700;color:var(--text)}
+.oi-region{font-size:11.5px;color:var(--del)}
+
+/* 상태 뱃지 */
+.status{display:inline-flex;align-items:center;padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;white-space:nowrap}
+.st-done{background:var(--green-lt);color:var(--green);border:1px solid rgba(22,163,74,.2)}
+.st-make{background:var(--blue-lt);color:var(--blue);border:1px solid rgba(37,99,235,.2)}
+.st-wait{background:var(--yellow-lt);color:var(--yellow);border:1px solid rgba(217,119,6,.2)}
+.st-recv{background:var(--bg);color:var(--sub);border:1px solid var(--bd)}
+
+.oi-product{font-size:12.5px;color:var(--sub);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 진행 단계 바 (인라인) */
+.progress{display:flex;align-items:center;gap:0}
+.pr-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.pr-step::before{content:'';position:absolute;top:7px;right:50%;width:100%;height:1px;background:var(--bd);z-index:0}
+.pr-step:first-child::before{display:none}
+.pr-dot{width:14px;height:14px;border-radius:50%;background:var(--white);border:1.5px solid var(--bd);z-index:1;position:relative;transition:all .2s}
+.pr-step.done .pr-dot{background:var(--or);border-color:var(--or)}
+.pr-step.done::before{background:var(--or)}
+.pr-step.active .pr-dot{background:var(--white);border-color:var(--or);box-shadow:0 0 0 3px rgba(232,72,26,.15)}
+.pr-lbl{font-size:10px;color:var(--del)}
+.pr-step.done .pr-lbl{color:var(--or)}
+.pr-step.active .pr-lbl{color:var(--text);font-weight:700}
+
+/* 우측 금액 */
+.oi-right{text-align:right;flex-shrink:0}
+.oi-amt{font-size:14px;font-weight:800;color:var(--text)}
+.oi-date{font-size:11.5px;color:var(--del);margin-top:3px}
+
+/* ══ 사이드 패널 ══ */
+.side{display:flex;flex-direction:column;gap:14px}
+
+/* 주문 조회 */
+.lookup-card{
+  background:var(--or);border-radius:var(--rs);padding:22px 20px;
+}
+.lookup-title{font-size:15px;font-weight:800;color:#fff;margin-bottom:4px}
+.lookup-sub{font-size:12.5px;color:rgba(255,255,255,.7);margin-bottom:16px;line-height:1.6}
+.lookup-input{
+  width:100%;padding:10px 14px;border:none;border-radius:var(--rs);
+  font-size:13px;font-family:inherit;color:var(--text);
+  margin-bottom:8px;
+}
+.lookup-input::placeholder{color:var(--del)}
+.lookup-btn{
+  width:100%;padding:11px;background:rgba(255,255,255,.2);
+  border:1px solid rgba(255,255,255,.4);color:#fff;
+  font-size:13.5px;font-weight:700;border-radius:var(--rs);cursor:pointer;
+  font-family:inherit;transition:background .15s;
+}
+.lookup-btn:hover{background:rgba(255,255,255,.32)}
+
+/* 실시간 피드 */
+.feed-list{max-height:300px;overflow-y:auto}
+.feed-list::-webkit-scrollbar{width:3px}
+.feed-list::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+.feed-item{
+  padding:12px 20px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:flex-start;gap:12px;
+  animation:fadeIn .4s ease;
+}
+@keyframes fadeIn{from{opacity:0;background:#FFF1EC}to{opacity:1;background:transparent}}
+.feed-item:last-child{border-bottom:none}
+/* 피드 아이콘 — SVG */
+.feed-ico{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--bg);border:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.feed-ico svg{width:13px;height:13px;fill:none;stroke:var(--sub);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.feed-ico.or-ico{background:var(--or-lt);border-color:rgba(232,72,26,.2)}
+.feed-ico.or-ico svg{stroke:var(--or)}
+.feed-ico.green-ico{background:var(--green-lt);border-color:rgba(22,163,74,.2)}
+.feed-ico.green-ico svg{stroke:var(--green)}
+.feed-txt{flex:1}
+.feed-main{font-size:12.5px;color:var(--text);line-height:1.55}
+.feed-main strong{font-weight:700;color:var(--or)}
+.feed-time{font-size:11px;color:var(--del);margin-top:2px}
+
+/* 인기 상품 */
+.rank-item{
+  padding:12px 20px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:12px;
+}
+.rank-item:last-child{border-bottom:none}
+.rank-no{
+  width:22px;height:22px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:800;flex-shrink:0;
+}
+.rn1{background:var(--or);color:#fff}
+.rn2{background:var(--text);color:#fff}
+.rn3{background:var(--sub);color:#fff}
+.rn4,.rn5{background:var(--bg);color:var(--sub);border:1px solid var(--bd)}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-bar-wrap{height:3px;background:var(--bg);border-radius:2px;overflow:hidden}
+.rank-bar{height:100%;background:var(--or);border-radius:2px;transition:width 1s ease}
+.rank-cnt{font-size:12.5px;font-weight:700;color:var(--sub);flex-shrink:0}
+
+/* ══ 주문 조회 결과 모달 ══ */
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  z-index:500;display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal.open{display:flex}
+.modal-box{
+  background:var(--white);border-radius:var(--rs);
+  width:100%;max-width:460px;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.18);
+}
+.modal-hd{
+  background:var(--or);color:#fff;
+  padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
+}
+.modal-hd-title{font-size:14px;font-weight:800}
+.modal-close{font-size:18px;cursor:pointer;color:rgba(255,255,255,.8);background:none;border:none;line-height:1}
+.modal-body{padding:24px}
+
+/* 단계 */
+.m-steps{display:flex;gap:0;margin-bottom:24px;position:relative}
+.m-steps::before{content:'';position:absolute;top:18px;left:0;right:0;height:1px;background:var(--bd)}
+.m-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1}
+.m-dot{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--white);border:1.5px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;
+}
+.m-dot svg{width:15px;height:15px;fill:none;stroke:var(--del);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.m-dot.done{background:var(--or);border-color:var(--or)}
+.m-dot.done svg{stroke:#fff}
+.m-dot.active{background:var(--white);border-color:var(--or);box-shadow:0 0 0 4px rgba(232,72,26,.12)}
+.m-dot.active svg{stroke:var(--or)}
+.m-lbl{font-size:11px;color:var(--sub)}
+.m-lbl.done,.m-lbl.active{color:var(--or);font-weight:700}
+
+/* 주문 정보 테이블 */
+.m-info-row{display:flex;gap:0;border-bottom:1px solid #F5F5F5;padding:10px 0}
+.m-info-row:last-child{border-bottom:none}
+.m-lbl-cell{font-size:12.5px;color:var(--sub);min-width:80px;flex-shrink:0}
+.m-val-cell{font-size:13px;color:var(--text);font-weight:600}
+.m-val-cell.or{color:var(--or)}
+
+/* ══ 푸터 ══ */
+.footer{background:var(--text);padding:40px 24px 24px}
+.footer-in{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;gap:40px;margin-bottom:24px}
+.ft-logo{font-size:20px;font-weight:900;color:var(--or);font-style:italic;margin-bottom:12px}
+.ft-info{font-size:11.5px;color:rgba(255,255,255,.35);line-height:2.1}
+.ft-links{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.ft-links a{font-size:12px;color:rgba(255,255,255,.4)}
+.ft-links a.em{color:rgba(255,255,255,.7);font-weight:700}
+.ft-cs-num{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+.ft-cs-info{font-size:12px;color:rgba(255,255,255,.38);line-height:2}
+.ft-copy{border-top:1px solid rgba(255,255,255,.07);padding-top:16px;font-size:11.5px;color:rgba(255,255,255,.2);text-align:center;max-width:1200px;margin:0 auto}
+</style>
+</head>
+<body>
+
+<!-- 공지배너 -->
+<div class="notice">
+  <div class="n-txt">무첨가 인증 · 납기 확인 후 즉시 제작 · 드롭박스 / 이메일 파일 접수 가능</div>
+  <div class="n-btn">자세히 →</div>
+</div>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="gnb-in">
+    <div class="logo">제안서몰</div>
+    <div class="srch">
+      <input type="text" placeholder="상품명으로 검색">
+      <button class="srch-btn">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      </button>
+    </div>
+    <nav class="gnb-nav">
+      <div class="gnb-a">전체상품</div>
+      <div class="gnb-a on">주문현황</div>
+      <div class="gnb-a">장바구니</div>
+      <div class="gnb-a">고객문의</div>
+    </nav>
+  </div>
+</header>
+
+<!-- 페이지 헤더 -->
+<div class="page-hd">
+  <h1>주문현황</h1>
+  <div class="live-wrap">
+    <div class="live-dot"></div>
+    <span class="live-txt">실시간 업데이트 중</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 통계 4개 -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-lbl">오늘 접수</div>
+      <div class="stat-val or" id="s1">18</div>
+      <div class="stat-sub"><span class="up">↑ 3건</span> 어제보다 많아요</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">제작 중</div>
+      <div class="stat-val blue" id="s2">6</div>
+      <div class="stat-sub">현재 진행 중인 주문</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">오늘 발송</div>
+      <div class="stat-val green" id="s3">12</div>
+      <div class="stat-sub">납기 준수율 100%</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">이번 달 거래</div>
+      <div class="stat-val or" id="s4">₩24.6M</div>
+      <div class="stat-sub">누적 5,000건 이상 제작</div>
+    </div>
+  </div>
+
+  <!-- 제작 단계 현황 -->
+  <div class="stage-bar">
+    <div class="stage-bar-title">현재 제작 단계별 현황</div>
+    <div class="stages">
+      <div class="stage">
+        <div class="stage-circle">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="stage-name">접수 대기</div>
+        <div class="stage-cnt">3</div>
+      </div>
+      <div class="stage active">
+        <div class="stage-circle">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        </div>
+        <div class="stage-name">제작 중</div>
+        <div class="stage-cnt">6</div>
+      </div>
+      <div class="stage">
+        <div class="stage-circle">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="stage-name">제작 완료</div>
+        <div class="stage-cnt">7</div>
+      </div>
+      <div class="stage">
+        <div class="stage-circle">
+          <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div class="stage-name">발송 완료</div>
+        <div class="stage-cnt">12</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2컬럼 -->
+  <div class="grid">
+
+    <!-- 좌측: 주문 목록 -->
+    <div>
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-title">오늘의 주문 현황</div>
+          <div class="card-hd-sub">개인정보 보호를 위해 일부 정보는 가려집니다</div>
+        </div>
+        <div id="orderList"></div>
+      </div>
+    </div>
+
+    <!-- 우측 -->
+    <div class="side">
+
+      <!-- 주문 조회 -->
+      <div class="lookup-card">
+        <div class="lookup-title">내 주문 조회</div>
+        <div class="lookup-sub">주문번호와 연락처로 진행 상황을 확인하세요</div>
+        <input class="lookup-input" type="text" placeholder="주문번호 (예: Pro-0001)" id="lookupNo">
+        <input class="lookup-input" type="text" placeholder="연락처 (예: 010-0000-0000)" id="lookupPhone">
+        <button class="lookup-btn" onclick="lookupOrder()">조회하기 →</button>
+      </div>
+
+      <!-- 실시간 피드 -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-title" style="display:flex;align-items:center;gap:7px">
+            실시간 주문 피드
+            <span style="font-size:10px;font-weight:700;color:var(--green);background:var(--green-lt);padding:2px 8px;border-radius:100px;border:1px solid rgba(22,163,74,.2)">LIVE</span>
+          </div>
+        </div>
+        <div class="feed-list" id="feedList"></div>
+      </div>
+
+      <!-- 인기 상품 -->
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-title">오늘의 인기 상품</div>
+        </div>
+        <div id="rankList"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 주문 조회 모달 -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="modal-hd-title">주문 진행 현황</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-steps" id="mSteps"></div>
+      <div id="mInfo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 푸터 -->
+<footer class="footer">
+  <div class="footer-in">
+    <div>
+      <div class="ft-logo">제안서몰</div>
+      <div class="ft-info">
+        대표: ○○○ &nbsp;|&nbsp; 사업자번호: 000-00-00000<br>
+        통신판매업신고: 제0000-서울○○-0000호<br>
+        주소: 서울특별시 ○○구 ○○로 00
+      </div>
+      <div class="ft-links">
+        <a href="#">회사소개</a>
+        <a href="#" class="em">개인정보처리방침</a>
+        <a href="#">이용약관</a>
+        <a href="#">고객문의</a>
+      </div>
+    </div>
+    <div>
+      <div class="ft-cs-info" style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:6px">고객센터</div>
+      <div class="ft-cs-num">02-000-0000</div>
+      <div class="ft-cs-info">평일: 09:00 ~ 18:00<br>점심: 12:00 ~ 13:00<br>주말 및 공휴일 휴무</div>
+    </div>
+    <div>
+      <div class="ft-cs-info" style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:6px">입금 계좌안내</div>
+      <div class="ft-cs-info">농협 351-0000-0000<br>예금주: (주)○○○</div>
+    </div>
+  </div>
+  <div class="ft-copy">© 제안서몰. All Rights Reserved.</div>
+</footer>
+
+<script>
+/* SVG 아이콘 */
+const SVG_ORDER = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+const SVG_CHECK = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`;
+const SVG_TRUCK = `<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`;
+const SVG_GEAR  = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`;
+
+/* 주문 데이터 */
+const ORDERS = [
+  {no:'Pro-0001',mask:'탁*현',product:'PT바인더 인쇄형',detail:'포크로스 / 10부',amount:742500,stage:4,date:'14:38',region:'경북'},
+  {no:'Pro-0002',mask:'전*원',product:'PT바인더 인쇄형',detail:'모시동이 / 1부', amount:88000, stage:4,date:'12:03',region:'경기'},
+  {no:'Pro-0003',mask:'정*수',product:'PT바인더 인쇄형',detail:'엔젤클로스 / 1부',amount:44000,stage:4,date:'10:38',region:'경기'},
+  {no:'Pro-0004',mask:'김*지',product:'PT바인더 원단형',detail:'하드커버 / 5부', amount:330000,stage:2,date:'09:22',region:'서울'},
+  {no:'Pro-0005',mask:'이*호',product:'하드커버 인쇄형',detail:'패브릭 / 3부',   amount:198000,stage:1,date:'08:15',region:'경기'},
+  {no:'Pro-0006',mask:'박*연',product:'3공바인더 인쇄형',detail:'포크로스 / 2부', amount:88000, stage:4,date:'07:44',region:'인천'},
+  {no:'Pro-0007',mask:'최*진',product:'하드커버 원단형',detail:'하드커버 / 1부', amount:55000, stage:3,date:'06:30',region:'부산'},
+  {no:'Pro-0008',mask:'한*수',product:'3공바인더 원단형',detail:'모시동이 / 8부', amount:0,     stage:1,date:'05:00',region:'대전'},
+];
+
+const STAGE_LABELS = ['접수','제작중','완료','발송'];
+const ST_CLS = {1:'st-wait',2:'st-make',3:'st-recv',4:'st-done'};
+const ST_TXT = {1:'접수대기',2:'제작중',3:'제작완료',4:'발송완료'};
+const AV_CLS = ['or','blue','green','',''];
+
+function renderOrders(){
+  const el = document.getElementById('orderList');
+  el.innerHTML = ORDERS.map((o,i)=>{
+    const avCls = i<3?AV_CLS[i]:'';
+    const stageHtml = STAGE_LABELS.map((s,si)=>{
+      const done = o.stage > si+1;
+      const active = o.stage === si+1;
+      return `<div class="pr-step ${done?'done':''} ${active?'active':''}">
+        <div class="pr-dot"></div>
+        <div class="pr-lbl">${s}</div>
+      </div>`;
+    }).join('');
+    const amt = o.amount>0 ? '₩'+o.amount.toLocaleString() : '견적중';
+    return `
+    <div class="order-item">
+      <div class="avatar ${avCls}">${o.mask[0]}</div>
+      <div class="oi-info">
+        <div class="oi-top">
+          <span class="oi-name">${o.mask}</span>
+          <span class="status ${ST_CLS[o.stage]}">${ST_TXT[o.stage]}</span>
+          <span class="oi-region">${o.region}</span>
+        </div>
+        <div class="oi-product">${o.product} · ${o.detail}</div>
+        <div class="progress">${stageHtml}</div>
+      </div>
+      <div class="oi-right">
+        <div class="oi-amt">${amt}</div>
+        <div class="oi-date">오늘 ${o.date}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* 실시간 피드 */
+const FEEDS = [
+  {cls:'or-ico',svg:SVG_ORDER, main:'<strong>탁*현</strong>님이 PT바인더 10부를 주문했습니다',time:'방금 전'},
+  {cls:'green-ico',svg:SVG_CHECK,main:'<strong>박*연</strong>님 주문이 <strong>발송 완료</strong>되었습니다',time:'3분 전'},
+  {cls:'',svg:SVG_GEAR, main:'<strong>김*지</strong>님 주문 <strong>제작이 시작</strong>되었습니다',time:'8분 전'},
+  {cls:'green-ico',svg:SVG_CHECK,main:'<strong>정*수</strong>님 주문이 발송되었습니다',time:'15분 전'},
+  {cls:'or-ico',svg:SVG_ORDER, main:'<strong>이*호</strong>님이 하드커버 인쇄형 3부를 주문했습니다',time:'22분 전'},
+  {cls:'',svg:SVG_TRUCK,main:'<strong>최*진</strong>님 주문 제작 완료, 발송 준비 중입니다',time:'31분 전'},
+  {cls:'or-ico',svg:SVG_ORDER, main:'<strong>한*수</strong>님이 3공바인더 8부를 주문했습니다',time:'45분 전'},
+];
+function renderFeed(){
+  const el = document.getElementById('feedList');
+  el.innerHTML = FEEDS.map(f=>`
+    <div class="feed-item">
+      <div class="feed-ico ${f.cls}">${f.svg}</div>
+      <div class="feed-txt">
+        <div class="feed-main">${f.main}</div>
+        <div class="feed-time">${f.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+/* 인기 상품 */
+const RANKS = [
+  {name:'PT바인더 인쇄형',cnt:7,pct:100},
+  {name:'하드커버 인쇄형',cnt:4,pct:57},
+  {name:'3공바인더 인쇄형',cnt:3,pct:43},
+  {name:'PT바인더 원단형',cnt:2,pct:29},
+  {name:'하드커버 원단형',cnt:2,pct:29},
+];
+function renderRank(){
+  const el = document.getElementById('rankList');
+  el.innerHTML = RANKS.map((r,i)=>`
+    <div class="rank-item">
+      <div class="rank-no rn${i+1}">${i+1}</div>
+      <div class="rank-info">
+        <div class="rank-name">${r.name}</div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${r.pct}%"></div></div>
+      </div>
+      <div class="rank-cnt">${r.cnt}건</div>
+    </div>`).join('');
+}
+
+/* 주문 조회 */
+const LOOKUP = {
+  'Pro-0001':{name:'탁*현',product:'PT바인더 인쇄형 / 10부',amount:'₩742,500',date:'2026/04/20',stage:4,ship:'경북 울진군 (택배)'},
+  'Pro-0002':{name:'전*원',product:'PT바인더 인쇄형 / 1부', amount:'₩88,000', date:'2026/04/12',stage:4,ship:'경기 하남시 (택배)'},
+  'Pro-0003':{name:'정*수',product:'PT바인더 인쇄형 / 1부', amount:'₩44,000', date:'2026/04/03',stage:4,ship:'경기 시흥시 (택배)'},
+  'Pro-0004':{name:'김*지',product:'PT바인더 원단형 / 5부', amount:'₩330,000',date:'2026/04/01',stage:2,ship:'서울 강남구 (택배)'},
+  'Pro-0005':{name:'이*호',product:'하드커버 인쇄형 / 3부', amount:'₩198,000',date:'2026/03/29',stage:1,ship:'경기 성남시 (택배)'},
+};
+const STEP_SVGS = [SVG_ORDER,SVG_GEAR,SVG_CHECK,SVG_TRUCK];
+const STEP_LBLS = ['접수완료','제작중','제작완료','발송완료'];
+
+function lookupOrder(){
+  const no = document.getElementById('lookupNo').value.trim();
+  const o = LOOKUP[no];
+  if(!o){alert('주문 정보를 찾을 수 없습니다.\n주문번호를 확인해 주세요.');return;}
+  document.getElementById('mSteps').innerHTML = STEP_SVGS.map((svg,i)=>{
+    const done   = o.stage > i+1;
+    const active = o.stage === i+1;
+    return `<div class="m-step">
+      <div class="m-dot ${done?'done':''} ${active?'active':''}">${svg}</div>
+      <div class="m-lbl ${done?'done':''} ${active?'active':''}">${STEP_LBLS[i]}</div>
+    </div>`;
+  }).join('');
+  const stColor = o.stage===4?'var(--green)':o.stage===2?'var(--blue)':'var(--or)';
+  document.getElementById('mInfo').innerHTML = `
+    <div class="m-info-row"><div class="m-lbl-cell">주문번호</div><div class="m-val-cell or">${no}</div></div>
+    <div class="m-info-row"><div class="m-lbl-cell">주문자</div><div class="m-val-cell">${o.name}</div></div>
+    <div class="m-info-row"><div class="m-lbl-cell">상품</div><div class="m-val-cell">${o.product}</div></div>
+    <div class="m-info-row"><div class="m-lbl-cell">결제금액</div><div class="m-val-cell or">${o.amount}</div></div>
+    <div class="m-info-row"><div class="m-lbl-cell">주문일</div><div class="m-val-cell">${o.date}</div></div>
+    <div class="m-info-row"><div class="m-lbl-cell">진행상태</div><div class="m-val-cell" style="color:${stColor};font-weight:800">${STEP_LBLS[o.stage-1]}</div></div>
+    <div class="m-info-row"><div class="m-lbl-cell">배송정보</div><div class="m-val-cell">${o.ship}</div></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+
+/* 실시간 피드 자동 추가 */
+const AUTO = [
+  {cls:'or-ico',svg:SVG_ORDER,main:'<strong>서*아</strong>님이 하드커버 원단형 5부를 주문했습니다'},
+  {cls:'green-ico',svg:SVG_CHECK,main:'<strong>김*준</strong>님 주문이 <strong>발송 완료</strong>되었습니다'},
+  {cls:'',svg:SVG_GEAR,main:'<strong>이*희</strong>님 주문 <strong>제작을 시작</strong>했습니다'},
+];
+let autoIdx=0;
+function addFeed(){
+  const f=AUTO[autoIdx++%AUTO.length];
+  const item=document.createElement('div');
+  item.className='feed-item';
+  item.innerHTML=`<div class="feed-ico ${f.cls}">${f.svg}</div><div class="feed-txt"><div class="feed-main">${f.main}</div><div class="feed-time">방금 전</div></div>`;
+  const list=document.getElementById('feedList');
+  list.insertBefore(item,list.firstChild);
+  while(list.children.length>10)list.removeChild(list.lastChild);
+}
+
+renderOrders();
+renderFeed();
+renderRank();
+setInterval(addFeed,14000);
+</script>
+</body>
+</html>

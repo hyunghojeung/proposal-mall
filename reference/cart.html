@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>제안서몰 — 장바구니</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#E8481A;--or-dk:#C93A10;--or-lt:#FFF1EC;
+  --bg:#F5F5F5;--white:#fff;
+  --text:#1A1A1A;--sub:#888;--del:#AAAAAA;
+  --bd:#E5E5E5;--bd2:#CCCCCC;
+  --rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  color:var(--text);background:var(--white);
+  -webkit-font-smoothing:antialiased;
+  font-size:14px;line-height:1.5;
+}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:inherit;border:none;outline:none;background:none}
+input,select,textarea{font-family:inherit;outline:none}
+
+/* ══ 공지배너 ══ */
+.notice{
+  background:var(--or);
+  display:flex;align-items:center;justify-content:center;
+  gap:24px;padding:10px 24px;
+}
+.n-txt{font-size:13px;font-weight:500;color:#fff;flex:1;text-align:center}
+.n-btn{
+  font-size:12px;font-weight:700;color:#fff;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:100px;padding:4px 14px;cursor:pointer;
+  white-space:nowrap;flex-shrink:0;transition:background .15s;
+}
+.n-btn:hover{background:rgba(255,255,255,.15)}
+
+/* ══ GNB ══ */
+.gnb{
+  background:var(--white);border-bottom:1px solid var(--bd);
+  position:sticky;top:0;z-index:300;
+}
+.gnb-in{
+  max-width:1200px;margin:0 auto;padding:0 24px;
+  height:64px;display:flex;align-items:center;gap:20px;
+}
+.logo{font-size:22px;font-weight:900;color:var(--or);letter-spacing:-1px;font-style:italic;flex-shrink:0}
+.srch{
+  display:flex;align-items:center;
+  border:1.5px solid var(--or);border-radius:100px;
+  overflow:hidden;flex:1;max-width:280px;
+}
+.srch input{
+  flex:1;border:none;padding:9px 16px;
+  font-size:13px;color:var(--text);background:transparent;
+}
+.srch-btn{
+  background:var(--or);color:#fff;
+  padding:9px 14px;font-size:14px;
+  border:none;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;
+}
+/* SVG 검색 아이콘 */
+.srch-btn svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round}
+.gnb-nav{display:flex;gap:2px;margin-left:auto}
+.gnb-a{
+  padding:8px 16px;font-size:14px;font-weight:700;
+  color:var(--text);cursor:pointer;white-space:nowrap;
+  transition:color .15s;border-radius:4px;
+}
+.gnb-a:hover{color:var(--or)}
+.gnb-a.on{color:var(--or)}
+.gnb-icons{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.gico{cursor:pointer;color:var(--text);position:relative;display:flex;align-items:center}
+.gico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cart-badge{
+  position:absolute;top:-6px;right:-7px;
+  background:var(--or);color:#fff;
+  font-size:9px;font-weight:800;
+  width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.pt-badge{
+  font-size:10px;font-weight:800;color:var(--or);
+  border:1px solid var(--or);border-radius:100px;
+  padding:2px 8px;cursor:pointer;white-space:nowrap;
+}
+
+/* ══ 페이지 타이틀 ══ */
+.page-hd{
+  text-align:center;padding:40px 24px 0;
+}
+.page-hd h1{
+  font-size:26px;font-weight:900;color:var(--text);
+  letter-spacing:-.5px;
+}
+
+/* ══ 탭 — 삭제됨 ══ */
+
+/* ══ 메인 레이아웃 ══ */
+.main{
+  max-width:1200px;margin:0 auto;
+  padding:28px 24px 80px;
+  display:grid;grid-template-columns:1fr 340px;
+  gap:24px;align-items:start;
+}
+
+/* ══ 섹션 박스 ══ */
+.section{
+  border:1px solid var(--bd);
+  border-radius:var(--rs);
+  background:var(--white);
+  overflow:hidden;
+  margin-bottom:12px;
+}
+.section-hd{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:14px 20px;
+  border-bottom:1px solid var(--bd);
+  background:var(--bg);
+}
+.section-hd-txt{font-size:13.5px;font-weight:700;color:var(--text)}
+
+/* ══ 전체 선택바 ══ */
+.select-bar{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 20px;border-bottom:1px solid var(--bd);
+}
+.cb-wrap{display:flex;align-items:center;gap:8px;cursor:pointer}
+.cb-wrap input[type=checkbox]{
+  width:16px;height:16px;
+  accent-color:var(--or);cursor:pointer;
+}
+.cb-lbl{font-size:13px;color:var(--text);font-weight:500}
+.cb-cnt{font-size:13px;color:var(--sub)}
+.sel-del{
+  margin-left:auto;
+  font-size:12.5px;color:var(--sub);
+  border:1px solid var(--bd);border-radius:var(--rs);
+  padding:5px 12px;background:var(--white);
+  transition:all .15s;
+}
+.sel-del:hover{color:var(--text);border-color:var(--bd2)}
+
+/* ══ 상품 아이템 (CARBX 완전 동일) ══ */
+.cart-item{
+  padding:20px;
+  border-bottom:1px solid var(--bd);
+  display:flex;align-items:flex-start;gap:16px;
+  transition:background .12s;
+  position:relative;
+}
+.cart-item:last-child{border-bottom:none}
+.cart-item:hover{background:#FAFAFA}
+
+/* 체크박스 */
+.item-cb{
+  width:16px;height:16px;
+  accent-color:var(--or);cursor:pointer;
+  margin-top:28px;flex-shrink:0;
+}
+
+/* 상품 이미지 */
+.item-img{
+  width:80px;height:80px;
+  border:1px solid var(--bd);border-radius:var(--rs);
+  background:var(--bg);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;cursor:pointer;
+}
+.item-img-ph{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+}
+.item-img-ph svg{width:36px;height:36px;opacity:.25}
+
+/* 상품 정보 */
+.item-info{flex:1;min-width:0}
+.item-name{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin-bottom:4px;cursor:pointer;line-height:1.4;
+}
+.item-name:hover{color:var(--or)}
+.item-price-line{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin-bottom:4px;
+}
+.item-ship{font-size:13px;color:var(--sub);margin-bottom:10px}
+.item-ship span{color:var(--sub)}
+
+/* 옵션 텍스트 */
+.item-option{
+  font-size:12.5px;color:var(--sub);
+  margin-bottom:14px;line-height:1.7;
+}
+.item-option a{color:var(--or);text-decoration:underline;font-size:12px}
+
+/* 수량 조절 (CARBX 동일: - 숫자 + 간격) */
+.qty-row{display:flex;align-items:center;gap:14px}
+.qty-ctrl{
+  display:flex;align-items:center;
+  border:1px solid var(--bd2);border-radius:var(--rs);
+  overflow:hidden;
+}
+.qty-btn{
+  width:32px;height:32px;background:var(--white);
+  border:none;font-size:16px;font-weight:400;color:var(--text);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .12s;flex-shrink:0;
+}
+.qty-btn:hover{background:var(--bg)}
+.qty-num{
+  width:44px;height:32px;border:none;
+  border-left:1px solid var(--bd);border-right:1px solid var(--bd);
+  text-align:center;font-size:14px;font-weight:700;color:var(--text);
+  background:var(--white);
+}
+.qty-del{
+  font-size:12.5px;color:var(--sub);
+  border:1px solid var(--bd);border-radius:var(--rs);
+  padding:5px 12px;background:var(--white);
+  transition:all .15s;
+}
+.qty-del:hover{color:var(--text);border-color:var(--bd2)}
+
+/* 주문금액 */
+.item-order-amt{
+  font-size:14px;color:var(--text);margin-top:14px;
+  display:flex;align-items:center;gap:6px;
+}
+.item-order-amt strong{font-weight:800;font-size:15px;color:var(--text)}
+
+/* 우측 버튼 (관심상품·주문하기) */
+.item-actions{
+  display:flex;gap:6px;margin-top:14px;
+}
+.item-btn{
+  padding:7px 14px;font-size:12.5px;font-weight:600;
+  border-radius:var(--rs);border:1px solid var(--bd2);
+  color:var(--text);background:var(--white);
+  transition:all .15s;cursor:pointer;
+}
+.item-btn:hover{border-color:var(--text)}
+.item-btn-primary{
+  background:var(--or);color:#fff;border-color:var(--or);
+}
+.item-btn-primary:hover{background:var(--or-dk);border-color:var(--or-dk)}
+
+/* X 닫기 버튼 */
+.item-close{
+  position:absolute;top:14px;right:16px;
+  width:22px;height:22px;border:none;background:none;
+  color:var(--del);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  line-height:1;transition:color .15s;
+}
+.item-close:hover{color:var(--text)}
+
+/* ══ 기본 배송비 섹션 ══ */
+.ship-section{
+  padding:14px 20px;background:var(--bg);
+  border:1px solid var(--bd);border-radius:var(--rs);
+  margin-bottom:12px;font-size:13px;color:var(--sub);
+  display:flex;align-items:center;gap:8px;
+}
+.ship-section strong{color:var(--text);font-weight:700}
+
+/* ══ 하단 버튼 바 ══ */
+.bottom-bar{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:28px;
+}
+.bb-btn{
+  padding:8px 16px;font-size:13px;
+  border:1px solid var(--bd2);border-radius:var(--rs);
+  color:var(--text);background:var(--white);
+  transition:all .15s;cursor:pointer;font-weight:500;
+}
+.bb-btn:hover{border-color:var(--text)}
+.bb-right{margin-left:auto;display:flex;gap:8px}
+
+/* ══ 이용안내 ══ */
+.guide{margin-bottom:0}
+.guide-title{font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px}
+.guide-group{margin-bottom:18px}
+.guide-group-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px}
+.guide-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.guide-list li{
+  font-size:13px;color:var(--sub);line-height:1.65;
+  padding-left:14px;position:relative;
+}
+.guide-list li::before{
+  content:'·';position:absolute;left:0;color:var(--del);
+}
+
+/* ══ 우측: 결제 요약 (CARBX 완전 동일) ══ */
+.summary{
+  border:1px solid var(--bd);
+  border-radius:var(--rs);background:var(--white);
+  overflow:hidden;position:sticky;top:76px;
+}
+.summary-body{padding:20px}
+.sum-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.sum-lbl{font-size:14px;color:var(--sub)}
+.sum-val{font-size:14px;font-weight:700;color:var(--text)}
+/* 결제예정금액 */
+.sum-divider{border:none;border-top:1px solid var(--bd);margin:14px 0}
+.sum-total-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:4px;
+}
+.sum-total-lbl{font-size:15px;font-weight:800;color:var(--text)}
+.sum-total-val{font-size:22px;font-weight:900;color:var(--or);letter-spacing:-.5px}
+
+/* 주문 버튼 (CARBX 동일: 크고 오렌지, 아래 흰 버튼) */
+.btn-order-all{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:52px;
+  background:var(--or);color:#fff;
+  font-size:15px;font-weight:800;
+  border:none;border-radius:var(--rs);cursor:pointer;
+  margin-top:18px;margin-bottom:8px;
+  transition:background .2s;font-family:inherit;
+  letter-spacing:-.2px;
+}
+.btn-order-all:hover{background:var(--or-dk)}
+.btn-order-sel{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;height:44px;
+  background:var(--white);color:var(--text);
+  font-size:14px;font-weight:700;
+  border:1.5px solid var(--bd2);border-radius:var(--rs);
+  cursor:pointer;font-family:inherit;
+  transition:all .15s;margin-bottom:14px;
+}
+.btn-order-sel:hover{border-color:var(--text)}
+.sum-note{
+  font-size:12px;color:var(--sub);
+  line-height:1.7;display:flex;align-items:flex-start;gap:6px;
+}
+.sum-note-ico{
+  width:14px;height:14px;border-radius:50%;
+  border:1px solid var(--or);color:var(--or);
+  font-size:10px;font-weight:800;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  margin-top:1px;
+}
+
+/* ══ 파일 전달 안내 ══ */
+.file-guide{
+  border:1px solid var(--bd);border-radius:var(--rs);
+  background:var(--white);overflow:hidden;
+  margin-bottom:12px;
+}
+.file-guide-hd{
+  padding:14px 20px;background:var(--bg);
+  border-bottom:1px solid var(--bd);
+  font-size:13.5px;font-weight:700;color:var(--text);
+}
+.file-guide-body{padding:18px 20px}
+/* 방법 선택 버튼 */
+.file-tabs{display:flex;gap:8px;margin-bottom:16px}
+.file-tab{
+  padding:9px 18px;font-size:13px;font-weight:600;
+  border:1.5px solid var(--bd2);border-radius:var(--rs);
+  color:var(--sub);background:var(--white);cursor:pointer;
+  transition:all .15s;
+}
+.file-tab.on{border-color:var(--or);color:var(--or);background:var(--or-lt)}
+/* 드롭존 */
+.dropzone{
+  border:1.5px dashed var(--bd2);border-radius:var(--rs);
+  padding:32px 20px;text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--bg);
+}
+.dropzone:hover{border-color:var(--or);background:var(--or-lt)}
+.dropzone input{display:none}
+.dz-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:5px}
+.dz-sub{font-size:12.5px;color:var(--sub)}
+/* 이메일 */
+.email-row{display:flex;gap:8px;align-items:stretch}
+.email-input{
+  flex:1;padding:10px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  font-size:13px;color:var(--sub);background:var(--bg);
+}
+.copy-btn{
+  padding:0 18px;background:var(--text);color:#fff;
+  font-size:13px;font-weight:700;border-radius:var(--rs);
+  cursor:pointer;white-space:nowrap;transition:background .15s;
+}
+.copy-btn:hover{background:#333}
+.file-note{
+  font-size:12.5px;color:var(--sub);
+  margin-top:12px;line-height:1.75;
+  padding-left:14px;border-left:2px solid var(--or);
+}
+
+/* ══ 주문자 정보 폼 ══ */
+.form-card{
+  border:1px solid var(--bd);border-radius:var(--rs);
+  background:var(--white);overflow:hidden;margin-bottom:12px;
+}
+.form-card-hd{
+  padding:14px 20px;background:var(--bg);
+  border-bottom:1px solid var(--bd);
+  font-size:13.5px;font-weight:700;color:var(--text);
+}
+.form-card-body{padding:20px}
+.form-row{margin-bottom:14px}
+.form-row:last-child{margin-bottom:0}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.f-label{
+  display:block;font-size:12.5px;font-weight:700;
+  color:var(--text);margin-bottom:7px;
+}
+.f-req{color:var(--or);margin-left:2px}
+.f-input{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  font-size:13.5px;color:var(--text);
+  transition:border-color .2s;background:var(--white);
+}
+.f-input:focus{border-color:var(--or)}
+.f-input::placeholder{color:var(--del);font-size:13px}
+.f-select{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  font-size:13.5px;color:var(--text);background:var(--white);cursor:pointer;
+}
+.f-select:focus{border-color:var(--or)}
+.f-check-row{
+  display:flex;align-items:center;gap:9px;
+  padding:12px 14px;background:var(--bg);border-radius:var(--rs);cursor:pointer;
+}
+.f-check-row input{width:15px;height:15px;accent-color:var(--or);cursor:pointer}
+.f-check-lbl{font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.f-check-hint{font-size:12px;color:var(--sub);margin-left:2px}
+
+/* 배송 방법 */
+.ship-opts{display:flex;gap:10px;margin-bottom:14px}
+.ship-opt{
+  flex:1;padding:14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  cursor:pointer;text-align:center;background:var(--white);
+  transition:all .15s;
+}
+.ship-opt:hover{border-color:var(--or-lt)}
+.ship-opt.on{border-color:var(--or);background:var(--or-lt)}
+.ship-opt-name{font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:3px}
+.ship-opt-desc{font-size:12px;color:var(--sub)}
+.ship-opt.on .ship-opt-name{color:var(--or)}
+
+/* 결제 방법 */
+.pay-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pay-opt{
+  padding:13px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  cursor:pointer;display:flex;align-items:center;gap:10px;
+  background:var(--white);transition:all .15s;
+}
+.pay-opt:hover{border-color:var(--bd2)}
+.pay-opt.on{border-color:var(--or);background:var(--or-lt)}
+.pay-opt input[type=radio]{accent-color:var(--or);width:14px;height:14px;flex-shrink:0}
+.pay-opt-name{font-size:13px;font-weight:700;color:var(--text)}
+.pay-opt-desc{font-size:11.5px;color:var(--sub)}
+.pay-opt.on .pay-opt-name{color:var(--or)}
+
+/* 계좌이체 정보 */
+.bank-info{
+  display:none;margin-top:12px;
+  background:var(--bg);border-radius:var(--rs);
+  padding:16px;border-left:3px solid var(--or);
+}
+.bank-info.show{display:block}
+.bank-info p{font-size:13px;color:var(--sub);line-height:2}
+.bank-num{font-size:16px;font-weight:900;color:var(--or)}
+
+/* 메모 */
+.f-textarea{
+  width:100%;padding:11px 14px;
+  border:1.5px solid var(--bd);border-radius:var(--rs);
+  font-size:13.5px;color:var(--text);resize:vertical;min-height:84px;
+  transition:border-color .2s;
+}
+.f-textarea:focus{border-color:var(--or)}
+.f-textarea::placeholder{color:var(--del);font-size:13px}
+
+/* 약관 동의 */
+.agree-all{
+  display:flex;align-items:center;gap:9px;
+  padding:12px 14px;background:var(--bg);border-radius:var(--rs);
+  margin-bottom:10px;cursor:pointer;
+}
+.agree-all input{width:15px;height:15px;accent-color:var(--or);cursor:pointer}
+.agree-all label{font-size:13px;font-weight:700;color:var(--text);cursor:pointer}
+.agree-item{display:flex;align-items:center;gap:8px;margin-bottom:7px;cursor:pointer}
+.agree-item input{width:14px;height:14px;accent-color:var(--or);cursor:pointer}
+.agree-item label{font-size:12.5px;color:var(--sub);cursor:pointer}
+.agree-item label a{color:var(--or)}
+
+/* 연속 쇼핑 */
+.continue{
+  font-size:13px;color:var(--sub);cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;
+  margin-bottom:22px;transition:color .15s;
+}
+.continue:hover{color:var(--text)}
+
+/* ══ 추천 상품 ══ */
+.rec-section{margin-top:32px}
+.rec-title{font-size:17px;font-weight:900;color:var(--text);letter-spacing:-.3px;margin-bottom:16px}
+.rec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.rec-card{
+  cursor:pointer;transition:transform .18s;
+}
+.rec-card:hover{transform:translateY(-3px)}
+.rec-card:hover .rec-img{box-shadow:0 8px 24px rgba(0,0,0,.09)}
+.rec-img{
+  width:100%;aspect-ratio:1;
+  background:var(--bg);border-radius:var(--rs);
+  border:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:10px;transition:box-shadow .18s;overflow:hidden;
+}
+.rec-img svg{width:48px;height:48px;opacity:.2}
+.rec-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.35}
+.rec-desc{font-size:12.5px;color:var(--sub);margin-bottom:5px}
+.rec-price{font-size:13.5px;font-weight:800;color:var(--text)}
+
+/* ══ 푸터 ══ */
+.footer{background:var(--text);padding:40px 24px 24px}
+.footer-in{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;gap:40px;margin-bottom:24px}
+.ft-logo{font-size:20px;font-weight:900;color:var(--or);font-style:italic;margin-bottom:12px}
+.ft-info{font-size:11.5px;color:rgba(255,255,255,.35);line-height:2.1}
+.ft-links{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.ft-links a{font-size:12px;color:rgba(255,255,255,.4)}
+.ft-links a.em{color:rgba(255,255,255,.7);font-weight:700}
+.ft-cs-title{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:6px}
+.ft-cs-num{font-size:22px;font-weight:900;color:var(--white);letter-spacing:-.5px;margin-bottom:4px}
+.ft-cs-info{font-size:12px;color:rgba(255,255,255,.38);line-height:2}
+.ft-bank-title{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:6px}
+.ft-bank-info{font-size:13px;color:rgba(255,255,255,.6);line-height:2}
+.ft-copy{border-top:1px solid rgba(255,255,255,.07);padding-top:16px;font-size:11.5px;color:rgba(255,255,255,.2);text-align:center;max-width:1200px;margin:0 auto}
+</style>
+</head>
+<body>
+
+<!-- 공지배너 -->
+<div class="notice">
+  <div class="n-txt">3만원 이상 무료배송 · 첫 구매 20% 할인쿠폰 지급</div>
+  <div class="n-btn">받기 +</div>
+</div>
+
+<!-- GNB -->
+<header class="gnb">
+  <div class="gnb-in">
+    <div class="logo">제안서몰</div>
+    <div class="srch">
+      <input type="text" placeholder="상품명으로 검색">
+      <button class="srch-btn">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      </button>
+    </div>
+    <nav class="gnb-nav">
+      <div class="gnb-a">전체상품</div>
+      <div class="gnb-a">주문현황</div>
+      <div class="gnb-a on">장바구니</div>
+      <div class="gnb-a">고객문의</div>
+    </nav>
+
+  </div>
+</header>
+
+<!-- 페이지 타이틀 -->
+<div class="page-hd">
+  <h1>장바구니</h1>
+</div>
+
+<!-- 메인 -->
+<div class="main">
+
+  <!-- 좌측 -->
+  <div>
+
+    <!-- 상품 목록 -->
+    <div class="section">
+      <!-- 전체 선택 -->
+      <div class="select-bar">
+        <label class="cb-wrap">
+          <input type="checkbox" id="checkAll" checked onchange="toggleAll(this)">
+          <span class="cb-lbl">전체선택</span>
+          <span class="cb-cnt" id="ckCnt">(2/2)</span>
+        </label>
+        <button class="sel-del" onclick="deleteChecked()">선택삭제</button>
+      </div>
+
+      <!-- 일반상품 그룹 -->
+      <div class="section-hd">
+        <span class="section-hd-txt">일반상품 (2)</span>
+      </div>
+
+      <!-- 상품 1 -->
+      <div class="cart-item" id="item-1">
+        <input type="checkbox" class="item-cb i-check" checked onchange="updateSummary()">
+        <div class="item-img">
+          <div class="item-img-ph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="item-info">
+          <div class="item-name">하드커버 스프링제본 — 인쇄형</div>
+          <div class="item-price-line">₩117,000</div>
+          <div class="item-ship">배송: (무료) / 기본배송</div>
+          <div class="item-option">
+            [옵션: 스노우지 100g / 80페이지 / 컬러양면 / A4 세로형 / 3부] (+₩0)
+            &nbsp;<a href="#">수정하기</a>
+          </div>
+          <div class="qty-row">
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="changeQty('item-1',-1)">−</button>
+              <input class="qty-num" type="number" value="3" min="1" id="qty-item-1" onchange="updateSummary()">
+              <button class="qty-btn" onclick="changeQty('item-1',1)">+</button>
+            </div>
+            <button class="qty-del">반품</button>
+          </div>
+          <div class="item-order-amt">주문금액 <strong id="amt-item-1">₩117,000</strong></div>
+          <div class="item-actions">
+            <button class="item-btn">관심상품</button>
+            <button class="item-btn item-btn-primary" onclick="location.href='#'">주문하기</button>
+          </div>
+        </div>
+        <button class="item-close" onclick="deleteItem('item-1')">×</button>
+      </div>
+
+      <!-- 상품 2 -->
+      <div class="cart-item" id="item-2">
+        <input type="checkbox" class="item-cb i-check" checked onchange="updateSummary()">
+        <div class="item-img">
+          <div class="item-img-ph">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+        </div>
+        <div class="item-info">
+          <div class="item-name">내지 인쇄 — 스노우지 100g 컬러양면</div>
+          <div class="item-price-line">₩45,600</div>
+          <div class="item-ship">배송: (무료) / 기본배송</div>
+          <div class="item-option">
+            [옵션: 스노우지 100g / 컬러양면 / A4 / 240장] (+₩0)
+            &nbsp;<a href="#">수정하기</a>
+          </div>
+          <div class="qty-row">
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="changeQty('item-2',-1)">−</button>
+              <input class="qty-num" type="number" value="240" min="1" id="qty-item-2" onchange="updateSummary()">
+              <button class="qty-btn" onclick="changeQty('item-2',1)">+</button>
+            </div>
+            <button class="qty-del">반품</button>
+          </div>
+          <div class="item-order-amt">주문금액 <strong id="amt-item-2">₩45,600</strong></div>
+          <div class="item-actions">
+            <button class="item-btn">관심상품</button>
+            <button class="item-btn item-btn-primary" onclick="location.href='#'">주문하기</button>
+          </div>
+        </div>
+        <button class="item-close" onclick="deleteItem('item-2')">×</button>
+      </div>
+
+      <!-- 기본배송 -->
+      <div style="padding:14px 20px;background:var(--bg);border-top:1px solid var(--bd)">
+        <div style="font-size:13px;color:var(--sub)">[기본배송]</div>
+      </div>
+    </div>
+
+    <!-- 하단 버튼 바 -->
+    <div class="bottom-bar">
+      <button class="bb-btn">전체선택</button>
+      <button class="bb-btn">선택삭제</button>
+      <div class="bb-right">
+        <button class="bb-btn">장바구니에서 삭제</button>
+        <button class="bb-btn">찜하기</button>
+        <button class="bb-btn">위시리스트로 이동</button>
+      </div>
+    </div>
+
+
+    <!-- 주문자 정보 -->
+    <div class="form-card">
+      <div class="form-card-hd">주문자 정보</div>
+      <div class="form-card-body">
+        <div class="form-grid">
+          <div>
+            <label class="f-label">이름<span class="f-req">*</span></label>
+            <input class="f-input" type="text" placeholder="홍길동">
+          </div>
+          <div>
+            <label class="f-label">회사명</label>
+            <input class="f-input" type="text" placeholder="(주)제안서회사">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label class="f-label">연락처<span class="f-req">*</span></label>
+            <input class="f-input" type="tel" placeholder="010-0000-0000">
+          </div>
+          <div>
+            <label class="f-label">이메일<span class="f-req">*</span></label>
+            <input class="f-input" type="email" placeholder="example@email.com">
+          </div>
+        </div>
+        <div class="f-check-row" onclick="toggleTax()">
+          <input type="checkbox" id="taxChk">
+          <label class="f-check-lbl" for="taxChk">세금계산서 발행 요청</label>
+          <span class="f-check-hint">(사업자번호 필요)</span>
+        </div>
+        <div id="taxInfo" style="display:none;margin-top:10px">
+          <div class="form-grid" style="margin-bottom:0">
+            <div>
+              <label class="f-label">사업자번호</label>
+              <input class="f-input" type="text" placeholder="000-00-00000">
+            </div>
+            <div>
+              <label class="f-label">사업자명</label>
+              <input class="f-input" type="text" placeholder="(주)회사명">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 수령 방법 -->
+    <div class="form-card">
+      <div class="form-card-hd">수령 방법</div>
+      <div class="form-card-body">
+        <div class="ship-opts">
+          <div class="ship-opt on" id="ship-d" onclick="selectShip('d')">
+            <div class="ship-opt-name">택배 배송</div>
+            <div class="ship-opt-desc">배송비 2,500원 (3만원↑ 무료)</div>
+          </div>
+          <div class="ship-opt" id="ship-v" onclick="selectShip('v')">
+            <div class="ship-opt-name">직접 방문 수령</div>
+            <div class="ship-opt-desc">배송비 무료 · 사전 연락 필수</div>
+          </div>
+        </div>
+        <div id="addr-wrap">
+          <div class="form-row">
+            <label class="f-label">수령인<span class="f-req">*</span></label>
+            <input class="f-input" type="text" placeholder="수령인 이름">
+          </div>
+          <div class="form-row">
+            <label class="f-label">연락처<span class="f-req">*</span></label>
+            <input class="f-input" type="tel" placeholder="010-0000-0000">
+          </div>
+          <div class="form-row">
+            <label class="f-label">배송 주소<span class="f-req">*</span></label>
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <input class="f-input" type="text" placeholder="우편번호" style="max-width:130px">
+              <button style="padding:10px 16px;background:var(--text);color:#fff;border:none;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit">주소 검색</button>
+            </div>
+            <input class="f-input" type="text" placeholder="기본 주소" style="margin-bottom:8px">
+            <input class="f-input" type="text" placeholder="상세 주소">
+          </div>
+          <div class="form-row">
+            <label class="f-label">배송 메모</label>
+            <select class="f-select">
+              <option value="">배송 메모 선택</option>
+              <option>문 앞에 두세요</option>
+              <option>경비실에 맡겨주세요</option>
+              <option>부재 시 연락 바랍니다</option>
+            </select>
+          </div>
+        </div>
+        <div id="visit-wrap" style="display:none">
+          <div style="background:var(--bg);border-radius:var(--rs);padding:16px;border-left:3px solid var(--or)">
+            <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:8px">방문 주소</div>
+            <div style="font-size:13.5px;color:var(--sub);line-height:2">
+              서울특별시 ○○구 ○○로 00<br>
+              대표전화: 02-000-0000<br>
+              <span style="font-size:12px;color:var(--del)">평일 09:00 ~ 18:00 · 방문 전 전화 필수</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 결제 방법 -->
+    <div class="form-card">
+      <div class="form-card-hd">결제 방법</div>
+      <div class="form-card-body">
+        <div class="pay-opts">
+          <label class="pay-opt on" onclick="selectPay(this,'card')">
+            <input type="radio" name="pay" checked>
+            <div><div class="pay-opt-name">신용·체크카드</div><div class="pay-opt-desc">사이다페이 안전결제</div></div>
+          </label>
+          <label class="pay-opt" onclick="selectPay(this,'bank')">
+            <input type="radio" name="pay">
+            <div><div class="pay-opt-name">무통장 입금</div><div class="pay-opt-desc">계좌이체</div></div>
+          </label>
+          <label class="pay-opt" onclick="selectPay(this,'kakao')">
+            <input type="radio" name="pay">
+            <div><div class="pay-opt-name">카카오페이</div><div class="pay-opt-desc">간편결제</div></div>
+          </label>
+          <label class="pay-opt" onclick="selectPay(this,'naver')">
+            <input type="radio" name="pay">
+            <div><div class="pay-opt-name">네이버페이</div><div class="pay-opt-desc">간편결제</div></div>
+          </label>
+        </div>
+        <div class="bank-info" id="bankInfo">
+          <p>입금 계좌<br><span class="bank-num">농협 351-0000-0000</span><br>예금주: (주)○○○<br><span style="font-size:12px;color:var(--del)">입금 확인 후 제작이 시작됩니다</span></p>
+        </div>
+        <div class="form-row" style="margin-top:14px">
+          <label class="f-label">주문 메모</label>
+          <textarea class="f-textarea" placeholder="납기 요청, 특이사항 등을 입력해 주세요"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- 약관 동의 -->
+    <div class="form-card">
+      <div class="form-card-hd">이용 약관 동의</div>
+      <div class="form-card-body">
+        <div class="agree-all">
+          <input type="checkbox" id="agreeAll" onchange="toggleAgreeAll(this)">
+          <label for="agreeAll">전체 약관에 동의합니다</label>
+        </div>
+        <div class="agree-item">
+          <input type="checkbox" class="ai"><label>[필수] <a href="#">이용약관</a>에 동의합니다</label>
+        </div>
+        <div class="agree-item">
+          <input type="checkbox" class="ai"><label>[필수] <a href="#">개인정보 수집·이용</a>에 동의합니다</label>
+        </div>
+        <div class="agree-item">
+          <input type="checkbox" class="ai"><label>[선택] 마케팅 정보 수신에 동의합니다</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="continue" onclick="history.back()">← 계속 쇼핑하기</div>
+
+    <!-- 이용안내 -->
+    <div class="guide">
+      <div class="guide-title">이용안내</div>
+      <div class="guide-group">
+        <div class="guide-group-title">장바구니 이용안내</div>
+        <ul class="guide-list">
+          <li>해외배송 상품과 국내배송 상품은 함께 결제하실 수 없으니 장바구니를 이용해 주시기 바랍니다.</li>
+          <li>해외배송 가능 상품의 경우 국내 쇼핑으로 이동하시면 국내배송으로 이용하실 수 있습니다.</li>
+          <li>선택하신 상품의 수량을 변경하실 경우 [수량변경/계산하기] 버튼을 눌러서 변경된 금액을 확인하세요.</li>
+          <li>장바구니와 관심상품을 이용하셔서 상품들을 주문하거나 관심상품으로 등록하실 수 있습니다.</li>
+          <li>찜하기된 동일상품을 장바구니에 추가한 경우 마지막에 추가된 옵션으로 표시됩니다.</li>
+        </ul>
+      </div>
+      <div class="guide-group">
+        <div class="guide-group-title">무이자할부 이용안내</div>
+        <ul class="guide-list">
+          <li>상품을 무이자할부 방식으로 주문하시려면 해당 상품의 주문하기/구매 버튼을 눌러 주문/결제하시면 됩니다.</li>
+          <li>전체 상품 주문 시 누르시면 전체 상품에 대해 동일한 방식의 결제 / 할부 상품에 대해서만 이루어질 수 있습니다.</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 우측: 주문 요약 -->
+  <div>
+    <div class="summary">
+      <div class="summary-body">
+        <div class="sum-row">
+          <span class="sum-lbl">총 상품금액</span>
+          <span class="sum-val" id="s-sub">₩162,600</span>
+        </div>
+        <div class="sum-row">
+          <span class="sum-lbl">총 배송비</span>
+          <span class="sum-val" id="s-ship">₩0</span>
+        </div>
+        <div class="sum-divider"></div>
+        <div class="sum-total-row">
+          <span class="sum-total-lbl">결제예정금액</span>
+          <span class="sum-total-val" id="s-total">₩162,600</span>
+        </div>
+        <button class="btn-order-all" onclick="submitOrder()">전체상품주문</button>
+        <button class="btn-order-sel">선택상품주문</button>
+        <div class="sum-note">
+          <div class="sum-note-ico">!</div>
+          <span>할인 적용 금액은 주문서 작성시 결제예정금액에서 확인 가능합니다.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- 추천 상품 -->
+<div style="max-width:1200px;margin:0 auto;padding:0 24px 60px">
+  <div class="rec-title">함께 구매하면 좋은 상품</div>
+  <div class="rec-grid">
+    <div class="rec-card">
+      <div class="rec-img">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <div class="rec-name">제안서 캐리어박스</div>
+      <div class="rec-desc">이동 편리한 핸들형 전용 박스</div>
+      <div class="rec-price">견적 문의</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-img">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+      </div>
+      <div class="rec-name">자석박스 (A4)</div>
+      <div class="rec-desc">프리미엄 자석 개폐 박스</div>
+      <div class="rec-price">견적 문의</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-img">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <div class="rec-name">PT용 바인더 인쇄형</div>
+      <div class="rec-desc">발표용 표지 인쇄 바인더</div>
+      <div class="rec-price">단가표 제공</div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-img">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <div class="rec-name">3공바인더 인쇄형</div>
+      <div class="rec-desc">표지 컬러 인쇄 3공 바인더</div>
+      <div class="rec-price">단가표 제공</div>
+    </div>
+  </div>
+</div>
+
+<!-- 푸터 -->
+<footer class="footer">
+  <div class="footer-in">
+    <div>
+      <div class="ft-logo">제안서몰</div>
+      <div class="ft-info">
+        대표: ○○○ &nbsp;|&nbsp; 사업자번호: 000-00-00000<br>
+        통신판매업신고: 제0000-서울○○-0000호<br>
+        주소: 서울특별시 ○○구 ○○로 00<br>
+        개인정보관리책임자: ○○○ &nbsp;|&nbsp; 고객센터: 02-000-0000
+      </div>
+      <div class="ft-links">
+        <a href="#">회사소개</a>
+        <a href="#">개인정보처리방침</a>
+        <a href="#" class="em">이용약관</a>
+        <a href="#">이용안내</a>
+      </div>
+    </div>
+    <div>
+      <div class="ft-cs-title">고객센터</div>
+      <div class="ft-cs-num">02-000-0000</div>
+      <div class="ft-cs-info">평일: 09:00 ~ 18:00<br>점심: 12:00 ~ 13:00<br>주말 및 공휴일 휴무</div>
+    </div>
+    <div>
+      <div class="ft-bank-title">입금 계좌안내</div>
+      <div class="ft-bank-info">농협 351-0000-0000<br>KB 100-00-000000<br>예금주: (주)○○○</div>
+    </div>
+  </div>
+  <div class="ft-copy">© 제안서몰. All Rights Reserved.</div>
+</footer>
+
+<script>
+const ITEMS = {
+  'item-1': {unit:39000, qty:3},
+  'item-2': {unit:190,   qty:240},
+};
+
+function changeQty(id, d){
+  const o = ITEMS[id];
+  o.qty = Math.max(1, o.qty + d);
+  document.getElementById('qty-'+id).value = o.qty;
+  document.getElementById('amt-'+id).textContent = '₩'+(o.unit*o.qty).toLocaleString();
+  updateSummary();
+}
+
+function updateSummary(){
+  const cks = document.querySelectorAll('.i-check');
+  let sub = 0;
+  cks.forEach((c,i)=>{
+    const id = i===0?'item-1':'item-2';
+    if(c.checked && ITEMS[id]){
+      const q = parseInt(document.getElementById('qty-'+id).value)||1;
+      ITEMS[id].qty = q;
+      sub += ITEMS[id].unit * q;
+      document.getElementById('amt-'+id).textContent = '₩'+(ITEMS[id].unit*q).toLocaleString();
+    }
+  });
+  const isVisit = document.getElementById('ship-v').classList.contains('on');
+  const ship = (sub>=30000||isVisit) ? 0 : 2500;
+  document.getElementById('s-sub').textContent   = '₩'+sub.toLocaleString();
+  document.getElementById('s-ship').textContent  = ship===0 ? '0원' : '₩'+ship.toLocaleString();
+  document.getElementById('s-total').textContent = '₩'+(sub+ship).toLocaleString();
+  // 체크 카운트
+  const n = [...cks].filter(c=>c.checked).length;
+  document.getElementById('ckCnt').textContent = `(${n}/${cks.length})`;
+  document.getElementById('checkAll').checked = n===cks.length;
+}
+
+function toggleAll(el){
+  document.querySelectorAll('.i-check').forEach(c=>c.checked=el.checked);
+  updateSummary();
+}
+function deleteItem(id){
+  if(!confirm('상품을 삭제하시겠습니까?')) return;
+  document.getElementById(id).remove();
+  delete ITEMS[id];
+  updateSummary();
+}
+function deleteChecked(){
+  ['item-1','item-2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){const cb=el.querySelector('.i-check');if(cb&&cb.checked){el.remove();delete ITEMS[id];}}
+  });
+  updateSummary();
+}
+
+function setFileTab(el,key){
+  document.querySelectorAll('.file-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('tab-dropbox').style.display = key==='dropbox'?'block':'none';
+  document.getElementById('tab-email').style.display   = key==='email'?'block':'none';
+}
+function copyEmail(){navigator.clipboard.writeText('order@제안서몰.co.kr').then(()=>alert('이메일 주소가 복사되었습니다.'))}
+function toggleTax(){
+  const c=document.getElementById('taxChk');c.checked=!c.checked;
+  document.getElementById('taxInfo').style.display=c.checked?'block':'none';
+}
+function selectShip(t){
+  document.getElementById('ship-d').classList.toggle('on',t==='d');
+  document.getElementById('ship-v').classList.toggle('on',t==='v');
+  document.getElementById('addr-wrap').style.display = t==='d'?'block':'none';
+  document.getElementById('visit-wrap').style.display= t==='v'?'block':'none';
+  updateSummary();
+}
+function selectPay(el,type){
+  document.querySelectorAll('.pay-opt').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('bankInfo').classList.toggle('show',type==='bank');
+}
+function toggleAgreeAll(el){document.querySelectorAll('.ai').forEach(c=>c.checked=el.checked)}
+document.querySelectorAll('.ai').forEach(c=>{c.addEventListener('change',()=>{
+  document.getElementById('agreeAll').checked=[...document.querySelectorAll('.ai')].every(x=>x.checked);
+})});
+function submitOrder(){alert('주문이 접수되었습니다.\n주문번호: Pro-0009\n담당자가 납기 확인 후 SMS로 알려드립니다.')}
+
+updateSummary();
+</script>
+</body>
+</html>
