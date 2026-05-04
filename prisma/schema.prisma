@@ -1,0 +1,224 @@
+// Prisma schema for 제안서몰 (proposal-mall)
+// 11 tables: products, option_groups, option_values,
+//            price_paper, price_binding, price_box,
+//            orders, order_items, inquiries, faqs, notices
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProductCategory {
+  CARRIER_BOX
+  MAGNETIC_BOX
+  BINDING_3_RING
+  BINDING_PT
+  BINDING_HARDCOVER
+  PAPER_INNER
+}
+
+enum BindingType {
+  PRINTED
+  FABRIC
+  NONE
+}
+
+enum PaperType {
+  MOJO
+  SNOW
+  ART
+  IMPORT
+  TEXTURE
+  NONE
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  IN_PRODUCTION
+  SHIPPING
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryMethod {
+  COURIER
+  PICKUP
+}
+
+enum InquiryStatus {
+  OPEN
+  ANSWERED
+  CLOSED
+}
+
+model Product {
+  id          Int             @id @default(autoincrement())
+  slug        String          @unique
+  name        String
+  category    ProductCategory
+  binding     BindingType     @default(NONE)
+  paper       PaperType       @default(NONE)
+  description String?
+  thumbnail   String?
+  images      String[]        @default([])
+  isActive    Boolean         @default(true)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  optionGroups OptionGroup[]
+  orderItems   OrderItem[]
+
+  @@map("products")
+}
+
+model OptionGroup {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  name      String
+  required  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  product Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  values  OptionValue[]
+
+  @@map("option_groups")
+}
+
+model OptionValue {
+  id            Int      @id @default(autoincrement())
+  optionGroupId Int
+  label         String
+  priceDelta    Int      @default(0)
+  sortOrder     Int      @default(0)
+
+  group OptionGroup @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
+
+  @@map("option_values")
+}
+
+model PricePaper {
+  id        Int       @id @default(autoincrement())
+  paper     PaperType
+  qtyTier   String
+  pageCount Int
+  unitPrice Int
+
+  @@unique([paper, qtyTier, pageCount])
+  @@map("price_paper")
+}
+
+model PriceBinding {
+  id        Int         @id @default(autoincrement())
+  binding   BindingType
+  qtyTier   String
+  variant   String
+  unitPrice Int
+
+  @@unique([binding, qtyTier, variant])
+  @@map("price_binding")
+}
+
+model PriceBox {
+  id        Int             @id @default(autoincrement())
+  category  ProductCategory
+  qtyTier   String
+  variant   String
+  unitPrice Int
+
+  @@unique([category, qtyTier, variant])
+  @@map("price_box")
+}
+
+model Order {
+  id              Int            @id @default(autoincrement())
+  serial          String         @unique
+  customerName    String
+  customerPhone   String
+  customerEmail   String
+  company         String?
+  deliveryMethod  DeliveryMethod
+  shippingAddress String?
+  shippingFee     Int            @default(0)
+  totalAmount     Int
+  status          OrderStatus    @default(PENDING)
+  paymentTid      String?
+  fileLink        String?
+  memo            String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  items OrderItem[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  productName String
+  quantity    Int
+  pageCount   Int?
+  optionsJson Json
+  unitPrice   Int
+  subtotal    Int
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Inquiry {
+  id         Int           @id @default(autoincrement())
+  name       String
+  email      String
+  phone      String?
+  subject    String
+  message    String
+  isPrivate  Boolean       @default(false)
+  password   String?
+  status     InquiryStatus @default(OPEN)
+  answer     String?
+  answeredAt DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("inquiries")
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  category  String
+  question  String
+  answer    String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faqs")
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  isPinned  Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isPinned, createdAt])
+  @@map("notices")
+}
