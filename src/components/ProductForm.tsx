@@ -149,13 +149,6 @@ export function ProductForm({
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand disabled:bg-bg"
             />
           </Field>
-          <Field label="상품명">
-            <input
-              value={v.name}
-              onChange={(e) => set("name", e.target.value)}
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
-            />
-          </Field>
           <Field label="카테고리">
             <select
               value={v.category}
@@ -167,27 +160,12 @@ export function ProductForm({
               ))}
             </select>
           </Field>
-          <Field label="제본 형태 (해당 시)">
-            <select
-              value={v.binding}
-              onChange={(e) => set("binding", e.target.value as BindingType)}
+          <Field label="상품명">
+            <input
+              value={v.name}
+              onChange={(e) => set("name", e.target.value)}
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
-            >
-              {BINDING_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label="기본 용지 (내지 카테고리 시)">
-            <select
-              value={v.paper}
-              onChange={(e) => set("paper", e.target.value as PaperType)}
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
-            >
-              {PAPER_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
+            />
           </Field>
           <Field label="정렬 순서">
             <input
@@ -213,6 +191,15 @@ export function ProductForm({
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
             />
           </Field>
+          {/* 숨김 필드 — 값은 유지, UI에서만 비표시 */}
+          <div className="hidden">
+            <select value={v.binding} onChange={(e) => set("binding", e.target.value as BindingType)}>
+              {BINDING_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <select value={v.paper} onChange={(e) => set("paper", e.target.value as PaperType)}>
+              {PAPER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
         </div>
         <label className="mt-3 flex items-center gap-2 text-[13px]">
           <input
