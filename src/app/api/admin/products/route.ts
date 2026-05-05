@@ -38,6 +38,7 @@ const createSchema = z.object({
   thumbnail: z.string().url().optional().or(z.literal("")).optional(),
   images: z.array(z.string().url()).default([]),
   contentBlocks: z.array(contentBlockSchema).default([]),
+  basePrice: z.number().int().min(0).default(0),
   sortOrder: z.number().int().default(0),
   isActive: z.boolean().default(true),
   optionGroups: z.array(optionGroupSchema).default([]),

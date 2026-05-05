@@ -1,6 +1,6 @@
 // 가격 견적 엔진
-// 상품 카테고리에 따라 적절한 단가표(paper / binding / box)에서 단가를 lookup
-// 옵션 선택값 → variant / paper type 매핑 → DB query → 단가 × 수량 = 합계
+// 1순위: 카테고리별 단가표(price_paper / price_binding / price_box) 조회
+// 2순위: 단가표 미등록 시 상품 기본단가(basePrice) + 옵션 추가단가(priceDelta) 합산
 
 import {
   type Product,
@@ -41,6 +41,38 @@ const PAPER_LABEL_TO_ENUM: Record<string, PaperType> = {
   질감용지: PaperType.TEXTURE,
 };
 
+// 기본 단가 + 선택 옵션 추가 단가 합산 (단가표 미등록 시 폴백)
+function calcDirectPrice(product: ProductWithOptions, options: SelectedOptions): number {
+  const base = (product as Product & { basePrice?: number }).basePrice ?? 0;
+  let delta = 0;
+  for (const group of product.optionGroups) {
+    const selectedLabel = options[group.name];
+    if (!selectedLabel) continue;
+    const val = group.values.find((v) => v.label === selectedLabel);
+    if (val) delta += val.priceDelta ?? 0;
+  }
+  return base + delta;
+}
+
+function directResult(
+  product: ProductWithOptions,
+  options: SelectedOptions,
+  quantity: number,
+  tier: string,
+): QuoteResult {
+  const unitPrice = calcDirectPrice(product, options);
+  if (unitPrice <= 0) throw new Error("단가가 설정되지 않았습니다. 관리자 페이지에서 기본 단가를 입력해 주세요.");
+  const optionDesc = Object.entries(options)
+    .map(([k, v]) => `${k}: ${v}`)
+    .join(" · ");
+  return {
+    unitPrice,
+    subtotal: unitPrice * quantity,
+    qtyTier: tier,
+    breakdown: optionDesc ? `${optionDesc} · 직접 단가 적용` : "직접 단가 적용",
+  };
+}
+
 export async function calculateQuote(input: QuoteInput): Promise<QuoteResult> {
   const { product, options, quantity } = input;
   const tier = quantityTier(quantity);
@@ -51,18 +83,19 @@ export async function calculateQuote(input: QuoteInput): Promise<QuoteResult> {
     if (!paper) throw new Error("용지를 선택해 주세요");
     const pageCount = input.pageCount ?? 0;
     if (pageCount <= 0) throw new Error("페이지 수를 입력해 주세요");
-    // 시드는 50/100/200 만 제공 — 가장 가까운 큰 구간으로 매핑
     const bucket = pageCount <= 50 ? 50 : pageCount <= 100 ? 100 : 200;
     const row = await prisma.pricePaper.findUnique({
       where: { paper_qtyTier_pageCount: { paper, qtyTier: tier, pageCount: bucket } },
     });
-    if (!row) throw new Error("해당 옵션의 단가가 등록되어 있지 않습니다");
-    return {
-      unitPrice: row.unitPrice,
-      subtotal: row.unitPrice * quantity,
-      qtyTier: tier,
-      breakdown: `${paperLabel} · ${pageCount}쪽 (${bucket}쪽 구간) · ${tier}부 구간`,
-    };
+    if (row) {
+      return {
+        unitPrice: row.unitPrice,
+        subtotal: row.unitPrice * quantity,
+        qtyTier: tier,
+        breakdown: `${paperLabel} · ${pageCount}쪽 (${bucket}쪽 구간) · ${tier}부 구간`,
+      };
+    }
+    return directResult(product, options, quantity, tier);
   }
 
   if (
@@ -70,34 +103,26 @@ export async function calculateQuote(input: QuoteInput): Promise<QuoteResult> {
     product.category === ProductCategory.BINDING_PT ||
     product.category === ProductCategory.BINDING_HARDCOVER
   ) {
-    const variant = options["형태"]; // "인쇄형" | "원단형"
+    const variant = options["형태"];
     if (!variant) throw new Error("형태(인쇄형/원단형)를 선택해 주세요");
-    const binding =
-      variant === "인쇄형" ? BindingType.PRINTED : BindingType.FABRIC;
+    const binding = variant === "인쇄형" ? BindingType.PRINTED : BindingType.FABRIC;
     let row = await prisma.priceBinding.findUnique({
-      where: {
-        binding_qtyTier_variant: { binding, qtyTier: tier, variant },
-      },
+      where: { binding_qtyTier_variant: { binding, qtyTier: tier, variant } },
     });
-    // 인쇄형 라벨도 PRINTED 단가표에 있으니 fallback 시 binding 매핑을 한 번 더 시도
     if (!row && binding === BindingType.FABRIC) {
       row = await prisma.priceBinding.findUnique({
-        where: {
-          binding_qtyTier_variant: {
-            binding: BindingType.PRINTED,
-            qtyTier: tier,
-            variant,
-          },
-        },
+        where: { binding_qtyTier_variant: { binding: BindingType.PRINTED, qtyTier: tier, variant } },
       });
     }
-    if (!row) throw new Error("해당 옵션의 단가가 등록되어 있지 않습니다");
-    return {
-      unitPrice: row.unitPrice,
-      subtotal: row.unitPrice * quantity,
-      qtyTier: tier,
-      breakdown: `${variant} · ${tier}부 구간`,
-    };
+    if (row) {
+      return {
+        unitPrice: row.unitPrice,
+        subtotal: row.unitPrice * quantity,
+        qtyTier: tier,
+        breakdown: `${variant} · ${tier}부 구간`,
+      };
+    }
+    return directResult(product, options, quantity, tier);
   }
 
   if (
@@ -107,22 +132,19 @@ export async function calculateQuote(input: QuoteInput): Promise<QuoteResult> {
     const size = options["사이즈"];
     if (!size) throw new Error("사이즈를 선택해 주세요");
     const row = await prisma.priceBox.findUnique({
-      where: {
-        category_qtyTier_variant: {
-          category: product.category,
-          qtyTier: tier,
-          variant: size,
-        },
-      },
+      where: { category_qtyTier_variant: { category: product.category, qtyTier: tier, variant: size } },
     });
-    if (!row) throw new Error("해당 옵션의 단가가 등록되어 있지 않습니다");
-    return {
-      unitPrice: row.unitPrice,
-      subtotal: row.unitPrice * quantity,
-      qtyTier: tier,
-      breakdown: `${size} · ${tier}개 구간`,
-    };
+    if (row) {
+      return {
+        unitPrice: row.unitPrice,
+        subtotal: row.unitPrice * quantity,
+        qtyTier: tier,
+        breakdown: `${size} · ${tier}개 구간`,
+      };
+    }
+    return directResult(product, options, quantity, tier);
   }
 
-  throw new Error(`지원하지 않는 카테고리: ${product.category}`);
+  // 카테고리 불일치 시에도 직접 단가 폴백 시도
+  return directResult(product, options, quantity, tier);
 }

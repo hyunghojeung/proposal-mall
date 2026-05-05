@@ -44,6 +44,7 @@ export default async function AdminProductEditPage({
           thumbnail: product.thumbnail ?? "",
           images: product.images ?? [],
           contentBlocks: (product.contentBlocks as ContentBlock[]) ?? [],
+          basePrice: product.basePrice,
           sortOrder: product.sortOrder,
           isActive: product.isActive,
           optionGroups: product.optionGroups.map((g) => ({

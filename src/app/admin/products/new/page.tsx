@@ -23,6 +23,7 @@ export default function AdminProductNewPage() {
           thumbnail: "",
           images: [],
           contentBlocks: [],
+          basePrice: 0,
           sortOrder: 0,
           isActive: true,
           optionGroups: [],

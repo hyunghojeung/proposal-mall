@@ -67,6 +67,7 @@ model Product {
   thumbnail   String?
   images        String[]        @default([])
   contentBlocks Json            @default("[]")
+  basePrice     Int             @default(0)
   isActive      Boolean         @default(true)
   sortOrder   Int             @default(0)
   createdAt   DateTime        @default(now())

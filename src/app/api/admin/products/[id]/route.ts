@@ -31,6 +31,7 @@ const patchSchema = z.object({
   thumbnail: z.string().url().nullable().optional().or(z.literal("")),
   images: z.array(z.string().url()).optional(),
   contentBlocks: z.array(contentBlockSchema).optional(),
+  basePrice: z.number().int().min(0).optional(),
   sortOrder: z.number().int().optional(),
   isActive: z.boolean().optional(),
   optionGroups: z.array(optionGroupSchema).nullable().optional(),

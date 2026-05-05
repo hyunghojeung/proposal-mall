@@ -19,6 +19,7 @@ export interface ProductFormValue {
   thumbnail: string;
   images: string[];
   contentBlocks: ContentBlock[];
+  basePrice: number;
   sortOrder: number;
   isActive: boolean;
   optionGroups: {
@@ -534,6 +535,19 @@ export function ProductForm({
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
             />
           </Field>
+          <Field label="기본 단가 (원 / 1개 기준)" className="sm:col-span-2">
+            <input
+              type="number"
+              min={0}
+              value={v.basePrice}
+              onChange={(e) => set("basePrice", Math.max(0, Number(e.target.value) || 0))}
+              placeholder="0"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+            />
+            <p className="mt-1 text-[11px] text-ink-sub">
+              단가표에 등록되지 않은 상품은 이 단가를 기준으로 계산됩니다. 옵션별 추가 단가는 아래 옵션 그룹에서 입력하세요.
+            </p>
+          </Field>
           <Field label="간단 설명 (상품명 아래 표시)" className="sm:col-span-2">
             <input
               value={v.description}
@@ -627,7 +641,8 @@ export function ProductForm({
                         type="number"
                         value={val.priceDelta}
                         onChange={(e) => setValue(gi, vi, { priceDelta: Number(e.target.value) || 0 })}
-                        placeholder="가격 가산 (원)"
+                        placeholder="추가 단가 (원)"
+                        title="기본 단가에 더해지는 옵션별 추가 금액"
                         className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
                       />
                       <button
