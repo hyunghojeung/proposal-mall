@@ -230,14 +230,6 @@ export function ProductDetailClient({ product }: Props) {
                   <div className="flex flex-wrap gap-2">
                     {g.values.map((v) => {
                       const selected = options[g.name] === v.label;
-                      const optionPrice =
-                        v.priceDelta > 0
-                          ? product.basePrice > 0
-                            ? product.basePrice + v.priceDelta
-                            : v.priceDelta
-                          : product.basePrice > 0
-                          ? product.basePrice
-                          : 0;
                       return (
                         <button
                           key={v.id}
@@ -250,9 +242,9 @@ export function ProductDetailClient({ product }: Props) {
                           }`}
                         >
                           <span>{v.label}</span>
-                          {optionPrice > 0 && (
+                          {v.priceDelta > 0 && (
                             <span className={`ml-1.5 text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
-                              {optionPrice.toLocaleString()}원
+                              +{v.priceDelta.toLocaleString()}원
                             </span>
                           )}
                         </button>
