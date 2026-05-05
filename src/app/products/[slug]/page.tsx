@@ -62,11 +62,16 @@ export default async function ProductDetailPage({
             description: product.description,
             images: product.images ?? [],
             contentBlocks: (product.contentBlocks as ContentBlock[]) ?? [],
+            basePrice: (product as typeof product & { basePrice?: number }).basePrice ?? 0,
             optionGroups: product.optionGroups.map((g) => ({
               id: g.id,
               name: g.name,
               required: g.required,
-              values: g.values.map((v) => ({ id: v.id, label: v.label })),
+              values: g.values.map((v) => ({
+                id: v.id,
+                label: v.label,
+                priceDelta: v.priceDelta,
+              })),
             })),
           }}
         />

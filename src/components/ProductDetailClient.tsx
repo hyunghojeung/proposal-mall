@@ -10,7 +10,7 @@ interface OptionGroupClient {
   id: number;
   name: string;
   required: boolean;
-  values: { id: number; label: string }[];
+  values: { id: number; label: string; priceDelta: number }[];
 }
 
 interface Props {
@@ -22,6 +22,7 @@ interface Props {
     description: string | null;
     images: string[];
     contentBlocks: ContentBlock[];
+    basePrice: number;
     optionGroups: OptionGroupClient[];
   };
 }
@@ -217,6 +218,11 @@ export function ProductDetailClient({ product }: Props) {
               {product.description}
             </p>
           )}
+          {product.basePrice > 0 && (
+            <p className="mt-2 text-[15px] font-bold text-ink">
+              {product.basePrice.toLocaleString()}원~
+            </p>
+          )}
 
           <div className="my-6 border-t border-line" />
 
@@ -228,18 +234,31 @@ export function ProductDetailClient({ product }: Props) {
               <div className="flex flex-wrap gap-2">
                 {g.values.map((v) => {
                   const selected = options[g.name] === v.label;
+                  const optionPrice =
+                    v.priceDelta > 0
+                      ? product.basePrice > 0
+                        ? product.basePrice + v.priceDelta
+                        : v.priceDelta
+                      : product.basePrice > 0
+                      ? product.basePrice
+                      : 0;
                   return (
                     <button
                       key={v.id}
                       type="button"
                       onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
-                      className={`rounded-sm border px-3 py-2 text-[13px] transition-colors ${
+                      className={`rounded-sm border px-3 py-2 text-left text-[13px] transition-colors ${
                         selected
                           ? "border-brand bg-brand-light font-bold text-brand"
                           : "border-line text-ink hover:border-ink"
                       }`}
                     >
-                      {v.label}
+                      <span>{v.label}</span>
+                      {optionPrice > 0 && (
+                        <span className={`ml-1.5 text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
+                          {optionPrice.toLocaleString()}원
+                        </span>
+                      )}
                     </button>
                   );
                 })}
