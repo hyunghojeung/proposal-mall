@@ -630,14 +630,15 @@ export function ProductForm({
                 </div>
                 <div className="mt-3 border-t border-line pt-3">
                   {/* 컬럼 헤더 */}
-                  <div className="mb-1 grid gap-2 sm:grid-cols-[2fr_1fr_auto]">
+                  <div className="mb-1 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
                     <span className="text-[11px] font-bold text-ink-sub">옵션명</span>
                     <span className="text-[11px] font-bold text-ink-sub">단가 (원)</span>
+                    <span className="text-[11px] font-bold text-ink-sub">정렬</span>
                     <span />
                   </div>
                   <div className="space-y-1.5">
                   {g.values.map((val, vi) => (
-                    <div key={vi} className="grid gap-2 sm:grid-cols-[2fr_1fr_auto] sm:items-center">
+                    <div key={vi} className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto] sm:items-center">
                       <input
                         value={val.label}
                         onChange={(e) => setValue(gi, vi, { label: e.target.value })}
@@ -649,6 +650,13 @@ export function ProductForm({
                         min={0}
                         value={val.priceDelta}
                         onChange={(e) => setValue(gi, vi, { priceDelta: Math.max(0, Number(e.target.value) || 0) })}
+                        placeholder="0"
+                        className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
+                      />
+                      <input
+                        type="number"
+                        value={val.sortOrder}
+                        onChange={(e) => setValue(gi, vi, { sortOrder: Number(e.target.value) || 0 })}
                         placeholder="0"
                         className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
                       />
