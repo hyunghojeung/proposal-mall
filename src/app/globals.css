@@ -73,6 +73,12 @@ body:has(.admin-dark) {
   color: #f5f5f5;
   border-color: #3a3a40;
 }
+.admin-dark input:disabled,
+.admin-dark input[disabled] {
+  background-color: #1e1e22 !important;
+  color: #6b6b73 !important;
+  border-color: #2e2e33 !important;
+}
 .admin-dark input::placeholder,
 .admin-dark textarea::placeholder {
   color: #6b6b73;
