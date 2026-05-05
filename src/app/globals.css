@@ -47,3 +47,46 @@ button {
     @apply mx-auto w-full max-w-page px-6;
   }
 }
+
+/* Admin dark theme — scoped to /admin only */
+.admin-dark {
+  color-scheme: dark;
+}
+body:has(.admin-dark) {
+  background: #0f0f10;
+}
+.admin-dark .bg-bg { background-color: #0f0f10; }
+.admin-dark .bg-white { background-color: #1c1c1f; }
+.admin-dark .text-ink { color: #f5f5f5; }
+.admin-dark .text-ink-sub { color: #a0a0a8; }
+.admin-dark .text-ink-del { color: #6b6b73; }
+.admin-dark .border-line { border-color: #2e2e33; }
+.admin-dark .border-line-strong { border-color: #4a4a52; }
+.admin-dark .bg-brand-light { background-color: rgba(232, 72, 26, 0.2); }
+.admin-dark .hover\:bg-white:hover { background-color: #2a2a2e; }
+.admin-dark .hover\:border-brand:hover { border-color: #E8481A; }
+
+.admin-dark input,
+.admin-dark select,
+.admin-dark textarea {
+  background-color: #2a2a2e;
+  color: #f5f5f5;
+  border-color: #3a3a40;
+}
+.admin-dark input::placeholder,
+.admin-dark textarea::placeholder {
+  color: #6b6b73;
+}
+.admin-dark select option {
+  background-color: #1c1c1f;
+  color: #f5f5f5;
+}
+.admin-dark input[type="checkbox"],
+.admin-dark input[type="radio"] {
+  accent-color: #E8481A;
+}
+
+.admin-dark thead.bg-bg,
+.admin-dark .bg-bg thead {
+  background-color: #18181b;
+}
