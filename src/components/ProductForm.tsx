@@ -51,7 +51,24 @@ const PAPER_OPTIONS: { value: PaperType; label: string }[] = [
   { value: "TEXTURE", label: "질감용지" },
 ];
 
-// ── 이미지 업로드 훅 ──────────────────────────────────────────
+// ── 공통 파일 업로드 유틸 ─────────────────────────────────────
+async function uploadFile(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch("/api/admin/upload", {
+    method: "POST",
+    body: fd,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const d = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(d?.error ?? "업로드 실패");
+  }
+  const d = (await res.json()) as { url: string };
+  return d.url;
+}
+
+// ── 이미지 업로드 훅 (단일) ───────────────────────────────────
 function useImageUpload(onDone: (url: string) => void) {
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
@@ -68,17 +85,14 @@ function useImageUpload(onDone: (url: string) => void) {
     e.target.value = "";
     setUploading(true);
     setUploadErr(null);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-    setUploading(false);
-    if (!res.ok) {
-      const d = (await res.json().catch(() => null)) as { error?: string } | null;
-      setUploadErr(d?.error ?? "업로드 실패");
-      return;
+    try {
+      const url = await uploadFile(file);
+      onDone(url);
+    } catch (err) {
+      setUploadErr(err instanceof Error ? err.message : "업로드 실패");
+    } finally {
+      setUploading(false);
     }
-    const d = (await res.json()) as { url: string };
-    onDone(d.url);
   }
 
   return { uploading, uploadErr, inputRef, triggerPick, handleChange };
@@ -125,13 +139,9 @@ function ImageGallery({
     const available = 5 - images.length;
     const newUrls: string[] = [];
     for (const file of files.slice(0, available)) {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      if (res.ok) {
-        const d = (await res.json()) as { url: string };
-        newUrls.push(d.url);
-      }
+      try {
+        newUrls.push(await uploadFile(file));
+      } catch { /* 개별 실패 무시 */ }
     }
     if (newUrls.length > 0) onChange([...images, ...newUrls]);
   }
@@ -246,9 +256,30 @@ function ContentBlockEditor({
   blocks: ContentBlock[];
   onChange: (b: ContentBlock[]) => void;
 }) {
-  const imgUpload = useImageUpload((url) =>
-    onChange([...blocks, { type: "image", url, caption: "" }])
-  );
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const [draggingOver, setDraggingOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function uploadImages(files: File[]) {
+    const imageFiles = files.filter((f) =>
+      ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type)
+    );
+    if (imageFiles.length === 0) return;
+    setUploading(true);
+    setUploadErr(null);
+    const newBlocks: ContentBlock[] = [];
+    for (const file of imageFiles) {
+      try {
+        const url = await uploadFile(file);
+        newBlocks.push({ type: "image", url, caption: "" });
+      } catch (err) {
+        setUploadErr(err instanceof Error ? err.message : "업로드 실패");
+      }
+    }
+    if (newBlocks.length > 0) onChange([...blocks, ...newBlocks]);
+    setUploading(false);
+  }
 
   function updateBlock(i: number, patch: Partial<ContentBlock>) {
     const next = [...blocks];
@@ -268,6 +299,21 @@ function ContentBlockEditor({
     onChange(next);
   }
 
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    setDraggingOver(true);
+  }
+
+  function handleDragLeave() {
+    setDraggingOver(false);
+  }
+
+  async function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDraggingOver(false);
+    await uploadImages(Array.from(e.dataTransfer.files));
+  }
+
   return (
     <div className="space-y-3">
       {blocks.map((block, i) => (
@@ -278,17 +324,11 @@ function ContentBlockEditor({
             </span>
             <div className="flex gap-1">
               <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0}
-                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">
-                ↑
-              </button>
+                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">↑</button>
               <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}
-                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">
-                ↓
-              </button>
+                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">↓</button>
               <button type="button" onClick={() => removeBlock(i)}
-                className="rounded px-1.5 py-0.5 text-[12px] text-brand hover:underline">
-                삭제
-              </button>
+                className="rounded px-1.5 py-0.5 text-[12px] text-brand hover:underline">삭제</button>
             </div>
           </div>
 
@@ -303,7 +343,7 @@ function ContentBlockEditor({
           ) : (
             <div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={block.url} alt={block.caption || "상품 이미지"} className="mb-2 max-h-60 rounded-sm object-contain" />
+              <img src={block.url} alt={block.caption || "상품 이미지"} className="mb-2 max-h-60 w-full rounded-sm object-contain" />
               <input
                 value={block.caption}
                 onChange={(e) => updateBlock(i, { caption: e.target.value })}
@@ -315,7 +355,19 @@ function ContentBlockEditor({
         </div>
       ))}
 
-      <div className="flex gap-2">
+      {/* 드래그앤드롭 존 */}
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`flex min-h-[64px] items-center justify-center rounded border-2 border-dashed p-4 text-[12px] transition-colors ${
+          draggingOver ? "border-brand bg-brand-light text-brand font-bold" : "border-line text-ink-sub"
+        }`}
+      >
+        {uploading ? "업로드 중…" : draggingOver ? "여기에 놓으세요" : "이미지를 여기에 드래그하거나 아래 버튼을 사용하세요"}
+      </div>
+
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => onChange([...blocks, { type: "text", content: "" }])}
@@ -325,22 +377,27 @@ function ContentBlockEditor({
         </button>
         <button
           type="button"
-          onClick={imgUpload.triggerPick}
-          disabled={imgUpload.uploading}
+          onClick={() => { setUploadErr(null); fileInputRef.current?.click(); }}
+          disabled={uploading}
           className="rounded-sm border border-line px-3 py-1.5 text-[12px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50"
         >
-          {imgUpload.uploading ? "업로드 중…" : "+ 이미지 블록 추가"}
+          {uploading ? "업로드 중…" : "+ 이미지 블록 추가 (복수 선택 가능)"}
         </button>
       </div>
-      {imgUpload.uploadErr && (
-        <p className="text-[12px] text-brand">{imgUpload.uploadErr}</p>
-      )}
+
+      {uploadErr && <p className="text-[12px] text-brand">{uploadErr}</p>}
+
       <input
-        ref={imgUpload.inputRef}
+        ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
+        multiple
         className="hidden"
-        onChange={imgUpload.handleChange}
+        onChange={async (e) => {
+          const files = Array.from(e.target.files ?? []);
+          e.target.value = "";
+          await uploadImages(files);
+        }}
       />
     </div>
   );
