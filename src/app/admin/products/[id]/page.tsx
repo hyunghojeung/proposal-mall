@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { AdminShell } from "@/components/AdminShell";
-import { ProductForm } from "@/components/ProductForm";
+import { ProductForm, type ContentBlock } from "@/components/ProductForm";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +42,8 @@ export default async function AdminProductEditPage({
           paper: product.paper,
           description: product.description ?? "",
           thumbnail: product.thumbnail ?? "",
+          images: product.images ?? [],
+          contentBlocks: (product.contentBlocks as ContentBlock[]) ?? [],
           sortOrder: product.sortOrder,
           isActive: product.isActive,
           optionGroups: product.optionGroups.map((g) => ({

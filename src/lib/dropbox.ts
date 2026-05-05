@@ -59,6 +59,75 @@ function isConfigured(): boolean {
   );
 }
 
+// 관리자가 업로드한 이미지를 Dropbox에 저장하고 직접 링크(raw URL)를 반환.
+// 미설정 시 stub URL 반환.
+export async function uploadProductImage(opts: {
+  filename: string;
+  buffer: Buffer;
+  mimeType: string;
+}): Promise<string> {
+  if (!isConfigured()) {
+    return `https://placehold.co/800x1000/f5f5f5/888888?text=${encodeURIComponent(opts.filename)}`;
+  }
+
+  const folder = process.env.DROPBOX_DEST_FOLDER?.replace(/\/$/, "") ?? "/proposal-mall-orders";
+  const destPath = `${folder}/product-images/${Date.now()}_${opts.filename.replace(/\s+/g, "_")}`;
+
+  const token = await getAccessToken();
+
+  // 1) 파일 업로드
+  const uploadRes = await fetch("https://content.dropboxapi.com/2/files/upload", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/octet-stream",
+      "Dropbox-API-Arg": JSON.stringify({
+        path: destPath,
+        mode: "add",
+        autorename: true,
+        mute: true,
+      }),
+    },
+    body: new Uint8Array(opts.buffer),
+  });
+  if (!uploadRes.ok) {
+    const t = await uploadRes.text();
+    throw new Error(`Dropbox upload failed: ${uploadRes.status} ${t}`);
+  }
+  const uploadData = (await uploadRes.json()) as { path_lower: string };
+
+  // 2) 공유 링크 생성
+  const linkRes = await fetch("https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      path: uploadData.path_lower,
+      settings: { requested_visibility: "public" },
+    }),
+  });
+
+  let sharedUrl: string;
+  if (linkRes.ok) {
+    const linkData = (await linkRes.json()) as { url: string };
+    sharedUrl = linkData.url;
+  } else {
+    // 이미 공유 링크가 있는 경우 재활용
+    const errData = (await linkRes.json()) as { error?: { shared_link_already_exists?: { metadata?: { url?: string } } } };
+    const existing = errData?.error?.shared_link_already_exists?.metadata?.url;
+    if (existing) {
+      sharedUrl = existing;
+    } else {
+      throw new Error(`Dropbox shared link failed: ${linkRes.status}`);
+    }
+  }
+
+  // dl.dropboxusercontent.com + ?raw=1 로 변환하면 img src에 직접 사용 가능
+  return sharedUrl.replace("www.dropbox.com", "dl.dropboxusercontent.com").replace(/\?dl=\d$/, "") + "?raw=1";
+}
+
 export async function createOrderFileRequest(opts: {
   orderSerial: string;
   customerName: string;

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProductCategory } from "@prisma/client";
 import { addToCart } from "@/lib/cart";
+import type { ContentBlock } from "@/components/ProductForm";
 
 interface OptionGroupClient {
   id: number;
@@ -19,6 +20,8 @@ interface Props {
     name: string;
     category: ProductCategory;
     description: string | null;
+    images: string[];
+    contentBlocks: ContentBlock[];
     optionGroups: OptionGroupClient[];
   };
 }
@@ -40,6 +43,90 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
   PAPER_INNER: "내지 인쇄",
 };
 
+// ── 이미지 갤러리 ──────────────────────────────────────────
+function ImageGallery({ images }: { images: string[] }) {
+  const [active, setActive] = useState(0);
+
+  if (images.length === 0) {
+    return (
+      <div className="aspect-[4/5] w-full rounded border border-line bg-bg flex items-center justify-center">
+        <span className="text-[13px] text-ink-sub">이미지 없음</span>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* 메인 이미지 */}
+      <div className="aspect-[4/5] w-full overflow-hidden rounded border border-line bg-bg">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={images[active]}
+          alt="상품 이미지"
+          className="h-full w-full object-contain"
+        />
+      </div>
+
+      {/* 썸네일 목록 */}
+      {images.length > 1 && (
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+          {images.map((url, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setActive(i)}
+              className={`h-16 w-16 shrink-0 overflow-hidden rounded border-2 transition-colors ${
+                i === active ? "border-brand" : "border-line"
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={`썸네일 ${i + 1}`} className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── 콘텐츠 블록 렌더러 ───────────────────────────────────────
+function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
+  if (blocks.length === 0) return null;
+
+  return (
+    <section className="mt-14 border-t border-line pt-10">
+      <h2 className="mb-8 text-[18px] font-black tracking-tight text-ink">상품 상세 설명</h2>
+      <div className="space-y-6 text-[14px] leading-relaxed text-ink">
+        {blocks.map((block, i) => {
+          if (block.type === "text") {
+            return (
+              <p key={i} className="whitespace-pre-wrap text-ink-sub">
+                {block.content}
+              </p>
+            );
+          }
+          return (
+            <figure key={i} className="mx-auto max-w-2xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={block.url}
+                alt={block.caption || "상품 이미지"}
+                className="w-full rounded border border-line object-contain"
+              />
+              {block.caption && (
+                <figcaption className="mt-2 text-center text-[12px] text-ink-sub">
+                  {block.caption}
+                </figcaption>
+              )}
+            </figure>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ── 메인 컴포넌트 ──────────────────────────────────────────
 export function ProductDetailClient({ product }: Props) {
   const router = useRouter();
   const isPaper = product.category === ProductCategory.PAPER_INNER;
@@ -61,7 +148,6 @@ export function ProductDetailClient({ product }: Props) {
 
   const reqIdRef = useRef(0);
 
-  // 옵션/수량/페이지 바뀔 때마다 가격 다시 계산
   useEffect(() => {
     const reqId = ++reqIdRef.current;
     setLoading(true);
@@ -113,142 +199,143 @@ export function ProductDetailClient({ product }: Props) {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
-      {/* 좌측: 이미지 자리 */}
-      <div className="aspect-[4/5] w-full rounded border border-line bg-bg" />
+    <>
+      <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+        {/* 좌측: 이미지 갤러리 */}
+        <ImageGallery images={product.images} />
 
-      {/* 우측: 옵션 + 가격 */}
-      <div>
-        <p className="mb-2 text-[12px] font-medium text-brand">
-          {CATEGORY_LABELS[product.category]}
-        </p>
-        <h1 className="mb-3 text-[24px] font-black tracking-tight text-ink">
-          {product.name}
-        </h1>
-        {product.description && (
-          <p className="text-[13px] leading-relaxed text-ink-sub">
-            {product.description}
+        {/* 우측: 옵션 + 가격 */}
+        <div>
+          <p className="mb-2 text-[12px] font-medium text-brand">
+            {CATEGORY_LABELS[product.category]}
           </p>
-        )}
+          <h1 className="mb-3 text-[24px] font-black tracking-tight text-ink">
+            {product.name}
+          </h1>
+          {product.description && (
+            <p className="text-[13px] leading-relaxed text-ink-sub">
+              {product.description}
+            </p>
+          )}
 
-        <div className="my-6 border-t border-line" />
+          <div className="my-6 border-t border-line" />
 
-        {product.optionGroups.map((g) => (
-          <div key={g.id} className="mb-5">
-            <label className="mb-2 block text-[13px] font-bold text-ink">
-              {g.name}
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {g.values.map((v) => {
-                const selected = options[g.name] === v.label;
-                return (
-                  <button
-                    key={v.id}
-                    type="button"
-                    onClick={() =>
-                      setOptions((o) => ({ ...o, [g.name]: v.label }))
-                    }
-                    className={`rounded-sm border px-3 py-2 text-[13px] transition-colors ${
-                      selected
-                        ? "border-brand bg-brand-light font-bold text-brand"
-                        : "border-line text-ink hover:border-ink"
-                    }`}
-                  >
-                    {v.label}
-                  </button>
-                );
-              })}
+          {product.optionGroups.map((g) => (
+            <div key={g.id} className="mb-5">
+              <label className="mb-2 block text-[13px] font-bold text-ink">
+                {g.name}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {g.values.map((v) => {
+                  const selected = options[g.name] === v.label;
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
+                      className={`rounded-sm border px-3 py-2 text-[13px] transition-colors ${
+                        selected
+                          ? "border-brand bg-brand-light font-bold text-brand"
+                          : "border-line text-ink hover:border-ink"
+                      }`}
+                    >
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {isPaper && (
-          <div className="mb-5">
-            <label className="mb-2 block text-[13px] font-bold text-ink">
-              페이지 수
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={2000}
-              value={pageCount}
-              onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
-              className="w-32 rounded-sm border border-line px-3 py-2 text-[14px] outline-none focus:border-brand"
-            />
+          {isPaper && (
+            <div className="mb-5">
+              <label className="mb-2 block text-[13px] font-bold text-ink">페이지 수</label>
+              <input
+                type="number"
+                min={1}
+                max={2000}
+                value={pageCount}
+                onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
+                className="w-32 rounded-sm border border-line px-3 py-2 text-[14px] outline-none focus:border-brand"
+              />
+              <p className="mt-1.5 text-[12px] text-ink-sub">
+                50쪽 이하 / 51~100쪽 / 101쪽 이상 구간으로 단가 적용
+              </p>
+            </div>
+          )}
+
+          <div className="mb-6">
+            <label className="mb-2 block text-[13px] font-bold text-ink">수량</label>
+            <div className="flex w-fit items-stretch overflow-hidden rounded-sm border border-line">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-3 py-2 text-ink hover:bg-bg"
+                aria-label="수량 감소"
+              >
+                −
+              </button>
+              <input
+                type="number"
+                min={1}
+                max={10000}
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+                className="w-20 border-0 text-center text-[14px] outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => q + 1)}
+                className="px-3 py-2 text-ink hover:bg-bg"
+                aria-label="수량 증가"
+              >
+                +
+              </button>
+            </div>
             <p className="mt-1.5 text-[12px] text-ink-sub">
-              50쪽 이하 / 51~100쪽 / 101쪽 이상 구간으로 단가 적용
+              수량 구간 1 / 2-4 / 5-9 / 10+ 에 따라 단가가 자동 적용됩니다.
             </p>
           </div>
-        )}
 
-        <div className="mb-6">
-          <label className="mb-2 block text-[13px] font-bold text-ink">수량</label>
-          <div className="flex w-fit items-stretch overflow-hidden rounded-sm border border-line">
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="px-3 py-2 text-ink hover:bg-bg"
-              aria-label="수량 감소"
-            >
-              −
-            </button>
-            <input
-              type="number"
-              min={1}
-              max={10000}
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-              className="w-20 border-0 text-center text-[14px] outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => q + 1)}
-              className="px-3 py-2 text-ink hover:bg-bg"
-              aria-label="수량 증가"
-            >
-              +
-            </button>
+          <div className="rounded border border-line bg-bg p-5">
+            {loading && !quote ? (
+              <p className="text-[13px] text-ink-sub">계산 중…</p>
+            ) : quoteErr ? (
+              <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
+            ) : quote ? (
+              <>
+                <div className="mb-3 flex items-baseline justify-between">
+                  <span className="text-[13px] text-ink-sub">단가</span>
+                  <span className="text-[15px] font-medium text-ink">
+                    {quote.unitPrice.toLocaleString()}원
+                  </span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[14px] font-bold text-ink">합계</span>
+                  <span className="text-[24px] font-black tracking-tight text-brand">
+                    {quote.subtotal.toLocaleString()}원
+                  </span>
+                </div>
+                <p className="mt-2 text-[12px] text-ink-sub">{quote.breakdown}</p>
+              </>
+            ) : (
+              <p className="text-[13px] text-ink-sub">옵션을 선택해 주세요.</p>
+            )}
           </div>
-          <p className="mt-1.5 text-[12px] text-ink-sub">
-            수량 구간 1 / 2-4 / 5-9 / 10+ 에 따라 단가가 자동 적용됩니다.
-          </p>
-        </div>
 
-        <div className="rounded border border-line bg-bg p-5">
-          {loading && !quote ? (
-            <p className="text-[13px] text-ink-sub">계산 중…</p>
-          ) : quoteErr ? (
-            <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
-          ) : quote ? (
-            <>
-              <div className="mb-3 flex items-baseline justify-between">
-                <span className="text-[13px] text-ink-sub">단가</span>
-                <span className="text-[15px] font-medium text-ink">
-                  {quote.unitPrice.toLocaleString()}원
-                </span>
-              </div>
-              <div className="flex items-baseline justify-between">
-                <span className="text-[14px] font-bold text-ink">합계</span>
-                <span className="text-[24px] font-black tracking-tight text-brand">
-                  {quote.subtotal.toLocaleString()}원
-                </span>
-              </div>
-              <p className="mt-2 text-[12px] text-ink-sub">{quote.breakdown}</p>
-            </>
-          ) : (
-            <p className="text-[13px] text-ink-sub">옵션을 선택해 주세요.</p>
-          )}
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={!quote || loading}
+            className="mt-5 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            장바구니 담기
+          </button>
         </div>
-
-        <button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={!quote || loading}
-          className="mt-5 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          장바구니 담기
-        </button>
       </div>
-    </div>
+
+      {/* 하단: 상품 상세 내용 */}
+      <ContentBlockRenderer blocks={product.contentBlocks} />
+    </>
   );
 }
