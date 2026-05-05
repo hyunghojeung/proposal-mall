@@ -273,67 +273,87 @@ export function ProductDetailClient({ product }: Props) {
             </div>
           )}
 
-          {product.optionGroups.length === 0 && !isPaper && (
-            <div className="my-6 border-t border-line" />
-          )}
+          {/* 가격 영역: 기본단가 → 옵션 → 수량 → 합계 */}
+          <div className="mt-6 overflow-hidden rounded border border-line">
 
-          <div className="mb-6">
-            <label className="mb-2 block text-[13px] font-bold text-ink">수량</label>
-            <div className="flex w-fit items-stretch overflow-hidden rounded-sm border border-line">
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="px-3 py-2 text-ink hover:bg-bg"
-                aria-label="수량 감소"
-              >
-                −
-              </button>
-              <input
-                type="number"
-                min={1}
-                max={10000}
-                value={quantity}
-                onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                className="w-20 border-0 text-center text-[14px] outline-none"
-              />
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => q + 1)}
-                className="px-3 py-2 text-ink hover:bg-bg"
-                aria-label="수량 증가"
-              >
-                +
-              </button>
-            </div>
-            <p className="mt-1.5 text-[12px] text-ink-sub">
-              수량 구간 1 / 2-4 / 5-9 / 10+ 에 따라 단가가 자동 적용됩니다.
-            </p>
-          </div>
+            {/* 기본 단가 */}
+            {product.basePrice > 0 && (
+              <div className="flex items-center justify-between border-b border-line px-4 py-3">
+                <span className="text-[13px] text-ink-sub">기본 단가</span>
+                <span className="text-[14px] font-medium text-ink">
+                  {product.basePrice.toLocaleString()}원
+                </span>
+              </div>
+            )}
 
-          <div className="rounded border border-line bg-bg p-5">
-            {loading && !quote ? (
-              <p className="text-[13px] text-ink-sub">계산 중…</p>
-            ) : quoteErr ? (
-              <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
-            ) : quote ? (
-              <>
-                <div className="mb-3 flex items-baseline justify-between">
-                  <span className="text-[13px] text-ink-sub">단가</span>
-                  <span className="text-[15px] font-medium text-ink">
-                    {quote.unitPrice.toLocaleString()}원
+            {/* 선택된 옵션별 단가 */}
+            {product.optionGroups.map((g) => {
+              const selectedLabel = options[g.name];
+              if (!selectedLabel) return null;
+              const val = g.values.find((v) => v.label === selectedLabel);
+              return (
+                <div key={g.id} className="flex items-center justify-between border-b border-line px-4 py-3">
+                  <span className="text-[13px] text-ink-sub">
+                    {g.name}
+                    <span className="ml-1.5 font-medium text-ink">{selectedLabel}</span>
+                  </span>
+                  <span className="text-[13px] text-ink-sub">
+                    {val && val.priceDelta > 0
+                      ? `+${val.priceDelta.toLocaleString()}원`
+                      : "—"}
                   </span>
                 </div>
+              );
+            })}
+
+            {/* 수량 */}
+            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+              <span className="text-[13px] text-ink-sub">수량</span>
+              <div className="flex items-stretch overflow-hidden rounded-sm border border-line">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="px-3 py-1.5 text-[14px] text-ink hover:bg-bg"
+                  aria-label="수량 감소"
+                >
+                  −
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  max={10000}
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
+                  className="w-16 border-0 bg-transparent text-center text-[14px] outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="px-3 py-1.5 text-[14px] text-ink hover:bg-bg"
+                  aria-label="수량 증가"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* 합계 */}
+            <div className="bg-bg px-4 py-4">
+              {loading && !quote ? (
+                <p className="text-[13px] text-ink-sub">계산 중…</p>
+              ) : quoteErr ? (
+                <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
+              ) : quote ? (
                 <div className="flex items-baseline justify-between">
                   <span className="text-[14px] font-bold text-ink">합계</span>
                   <span className="text-[24px] font-black tracking-tight text-brand">
                     {quote.subtotal.toLocaleString()}원
                   </span>
                 </div>
-                <p className="mt-2 text-[12px] text-ink-sub">{quote.breakdown}</p>
-              </>
-            ) : (
-              <p className="text-[13px] text-ink-sub">옵션을 선택해 주세요.</p>
-            )}
+              ) : (
+                <p className="text-[13px] text-ink-sub">옵션을 선택해 주세요.</p>
+              )}
+            </div>
           </div>
 
           <button
