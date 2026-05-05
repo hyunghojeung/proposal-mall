@@ -147,6 +147,22 @@ export function ProductDetailClient({ product }: Props) {
   const [quoteErr, setQuoteErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // 클라이언트 즉시 계산: basePrice + 선택 옵션 priceDelta 합산
+  const localUnitPrice = useMemo(() => {
+    let price = product.basePrice;
+    for (const g of product.optionGroups) {
+      const selectedLabel = options[g.name];
+      if (!selectedLabel) continue;
+      const val = g.values.find((v) => v.label === selectedLabel);
+      if (val) price += val.priceDelta;
+    }
+    return price;
+  }, [product.basePrice, product.optionGroups, options]);
+
+  // 표시할 단가·합계: 단가표 API 결과 우선, 없으면 클라이언트 계산 사용
+  const displayUnitPrice = quote?.unitPrice ?? (localUnitPrice > 0 ? localUnitPrice : null);
+  const displaySubtotal = quote?.subtotal ?? (localUnitPrice > 0 ? localUnitPrice * quantity : null);
+
   const reqIdRef = useRef(0);
 
   useEffect(() => {
@@ -172,6 +188,7 @@ export function ProductDetailClient({ product }: Props) {
           setQuoteErr(data.error ?? "가격 계산 실패");
         } else {
           setQuote(data);
+          setQuoteErr(null);
         }
       })
       .catch(() => {
@@ -185,7 +202,9 @@ export function ProductDetailClient({ product }: Props) {
   }, [product.slug, options, quantity, pageCount, isPaper]);
 
   function handleAddToCart() {
-    if (!quote) return;
+    const unitPrice = displayUnitPrice;
+    const subtotal = displaySubtotal;
+    if (!unitPrice || !subtotal) return;
     addToCart({
       productId: product.id,
       slug: product.slug,
@@ -193,8 +212,8 @@ export function ProductDetailClient({ product }: Props) {
       options,
       quantity,
       pageCount: isPaper ? pageCount : undefined,
-      unitPrice: quote.unitPrice,
-      subtotal: quote.subtotal,
+      unitPrice,
+      subtotal,
     });
     router.push("/cart");
   }
@@ -334,19 +353,19 @@ export function ProductDetailClient({ product }: Props) {
 
             {/* 합계 */}
             <div className="bg-bg px-4 py-4">
-              {loading && !quote ? (
-                <p className="text-[13px] text-ink-sub">계산 중…</p>
-              ) : quoteErr ? (
+              {quoteErr && !displaySubtotal ? (
                 <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
-              ) : quote ? (
+              ) : displaySubtotal ? (
                 <div className="flex items-baseline justify-between">
                   <span className="text-[14px] font-bold text-ink">합계</span>
                   <span className="text-[24px] font-black tracking-tight text-brand">
-                    {quote.subtotal.toLocaleString()}원
+                    {displaySubtotal.toLocaleString()}원
                   </span>
                 </div>
+              ) : loading ? (
+                <p className="text-[13px] text-ink-sub">계산 중…</p>
               ) : (
-                <p className="text-[13px] text-ink-sub">옵션을 선택해 주세요.</p>
+                <p className="text-[13px] text-ink-sub">단가가 설정되지 않았습니다.</p>
               )}
             </div>
           </div>
@@ -354,7 +373,7 @@ export function ProductDetailClient({ product }: Props) {
           <button
             type="button"
             onClick={handleAddToCart}
-            disabled={!quote || loading}
+            disabled={!displaySubtotal}
             className="mt-5 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
           >
             장바구니 담기
