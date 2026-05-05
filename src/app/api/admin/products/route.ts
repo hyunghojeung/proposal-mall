@@ -77,7 +77,12 @@ export async function POST(req: NextRequest) {
           })),
         },
       },
-      include: { optionGroups: { include: { values: true } } },
+      include: {
+        optionGroups: {
+          orderBy: { sortOrder: "asc" },
+          include: { values: { orderBy: { sortOrder: "asc" } } },
+        },
+      },
     });
     return NextResponse.json({ product }, { status: 201 });
   } catch (err) {

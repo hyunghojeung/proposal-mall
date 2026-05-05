@@ -90,7 +90,12 @@ export async function PATCH(
           ? { thumbnail: thumbnail || null }
           : {}),
       },
-      include: { optionGroups: { include: { values: true } } },
+      include: {
+        optionGroups: {
+          orderBy: { sortOrder: "asc" },
+          include: { values: { orderBy: { sortOrder: "asc" } } },
+        },
+      },
     });
   });
 

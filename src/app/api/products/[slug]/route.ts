@@ -9,7 +9,12 @@ export async function GET(
 ) {
   const product = await prisma.product.findUnique({
     where: { slug: params.slug },
-    include: { optionGroups: { include: { values: true } } },
+    include: {
+      optionGroups: {
+        orderBy: { sortOrder: "asc" },
+        include: { values: { orderBy: { sortOrder: "asc" } } },
+      },
+    },
   });
   if (!product) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

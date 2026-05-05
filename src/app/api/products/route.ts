@@ -12,7 +12,10 @@ export async function GET(req: NextRequest) {
     },
     orderBy: { sortOrder: "asc" },
     include: {
-      optionGroups: { include: { values: true } },
+      optionGroups: {
+        orderBy: { sortOrder: "asc" },
+        include: { values: { orderBy: { sortOrder: "asc" } } },
+      },
     },
   });
   return NextResponse.json({ products });
