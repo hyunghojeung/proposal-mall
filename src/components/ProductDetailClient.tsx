@@ -224,47 +224,50 @@ export function ProductDetailClient({ product }: Props) {
             </p>
           )}
 
-          <div className="my-6 border-t border-line" />
-
-          {product.optionGroups.map((g) => (
-            <div key={g.id} className="mb-5">
-              <label className="mb-2 block text-[13px] font-bold text-ink">
-                {g.name}
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {g.values.map((v) => {
-                  const selected = options[g.name] === v.label;
-                  const optionPrice =
-                    v.priceDelta > 0
-                      ? product.basePrice > 0
-                        ? product.basePrice + v.priceDelta
-                        : v.priceDelta
-                      : product.basePrice > 0
-                      ? product.basePrice
-                      : 0;
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
-                      className={`rounded-sm border px-3 py-2 text-left text-[13px] transition-colors ${
-                        selected
-                          ? "border-brand bg-brand-light font-bold text-brand"
-                          : "border-line text-ink hover:border-ink"
-                      }`}
-                    >
-                      <span>{v.label}</span>
-                      {optionPrice > 0 && (
-                        <span className={`ml-1.5 text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
-                          {optionPrice.toLocaleString()}원
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+          {product.optionGroups.length > 0 && (
+            <>
+              <div className="my-6 border-t border-line" />
+              {product.optionGroups.map((g) => (
+                <div key={g.id} className="mb-5">
+                  <label className="mb-2 block text-[13px] font-bold text-ink">
+                    {g.name}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {g.values.map((v) => {
+                      const selected = options[g.name] === v.label;
+                      const optionPrice =
+                        v.priceDelta > 0
+                          ? product.basePrice > 0
+                            ? product.basePrice + v.priceDelta
+                            : v.priceDelta
+                          : product.basePrice > 0
+                          ? product.basePrice
+                          : 0;
+                      return (
+                        <button
+                          key={v.id}
+                          type="button"
+                          onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
+                          className={`rounded-sm border px-3 py-2 text-left text-[13px] transition-colors ${
+                            selected
+                              ? "border-brand bg-brand-light font-bold text-brand"
+                              : "border-line text-ink hover:border-ink"
+                          }`}
+                        >
+                          <span>{v.label}</span>
+                          {optionPrice > 0 && (
+                            <span className={`ml-1.5 text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
+                              {optionPrice.toLocaleString()}원
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
 
           {isPaper && (
             <div className="mb-5">
@@ -281,6 +284,10 @@ export function ProductDetailClient({ product }: Props) {
                 50쪽 이하 / 51~100쪽 / 101쪽 이상 구간으로 단가 적용
               </p>
             </div>
+          )}
+
+          {product.optionGroups.length === 0 && !isPaper && (
+            <div className="my-6 border-t border-line" />
           )}
 
           <div className="mb-6">
