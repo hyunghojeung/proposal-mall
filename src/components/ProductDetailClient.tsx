@@ -218,6 +218,11 @@ export function ProductDetailClient({ product }: Props) {
               {product.description}
             </p>
           )}
+          {product.basePrice > 0 && (
+            <p className="mt-3 text-[22px] font-black tracking-tight text-ink">
+              {product.basePrice.toLocaleString()}원
+            </p>
+          )}
 
           {product.optionGroups.length > 0 && (
             <>
@@ -275,16 +280,6 @@ export function ProductDetailClient({ product }: Props) {
 
           {/* 가격 영역: 기본단가 → 옵션 → 수량 → 합계 */}
           <div className="mt-6 overflow-hidden rounded border border-line">
-
-            {/* 기본 단가 */}
-            {product.basePrice > 0 && (
-              <div className="flex items-center justify-between border-b border-line px-4 py-3">
-                <span className="text-[13px] text-ink-sub">기본 단가</span>
-                <span className="text-[14px] font-medium text-ink">
-                  {product.basePrice.toLocaleString()}원
-                </span>
-              </div>
-            )}
 
             {/* 선택된 옵션별 단가 */}
             {product.optionGroups.map((g) => {
