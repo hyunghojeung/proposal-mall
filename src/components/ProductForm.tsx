@@ -545,7 +545,7 @@ export function ProductForm({
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
             />
             <p className="mt-1 text-[11px] text-ink-sub">
-              단가표에 등록되지 않은 상품은 이 단가를 기준으로 계산됩니다. 옵션별 추가 단가는 아래 옵션 그룹에서 입력하세요.
+              단가표가 없을 때 기준 단가. 옵션에도 단가를 입력하면 합산됩니다 (기본 단가 + 옵션 단가).
             </p>
           </Field>
           <Field label="간단 설명 (상품명 아래 표시)" className="sm:col-span-2">
@@ -628,21 +628,28 @@ export function ProductForm({
                     그룹 삭제
                   </button>
                 </div>
-                <div className="mt-3 space-y-1.5 border-t border-line pt-3">
+                <div className="mt-3 border-t border-line pt-3">
+                  {/* 컬럼 헤더 */}
+                  <div className="mb-1 grid gap-2 sm:grid-cols-[2fr_1fr_auto]">
+                    <span className="text-[11px] font-bold text-ink-sub">옵션명</span>
+                    <span className="text-[11px] font-bold text-ink-sub">단가 (원)</span>
+                    <span />
+                  </div>
+                  <div className="space-y-1.5">
                   {g.values.map((val, vi) => (
                     <div key={vi} className="grid gap-2 sm:grid-cols-[2fr_1fr_auto] sm:items-center">
                       <input
                         value={val.label}
                         onChange={(e) => setValue(gi, vi, { label: e.target.value })}
-                        placeholder="라벨 (예: A4, 인쇄형)"
+                        placeholder="A4, 인쇄형, 소형 …"
                         className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
                       />
                       <input
                         type="number"
+                        min={0}
                         value={val.priceDelta}
-                        onChange={(e) => setValue(gi, vi, { priceDelta: Number(e.target.value) || 0 })}
-                        placeholder="추가 단가 (원)"
-                        title="기본 단가에 더해지는 옵션별 추가 금액"
+                        onChange={(e) => setValue(gi, vi, { priceDelta: Math.max(0, Number(e.target.value) || 0) })}
+                        placeholder="0"
                         className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
                       />
                       <button
@@ -654,6 +661,7 @@ export function ProductForm({
                       </button>
                     </div>
                   ))}
+                  </div>
                   <button
                     type="button"
                     onClick={() => addValue(gi)}
