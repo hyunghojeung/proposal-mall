@@ -92,67 +92,147 @@ function ImageGallery({
   images: string[];
   onChange: (imgs: string[]) => void;
 }) {
+  const [draggingOver, setDraggingOver] = useState(false);
   const upload = useImageUpload((url) => onChange([...images, url]));
+
+  function setRepresentative(i: number) {
+    if (i === 0) return;
+    const next = [...images];
+    const [picked] = next.splice(i, 1);
+    next.unshift(picked);
+    onChange(next);
+  }
+
+  function removeImage(i: number) {
+    onChange(images.filter((_, j) => j !== i));
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    if (images.length < 5) setDraggingOver(true);
+  }
+
+  function handleDragLeave() {
+    setDraggingOver(false);
+  }
+
+  async function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDraggingOver(false);
+    const files = Array.from(e.dataTransfer.files).filter((f) =>
+      ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type),
+    );
+    const available = 5 - images.length;
+    const newUrls: string[] = [];
+    for (const file of files.slice(0, available)) {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      if (res.ok) {
+        const d = (await res.json()) as { url: string };
+        newUrls.push(d.url);
+      }
+    }
+    if (newUrls.length > 0) onChange([...images, ...newUrls]);
+  }
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3">
+      {/* 드래그앤드롭 존 */}
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`mb-3 flex min-h-[60px] flex-wrap gap-3 rounded border-2 border-dashed p-3 transition-colors ${
+          draggingOver ? "border-brand bg-brand-light" : "border-line"
+        }`}
+      >
+        {images.length === 0 && !draggingOver && (
+          <p className="flex w-full items-center justify-center text-[12px] text-ink-sub">
+            이미지를 여기에 드래그하거나 아래 버튼으로 추가하세요
+          </p>
+        )}
+        {draggingOver && (
+          <p className="flex w-full items-center justify-center text-[12px] font-bold text-brand">
+            여기에 놓으세요
+          </p>
+        )}
+
         {images.map((url, i) => (
-          <div key={i} className="group relative">
+          <div key={url} className="group relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={url}
               alt={`상품 이미지 ${i + 1}`}
-              className="h-24 w-24 rounded-sm border border-line object-cover"
+              className={`h-24 w-24 rounded-sm object-cover transition-all ${
+                i === 0 ? "border-2 border-brand" : "border border-line"
+              }`}
             />
+            {/* 대표 뱃지 */}
             {i === 0 && (
               <span className="absolute left-0 top-0 rounded-br-sm rounded-tl-sm bg-brand px-1.5 py-0.5 text-[10px] font-bold text-white">
                 대표
               </span>
             )}
-            <button
-              type="button"
-              onClick={() => onChange(images.filter((_, j) => j !== i))}
-              className="absolute right-0 top-0 hidden rounded-bl-sm rounded-tr-sm bg-black/60 px-1.5 py-0.5 text-[11px] text-white group-hover:block"
-            >
-              ×
-            </button>
+            {/* 호버 오버레이 */}
+            <div className="absolute inset-0 hidden rounded-sm bg-black/50 group-hover:flex flex-col items-center justify-center gap-1">
+              {i !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => setRepresentative(i)}
+                  className="rounded bg-brand px-2 py-0.5 text-[10px] font-bold text-white hover:bg-brand-dark"
+                >
+                  대표 설정
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => removeImage(i)}
+                className="rounded bg-black/70 px-2 py-0.5 text-[10px] text-white hover:bg-black"
+              >
+                삭제
+              </button>
+            </div>
           </div>
         ))}
+      </div>
 
+      <div className="flex items-center gap-3">
         {images.length < 5 && (
           <button
             type="button"
             onClick={upload.triggerPick}
             disabled={upload.uploading}
-            className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-sm border border-dashed border-line text-[12px] text-ink-sub hover:border-brand hover:text-brand disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-sm border border-line px-3 py-1.5 text-[12px] text-ink-sub hover:border-brand hover:text-brand disabled:opacity-50"
           >
             {upload.uploading ? (
-              <span>업로드 중…</span>
+              "업로드 중…"
             ) : (
               <>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 16V8m0 0-3 3m3-3 3 3" strokeLinecap="round" strokeLinejoin="round" />
                   <rect x="3" y="3" width="18" height="18" rx="3" />
                 </svg>
-                <span>이미지 추가</span>
+                이미지 추가 ({images.length}/5)
               </>
             )}
           </button>
         )}
+        {upload.uploadErr && (
+          <p className="text-[12px] text-brand">{upload.uploadErr}</p>
+        )}
       </div>
-      {upload.uploadErr && (
-        <p className="mt-1.5 text-[12px] text-brand">{upload.uploadErr}</p>
-      )}
+
       <input
         ref={upload.inputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp,image/gif"
+        multiple
         className="hidden"
         onChange={upload.handleChange}
       />
       <p className="mt-2 text-[11px] text-ink-sub">
-        최대 5장 · JPG/PNG/WEBP · 10MB 이하 · 첫 번째 이미지가 대표 이미지
+        최대 5장 · JPG/PNG/WEBP · 10MB 이하 · 이미지 위에 커서를 올리면 대표 설정 / 삭제 버튼이 나타납니다
       </p>
     </div>
   );

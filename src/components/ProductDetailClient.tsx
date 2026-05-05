@@ -49,7 +49,7 @@ function ImageGallery({ images }: { images: string[] }) {
 
   if (images.length === 0) {
     return (
-      <div className="aspect-[4/5] w-full rounded border border-line bg-bg flex items-center justify-center">
+      <div className="w-full rounded border border-line bg-bg flex items-center justify-center" style={{ height: 420 }}>
         <span className="text-[13px] text-ink-sub">이미지 없음</span>
       </div>
     );
@@ -57,8 +57,8 @@ function ImageGallery({ images }: { images: string[] }) {
 
   return (
     <div>
-      {/* 메인 이미지 */}
-      <div className="aspect-[4/5] w-full overflow-hidden rounded border border-line bg-bg">
+      {/* 메인 이미지 — 고정 높이로 오른쪽 옵션 영역과 균형 맞춤 */}
+      <div className="w-full overflow-hidden rounded border border-line bg-bg" style={{ height: 420 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={images[active]}
