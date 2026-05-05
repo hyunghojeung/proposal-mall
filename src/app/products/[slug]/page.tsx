@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { ProductDetailClient } from "@/components/ProductDetailClient";
+import type { ContentBlock } from "@/components/ProductForm";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +60,8 @@ export default async function ProductDetailPage({
             name: product.name,
             category: product.category,
             description: product.description,
+            images: product.images ?? [],
+            contentBlocks: (product.contentBlocks as ContentBlock[]) ?? [],
             optionGroups: product.optionGroups.map((g) => ({
               id: g.id,
               name: g.name,

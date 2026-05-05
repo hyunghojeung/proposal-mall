@@ -65,8 +65,9 @@ model Product {
   paper       PaperType       @default(NONE)
   description String?
   thumbnail   String?
-  images      String[]        @default([])
-  isActive    Boolean         @default(true)
+  images        String[]        @default([])
+  contentBlocks Json            @default("[]")
+  isActive      Boolean         @default(true)
   sortOrder   Int             @default(0)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt

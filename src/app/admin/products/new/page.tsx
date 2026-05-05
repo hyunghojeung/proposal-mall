@@ -21,6 +21,8 @@ export default function AdminProductNewPage() {
           paper: PaperType.NONE,
           description: "",
           thumbnail: "",
+          images: [],
+          contentBlocks: [],
           sortOrder: 0,
           isActive: true,
           optionGroups: [],

@@ -19,6 +19,11 @@ const optionGroupSchema = z.object({
   values: z.array(optionValueSchema).default([]),
 });
 
+const contentBlockSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("text"), content: z.string().max(5000) }),
+  z.object({ type: z.literal("image"), url: z.string().url(), caption: z.string().max(200).default("") }),
+]);
+
 const createSchema = z.object({
   slug: z
     .string()
@@ -30,7 +35,9 @@ const createSchema = z.object({
   binding: z.nativeEnum(BindingType).default(BindingType.NONE),
   paper: z.nativeEnum(PaperType).default(PaperType.NONE),
   description: z.string().max(2000).optional(),
-  thumbnail: z.string().url().optional().or(z.literal("")),
+  thumbnail: z.string().url().optional().or(z.literal("")).optional(),
+  images: z.array(z.string().url()).default([]),
+  contentBlocks: z.array(contentBlockSchema).default([]),
   sortOrder: z.number().int().default(0),
   isActive: z.boolean().default(true),
   optionGroups: z.array(optionGroupSchema).default([]),
@@ -46,12 +53,15 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
-  const { optionGroups, thumbnail, ...rest } = parsed.data;
+  const { optionGroups, thumbnail, images, contentBlocks, ...rest } = parsed.data;
+  const derivedThumbnail = images[0] ?? thumbnail ?? null;
   try {
     const product = await prisma.product.create({
       data: {
         ...rest,
-        thumbnail: thumbnail || null,
+        thumbnail: derivedThumbnail || null,
+        images,
+        contentBlocks,
         optionGroups: {
           create: optionGroups.map((g, i) => ({
             name: g.name,

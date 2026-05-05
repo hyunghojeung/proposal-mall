@@ -1,8 +1,12 @@
 "use client";
 
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
 import { ProductCategory, BindingType, PaperType } from "@prisma/client";
+
+export type ContentBlock =
+  | { type: "text"; content: string }
+  | { type: "image"; url: string; caption: string };
 
 export interface ProductFormValue {
   id?: number;
@@ -13,6 +17,8 @@ export interface ProductFormValue {
   paper: PaperType;
   description: string;
   thumbnail: string;
+  images: string[];
+  contentBlocks: ContentBlock[];
   sortOrder: number;
   isActive: boolean;
   optionGroups: {
@@ -45,6 +51,222 @@ const PAPER_OPTIONS: { value: PaperType; label: string }[] = [
   { value: "TEXTURE", label: "질감용지" },
 ];
 
+// ── 이미지 업로드 훅 ──────────────────────────────────────────
+function useImageUpload(onDone: (url: string) => void) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function triggerPick() {
+    setUploadErr(null);
+    inputRef.current?.click();
+  }
+
+  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setUploading(true);
+    setUploadErr(null);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+    setUploading(false);
+    if (!res.ok) {
+      const d = (await res.json().catch(() => null)) as { error?: string } | null;
+      setUploadErr(d?.error ?? "업로드 실패");
+      return;
+    }
+    const d = (await res.json()) as { url: string };
+    onDone(d.url);
+  }
+
+  return { uploading, uploadErr, inputRef, triggerPick, handleChange };
+}
+
+// ── 이미지 갤러리 섹션 ───────────────────────────────────────
+function ImageGallery({
+  images,
+  onChange,
+}: {
+  images: string[];
+  onChange: (imgs: string[]) => void;
+}) {
+  const upload = useImageUpload((url) => onChange([...images, url]));
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-3">
+        {images.map((url, i) => (
+          <div key={i} className="group relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={url}
+              alt={`상품 이미지 ${i + 1}`}
+              className="h-24 w-24 rounded-sm border border-line object-cover"
+            />
+            {i === 0 && (
+              <span className="absolute left-0 top-0 rounded-br-sm rounded-tl-sm bg-brand px-1.5 py-0.5 text-[10px] font-bold text-white">
+                대표
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={() => onChange(images.filter((_, j) => j !== i))}
+              className="absolute right-0 top-0 hidden rounded-bl-sm rounded-tr-sm bg-black/60 px-1.5 py-0.5 text-[11px] text-white group-hover:block"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+
+        {images.length < 5 && (
+          <button
+            type="button"
+            onClick={upload.triggerPick}
+            disabled={upload.uploading}
+            className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-sm border border-dashed border-line text-[12px] text-ink-sub hover:border-brand hover:text-brand disabled:opacity-50"
+          >
+            {upload.uploading ? (
+              <span>업로드 중…</span>
+            ) : (
+              <>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 16V8m0 0-3 3m3-3 3 3" strokeLinecap="round" strokeLinejoin="round" />
+                  <rect x="3" y="3" width="18" height="18" rx="3" />
+                </svg>
+                <span>이미지 추가</span>
+              </>
+            )}
+          </button>
+        )}
+      </div>
+      {upload.uploadErr && (
+        <p className="mt-1.5 text-[12px] text-brand">{upload.uploadErr}</p>
+      )}
+      <input
+        ref={upload.inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={upload.handleChange}
+      />
+      <p className="mt-2 text-[11px] text-ink-sub">
+        최대 5장 · JPG/PNG/WEBP · 10MB 이하 · 첫 번째 이미지가 대표 이미지
+      </p>
+    </div>
+  );
+}
+
+// ── 콘텐츠 블록 에디터 ───────────────────────────────────────
+function ContentBlockEditor({
+  blocks,
+  onChange,
+}: {
+  blocks: ContentBlock[];
+  onChange: (b: ContentBlock[]) => void;
+}) {
+  const imgUpload = useImageUpload((url) =>
+    onChange([...blocks, { type: "image", url, caption: "" }])
+  );
+
+  function updateBlock(i: number, patch: Partial<ContentBlock>) {
+    const next = [...blocks];
+    next[i] = { ...next[i], ...patch } as ContentBlock;
+    onChange(next);
+  }
+
+  function removeBlock(i: number) {
+    onChange(blocks.filter((_, j) => j !== i));
+  }
+
+  function moveBlock(i: number, dir: -1 | 1) {
+    const next = [...blocks];
+    const j = i + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  }
+
+  return (
+    <div className="space-y-3">
+      {blocks.map((block, i) => (
+        <div key={i} className="rounded border border-line p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[11px] font-bold text-ink-sub uppercase">
+              {block.type === "text" ? "텍스트" : "이미지"}
+            </span>
+            <div className="flex gap-1">
+              <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0}
+                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">
+                ↑
+              </button>
+              <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}
+                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">
+                ↓
+              </button>
+              <button type="button" onClick={() => removeBlock(i)}
+                className="rounded px-1.5 py-0.5 text-[12px] text-brand hover:underline">
+                삭제
+              </button>
+            </div>
+          </div>
+
+          {block.type === "text" ? (
+            <textarea
+              value={block.content}
+              onChange={(e) => updateBlock(i, { content: e.target.value })}
+              rows={4}
+              placeholder="본문 텍스트를 입력하세요"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+            />
+          ) : (
+            <div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={block.url} alt={block.caption || "상품 이미지"} className="mb-2 max-h-60 rounded-sm object-contain" />
+              <input
+                value={block.caption}
+                onChange={(e) => updateBlock(i, { caption: e.target.value })}
+                placeholder="이미지 캡션 (선택)"
+                className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[12px] outline-none focus:border-brand"
+              />
+            </div>
+          )}
+        </div>
+      ))}
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => onChange([...blocks, { type: "text", content: "" }])}
+          className="rounded-sm border border-line px-3 py-1.5 text-[12px] text-ink-sub hover:border-ink hover:text-ink"
+        >
+          + 텍스트 블록 추가
+        </button>
+        <button
+          type="button"
+          onClick={imgUpload.triggerPick}
+          disabled={imgUpload.uploading}
+          className="rounded-sm border border-line px-3 py-1.5 text-[12px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50"
+        >
+          {imgUpload.uploading ? "업로드 중…" : "+ 이미지 블록 추가"}
+        </button>
+      </div>
+      {imgUpload.uploadErr && (
+        <p className="text-[12px] text-brand">{imgUpload.uploadErr}</p>
+      )}
+      <input
+        ref={imgUpload.inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+        onChange={imgUpload.handleChange}
+      />
+    </div>
+  );
+}
+
+// ── 메인 폼 ──────────────────────────────────────────────────
 export function ProductForm({
   initial,
   mode,
@@ -58,35 +280,39 @@ export function ProductForm({
   const [pending, start] = useTransition();
 
   function set<K extends keyof ProductFormValue>(key: K, value: ProductFormValue[K]) {
-    setV({ ...v, [key]: value });
+    setV((prev) => ({ ...prev, [key]: value }));
   }
 
   function setGroup(idx: number, patch: Partial<ProductFormValue["optionGroups"][number]>) {
     const next = [...v.optionGroups];
     next[idx] = { ...next[idx], ...patch };
-    setV({ ...v, optionGroups: next });
+    setV((prev) => ({ ...prev, optionGroups: next }));
   }
 
   function addGroup() {
-    setV({
-      ...v,
+    setV((prev) => ({
+      ...prev,
       optionGroups: [
-        ...v.optionGroups,
-        { name: "", required: true, sortOrder: v.optionGroups.length, values: [] },
+        ...prev.optionGroups,
+        { name: "", required: true, sortOrder: prev.optionGroups.length, values: [] },
       ],
-    });
+    }));
   }
 
   function removeGroup(idx: number) {
-    setV({ ...v, optionGroups: v.optionGroups.filter((_, i) => i !== idx) });
+    setV((prev) => ({ ...prev, optionGroups: prev.optionGroups.filter((_, i) => i !== idx) }));
   }
 
-  function setValue(gIdx: number, vIdx: number, patch: Partial<{ label: string; priceDelta: number; sortOrder: number }>) {
+  function setValue(
+    gIdx: number,
+    vIdx: number,
+    patch: Partial<{ label: string; priceDelta: number; sortOrder: number }>,
+  ) {
     const next = [...v.optionGroups];
     const values = [...next[gIdx].values];
     values[vIdx] = { ...values[vIdx], ...patch };
     next[gIdx] = { ...next[gIdx], values };
-    setV({ ...v, optionGroups: next });
+    setV((prev) => ({ ...prev, optionGroups: next }));
   }
 
   function addValue(gIdx: number) {
@@ -98,32 +324,27 @@ export function ProductForm({
         { label: "", priceDelta: 0, sortOrder: next[gIdx].values.length },
       ],
     };
-    setV({ ...v, optionGroups: next });
+    setV((prev) => ({ ...prev, optionGroups: next }));
   }
 
   function removeValue(gIdx: number, vIdx: number) {
     const next = [...v.optionGroups];
-    next[gIdx] = {
-      ...next[gIdx],
-      values: next[gIdx].values.filter((_, i) => i !== vIdx),
-    };
-    setV({ ...v, optionGroups: next });
+    next[gIdx] = { ...next[gIdx], values: next[gIdx].values.filter((_, i) => i !== vIdx) };
+    setV((prev) => ({ ...prev, optionGroups: next }));
   }
 
   function submit() {
     setErr(null);
     start(async () => {
-      const url =
-        mode === "create" ? "/api/admin/products" : `/api/admin/products/${v.id}`;
+      const url = mode === "create" ? "/api/admin/products" : `/api/admin/products/${v.id}`;
       const method = mode === "create" ? "POST" : "PATCH";
-      const payload = {
-        ...v,
-        thumbnail: v.thumbnail || undefined,
-      };
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...v,
+          thumbnail: v.images[0] ?? v.thumbnail ?? undefined,
+        }),
       });
       if (!res.ok) {
         const data = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -137,6 +358,7 @@ export function ProductForm({
 
   return (
     <div className="space-y-6">
+      {/* 기본 정보 */}
       <section className="rounded border border-line p-5">
         <h2 className="mb-4 text-[14px] font-bold text-ink">기본 정보</h2>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -145,7 +367,7 @@ export function ProductForm({
               value={v.slug}
               onChange={(e) => set("slug", e.target.value)}
               disabled={mode === "edit"}
-              placeholder="binding-3-ring"
+              placeholder="carrier-box"
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand disabled:bg-bg"
             />
           </Field>
@@ -175,31 +397,14 @@ export function ProductForm({
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
             />
           </Field>
-          <Field label="썸네일 URL (선택)" className="sm:col-span-2">
+          <Field label="간단 설명 (상품명 아래 표시)" className="sm:col-span-2">
             <input
-              value={v.thumbnail}
-              onChange={(e) => set("thumbnail", e.target.value)}
-              placeholder="https://..."
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
-            />
-          </Field>
-          <Field label="설명" className="sm:col-span-2">
-            <textarea
               value={v.description}
               onChange={(e) => set("description", e.target.value)}
-              rows={3}
+              placeholder="한 줄 소개 문구"
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
             />
           </Field>
-          {/* 숨김 필드 — 값은 유지, UI에서만 비표시 */}
-          <div className="hidden">
-            <select value={v.binding} onChange={(e) => set("binding", e.target.value as BindingType)}>
-              {BINDING_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-            <select value={v.paper} onChange={(e) => set("paper", e.target.value as PaperType)}>
-              {PAPER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
         </div>
         <label className="mt-3 flex items-center gap-2 text-[13px]">
           <input
@@ -210,8 +415,24 @@ export function ProductForm({
           />
           사이트에 노출
         </label>
+        {/* 숨김 필드 — 값 유지 */}
+        <div className="hidden">
+          <select value={v.binding} onChange={(e) => set("binding", e.target.value as BindingType)}>
+            {BINDING_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+          <select value={v.paper} onChange={(e) => set("paper", e.target.value as PaperType)}>
+            {PAPER_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
       </section>
 
+      {/* 상품 이미지 */}
+      <section className="rounded border border-line p-5">
+        <h2 className="mb-4 text-[14px] font-bold text-ink">상품 이미지</h2>
+        <ImageGallery images={v.images} onChange={(imgs) => set("images", imgs)} />
+      </section>
+
+      {/* 옵션 그룹 */}
       <section className="rounded border border-line p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-[14px] font-bold text-ink">옵션 그룹</h2>
@@ -223,10 +444,9 @@ export function ProductForm({
             + 그룹 추가
           </button>
         </div>
-
         {v.optionGroups.length === 0 ? (
           <p className="rounded border border-dashed border-line bg-bg px-4 py-8 text-center text-[12px] text-ink-sub">
-            옵션 그룹이 없습니다. 박스/제본은 사이즈·형태가 옵션, 내지는 용지가 옵션입니다.
+            옵션 그룹이 없습니다.
           </p>
         ) : (
           <div className="space-y-4">
@@ -257,7 +477,6 @@ export function ProductForm({
                     그룹 삭제
                   </button>
                 </div>
-
                 <div className="mt-3 space-y-1.5 border-t border-line pt-3">
                   {g.values.map((val, vi) => (
                     <div key={vi} className="grid gap-2 sm:grid-cols-[2fr_1fr_auto] sm:items-center">
@@ -270,9 +489,7 @@ export function ProductForm({
                       <input
                         type="number"
                         value={val.priceDelta}
-                        onChange={(e) =>
-                          setValue(gi, vi, { priceDelta: Number(e.target.value) || 0 })
-                        }
+                        onChange={(e) => setValue(gi, vi, { priceDelta: Number(e.target.value) || 0 })}
                         placeholder="가격 가산 (원)"
                         className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
                       />
@@ -297,6 +514,18 @@ export function ProductForm({
             ))}
           </div>
         )}
+      </section>
+
+      {/* 상품 상세 내용 */}
+      <section className="rounded border border-line p-5">
+        <h2 className="mb-1 text-[14px] font-bold text-ink">상품 상세 내용</h2>
+        <p className="mb-4 text-[12px] text-ink-sub">
+          상품 페이지 하단에 표시됩니다. 텍스트와 이미지를 자유롭게 조합하세요.
+        </p>
+        <ContentBlockEditor
+          blocks={v.contentBlocks}
+          onChange={(b) => set("contentBlocks", b)}
+        />
       </section>
 
       {err && <p className="text-[13px] font-medium text-brand">{err}</p>}
