@@ -70,8 +70,8 @@ export async function uploadProductImage(opts: {
     return `https://placehold.co/800x1000/f5f5f5/888888?text=${encodeURIComponent(opts.filename)}`;
   }
 
-  const folder = process.env.DROPBOX_DEST_FOLDER?.replace(/\/$/, "") ?? "/proposal-mall-orders";
-  const destPath = `${folder}/product-images/${Date.now()}_${opts.filename.replace(/\s+/g, "_")}`;
+  const folder = (process.env.DROPBOX_PRODUCT_FOLDER ?? "/proposal-mall-products").replace(/\/$/, "");
+  const destPath = `${folder}/${Date.now()}_${opts.filename.replace(/\s+/g, "_")}`;
 
   const token = await getAccessToken();
 
