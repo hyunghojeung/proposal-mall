@@ -218,11 +218,6 @@ export function ProductDetailClient({ product }: Props) {
               {product.description}
             </p>
           )}
-          {product.basePrice > 0 && (
-            <p className="mt-2 text-[15px] font-bold text-ink">
-              {product.basePrice.toLocaleString()}원~
-            </p>
-          )}
 
           {product.optionGroups.length > 0 && (
             <>
