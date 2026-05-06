@@ -43,17 +43,21 @@ export default function Home() {
       <Header />
 
       <section className="relative flex min-h-[480px] items-center overflow-hidden bg-bg">
-        <div
-          className="absolute bottom-0 right-0 top-0 w-[68%]"
-          style={{
-            background: "linear-gradient(145deg, #ddd8d3, #c8c0b8)",
-          }}
-        />
+        {/* 히어로 이미지 */}
+        <div className="absolute bottom-0 right-0 top-0 w-[62%]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/hero-box.png"
+            alt="제안서 캐리어박스"
+            className="h-full w-full object-cover object-left-top"
+          />
+        </div>
+        {/* 텍스트 가독성을 위한 왼쪽 페이드 오버레이 */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to right, #F5F5F5 0%, #F5F5F5 28%, rgba(245,245,245,.95) 38%, rgba(245,245,245,.7) 50%, rgba(245,245,245,.2) 65%, transparent 80%)",
+              "linear-gradient(to right, #F5F5F5 0%, #F5F5F5 30%, rgba(245,245,245,.95) 40%, rgba(245,245,245,.7) 52%, rgba(245,245,245,.2) 66%, transparent 80%)",
           }}
         />
         <div className="relative z-10 mx-auto w-full max-w-page px-6 py-20">
