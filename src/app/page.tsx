@@ -43,8 +43,8 @@ export default function Home() {
       <Header />
 
       <section className="relative flex min-h-[480px] items-center overflow-hidden bg-bg">
-        {/* 히어로 이미지 */}
-        <div className="absolute bottom-0 right-0 top-0 w-[62%]">
+        {/* 히어로 이미지 — 200px 위로 이동 */}
+        <div className="absolute bottom-0 right-0 w-[62%]" style={{ top: "-200px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/hero-box.png"
