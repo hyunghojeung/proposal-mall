@@ -44,7 +44,7 @@ export default function Home() {
 
       <section className="relative flex min-h-[480px] items-center overflow-hidden bg-bg">
         {/* 히어로 이미지 — 200px 위로 이동 */}
-        <div className="absolute bottom-0 right-0 w-[62%]" style={{ top: "-200px" }}>
+        <div className="absolute bottom-0 right-0 w-[75%]" style={{ top: "-200px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/hero-box.png"
@@ -52,12 +52,12 @@ export default function Home() {
             className="h-full w-full object-cover object-left-top"
           />
         </div>
-        {/* 텍스트 가독성을 위한 왼쪽 페이드 오버레이 */}
+        {/* 텍스트 가독성 + 이미지 경계 자연스럽게 연결 */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to right, #F5F5F5 0%, #F5F5F5 30%, rgba(245,245,245,.95) 40%, rgba(245,245,245,.7) 52%, rgba(245,245,245,.2) 66%, transparent 80%)",
+              "linear-gradient(to right, #F5F5F5 0%, #F5F5F5 28%, rgba(245,245,245,0.98) 36%, rgba(245,245,245,0.85) 45%, rgba(245,245,245,0.5) 55%, rgba(245,245,245,0.15) 68%, transparent 82%)",
           }}
         />
         <div className="relative z-10 mx-auto w-full max-w-page px-6 py-20">
