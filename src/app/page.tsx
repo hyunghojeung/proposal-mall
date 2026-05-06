@@ -57,7 +57,7 @@ export default function Home() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to right, #F5F5F5 0%, #F5F5F5 28%, rgba(245,245,245,0.98) 36%, rgba(245,245,245,0.85) 45%, rgba(245,245,245,0.5) 55%, rgba(245,245,245,0.15) 68%, transparent 82%)",
+              "linear-gradient(to right, #F5F5F5 0%, #F5F5F5 42%, rgba(245,245,245,0.92) 52%, rgba(245,245,245,0.6) 62%, rgba(245,245,245,0.2) 74%, transparent 88%)",
           }}
         />
         <div className="relative z-10 mx-auto w-full max-w-page px-6 py-20">
