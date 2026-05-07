@@ -8,7 +8,7 @@ import {
   readCart,
   subscribeCart,
 } from "@/lib/cart";
-import { shippingFee, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
+import { shippingFee, type DeliveryMethod } from "@/lib/pricing";
 
 interface CheckoutResp {
   order?: { serial: string; totalAmount: number };
@@ -21,6 +21,18 @@ interface CheckoutResp {
   error?: string;
 }
 
+type PaymentMethod = "CARD" | "TRANSFER";
+
+const DELIVERY_OPTIONS: { value: DeliveryMethod; label: string }[] = [
+  { value: "COURIER_PREPAID", label: "택배선불" },
+  { value: "COURIER_COLLECT", label: "택배착불" },
+  { value: "QUICK_COLLECT",   label: "퀵(착불)" },
+  { value: "PICKUP",          label: "직접수령" },
+];
+
+const needsAddress = (m: DeliveryMethod) =>
+  m === "COURIER_PREPAID" || m === "COURIER_COLLECT" || m === "QUICK_COLLECT";
+
 export function CheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,12 +41,25 @@ export function CheckoutForm() {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
+  // 주문자 정보
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [company, setCompany] = useState("");
+
+  // 배송 정보
+  const [sameAsOrderer, setSameAsOrderer] = useState(false);
+  const [recipientName, setRecipientName] = useState("");
+  const [recipientPhone, setRecipientPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [addressDetail, setAddressDetail] = useState("");
+  const [shippingMemo, setShippingMemo] = useState("");
+
+  // 배송방법 / 결제방법
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("COURIER_PREPAID");
-  const [shippingAddress, setShippingAddress] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CARD");
+
+  // 주문 요청사항
   const [memo, setMemo] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
@@ -46,22 +71,49 @@ export function CheckoutForm() {
     return subscribeCart(() => setItems(readCart()));
   }, []);
 
+  // 주문자 정보와 동일 체크 시 복사
+  useEffect(() => {
+    if (sameAsOrderer) {
+      setRecipientName(customerName);
+      setRecipientPhone(customerPhone);
+    }
+  }, [sameAsOrderer, customerName, customerPhone]);
+
   const subtotal = useMemo(() => cartSubtotal(items), [items]);
   const fee = shippingFee(subtotal, deliveryMethod);
   const total = subtotal + fee;
 
+  // 다음 주소 검색 (카카오 Postcode API)
+  function handleAddressSearch() {
+    if (typeof window === "undefined") return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const daum = (window as any).daum;
+    if (daum?.Postcode) {
+      new daum.Postcode({
+        oncomplete: (data: { address: string; buildingName?: string }) => {
+          setAddress(data.address + (data.buildingName ? ` (${data.buildingName})` : ""));
+        },
+      }).open();
+    } else {
+      // API 미로드 시 직접 입력 안내
+      alert("주소를 직접 입력해 주세요.");
+    }
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (items.length === 0) {
-      setErr("장바구니가 비어 있습니다.");
-      return;
-    }
+    if (items.length === 0) { setErr("장바구니가 비어 있습니다."); return; }
     setSubmitting(true);
     setErr(null);
+
+    const shippingAddress = needsAddress(deliveryMethod)
+      ? [address, addressDetail].filter(Boolean).join(" ")
+      : undefined;
 
     try {
       const res = await fetch("/api/orders/checkout", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerName,
@@ -69,8 +121,13 @@ export function CheckoutForm() {
           customerEmail,
           company: company || undefined,
           deliveryMethod,
-          shippingAddress: (deliveryMethod === "COURIER_PREPAID" || deliveryMethod === "COURIER_COLLECT") ? shippingAddress : undefined,
-          memo: memo || undefined,
+          shippingAddress,
+          memo: [
+            recipientName !== customerName ? `받는분: ${recipientName} ${recipientPhone}` : "",
+            shippingMemo ? `배송 메모: ${shippingMemo}` : "",
+            `결제방법: ${paymentMethod === "CARD" ? "카드결제" : "무통장입금"}`,
+            memo || "",
+          ].filter(Boolean).join("\n") || undefined,
           items: items.map((it) => ({
             slug: it.slug,
             options: it.options,
@@ -80,59 +137,32 @@ export function CheckoutForm() {
         }),
       });
       const data = (await res.json()) as CheckoutResp;
-      if (!res.ok) {
-        setErr(data.error ?? "결제 요청 실패");
-        setSubmitting(false);
-        return;
-      }
+      if (!res.ok) { setErr(data.error ?? "결제 요청 실패"); setSubmitting(false); return; }
       const payment = data.payment;
-      if (!payment) {
-        setErr("결제 정보가 없습니다");
-        setSubmitting(false);
-        return;
-      }
-      if (payment.testCompletedUrl) {
-        // stub: 즉시 성공 URL로 이동
-        window.location.href = payment.testCompletedUrl;
-        return;
-      }
-      if (payment.redirectUrl) {
-        window.location.href = payment.redirectUrl;
-        return;
-      }
+      if (!payment) { setErr("결제 정보가 없습니다"); setSubmitting(false); return; }
+      if (payment.testCompletedUrl) { window.location.href = payment.testCompletedUrl; return; }
+      if (payment.redirectUrl) { window.location.href = payment.redirectUrl; return; }
       if (payment.formAction) {
-        // POST 자동 제출 폼 생성
         const form = document.createElement("form");
         form.action = payment.formAction.url;
         form.method = payment.formAction.method;
         for (const [k, v] of Object.entries(payment.formAction.fields)) {
           const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = k;
-          input.value = v;
+          input.type = "hidden"; input.name = k; input.value = v;
           form.appendChild(input);
         }
-        document.body.appendChild(form);
-        form.submit();
-        return;
+        document.body.appendChild(form); form.submit(); return;
       }
-      setErr("결제 응답을 처리할 수 없습니다");
-      setSubmitting(false);
-    } catch {
-      setErr("네트워크 오류");
-      setSubmitting(false);
-    }
+      setErr("결제 응답을 처리할 수 없습니다"); setSubmitting(false);
+    } catch { setErr("네트워크 오류"); setSubmitting(false); }
   }
 
   if (hydrated && items.length === 0) {
     return (
       <div className="py-20 text-center">
         <p className="mb-4 text-[15px] text-ink-sub">장바구니가 비어 결제할 수 없습니다.</p>
-        <button
-          type="button"
-          onClick={() => router.push("/products")}
-          className="rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark"
-        >
+        <button type="button" onClick={() => router.push("/products")}
+          className="rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark">
           상품 둘러보기
         </button>
       </div>
@@ -141,114 +171,153 @@ export function CheckoutForm() {
 
   return (
     <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-      <div className="space-y-7">
+      {/* ── 왼쪽: 입력 섹션 ── */}
+      <div className="space-y-5">
         {failReason && (
           <div className="rounded border border-brand bg-brand-light px-4 py-3 text-[13px] text-brand">
             결제가 완료되지 않았습니다 ({failReason}). 다시 시도해 주세요.
           </div>
         )}
 
-        <fieldset>
-          <legend className="mb-3 text-[15px] font-bold text-ink">주문자 정보</legend>
+        {/* ① 주문자 정보 */}
+        <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} title="주문자 정보">
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="이름" required>
-              <input
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                required
-                maxLength={100}
-                className="w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
-              />
+            <Field label="고객명" required>
+              <input value={customerName} onChange={(e) => setCustomerName(e.target.value)}
+                required maxLength={100} placeholder="홍길동"
+                className={input} />
             </Field>
             <Field label="연락처" required>
-              <input
-                value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                required
-                maxLength={40}
-                placeholder="010-0000-0000"
-                className="w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
-              />
+              <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)}
+                required maxLength={40} placeholder="010-0000-0000"
+                className={input} />
             </Field>
-            <Field label="이메일" required>
-              <input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                required
-                className="w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
-              />
+            <Field label="이메일" required className="sm:col-span-2">
+              <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)}
+                required placeholder="example@email.com"
+                className={input} />
             </Field>
-            <Field label="회사명">
-              <input
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                maxLength={100}
-                className="w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
-              />
+            <Field label="회사명 (선택)" className="sm:col-span-2">
+              <input value={company} onChange={(e) => setCompany(e.target.value)}
+                maxLength={100} placeholder="회사명"
+                className={input} />
             </Field>
           </div>
-        </fieldset>
+        </Card>
 
-        <fieldset>
-          <legend className="mb-3 text-[15px] font-bold text-ink">수령 방식</legend>
-          <div className="grid gap-2">
-            {(
-              [
-                { value: "COURIER_PREPAID", desc: "3,000원 (30,000원↑ 무료)" },
-                { value: "COURIER_COLLECT", desc: "착불 — 수령 시 지불" },
-                { value: "QUICK_PREPAID",   desc: "실비 별도 안내" },
-                { value: "QUICK_COLLECT",   desc: "착불 — 수령 시 지불" },
-                { value: "PICKUP",          desc: "무료" },
-              ] as { value: DeliveryMethod; desc: string }[]
-            ).map(({ value, desc }) => (
-              <label
-                key={value}
-                className={`flex cursor-pointer items-center gap-2 rounded-sm border px-4 py-3 text-[14px] transition-colors hover:border-ink ${
-                  deliveryMethod === value ? "border-brand bg-brand-light" : "border-line"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="delivery"
+        {/* ② 배송 정보 */}
+        <Card
+          icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>}
+          title="배송 정보"
+          extra={
+            <label className="flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-sub">
+              <input type="checkbox" checked={sameAsOrderer}
+                onChange={(e) => setSameAsOrderer(e.target.checked)}
+                className="accent-[#E8481A]" />
+              주문자 정보와 동일
+            </label>
+          }
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="받는분 성함" required>
+              <input value={recipientName} onChange={(e) => setRecipientName(e.target.value)}
+                required maxLength={100} placeholder="홍길동"
+                className={input} />
+            </Field>
+            <Field label="받는분 연락처" required>
+              <input value={recipientPhone} onChange={(e) => setRecipientPhone(e.target.value)}
+                required maxLength={40} placeholder="010-0000-0000"
+                className={input} />
+            </Field>
+          </div>
+          {needsAddress(deliveryMethod) && (
+            <div className="mt-3 space-y-2">
+              <Field label="주소" required>
+                <div className="flex gap-2">
+                  <input value={address} onChange={(e) => setAddress(e.target.value)}
+                    required placeholder="주소 검색 버튼을 클릭하세요"
+                    className={`${input} flex-1`} readOnly onClick={handleAddressSearch} />
+                  <button type="button" onClick={handleAddressSearch}
+                    className="flex shrink-0 items-center gap-1 rounded-sm border border-line px-3 py-2 text-[13px] text-ink-sub hover:border-brand hover:text-brand">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    주소 검색
+                  </button>
+                </div>
+              </Field>
+              <Field label="상세주소">
+                <input value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)}
+                  maxLength={200} placeholder="동, 호수 등 상세주소"
+                  className={input} />
+              </Field>
+            </div>
+          )}
+          <div className="mt-3">
+            <Field label="배송 메모 (선택)">
+              <textarea value={shippingMemo} onChange={(e) => setShippingMemo(e.target.value)}
+                rows={2} maxLength={500} placeholder="배송 시 요청사항 (선택사항)"
+                className={`${input} resize-none`} />
+            </Field>
+          </div>
+        </Card>
+
+        {/* ③ 배송방법 — 가로 심플 라디오 */}
+        <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} title="배송방법">
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {DELIVERY_OPTIONS.map(({ value, label }) => (
+              <label key={value} className="flex cursor-pointer items-center gap-2 text-[14px]">
+                <input type="radio" name="delivery" value={value}
                   checked={deliveryMethod === value}
                   onChange={() => setDeliveryMethod(value)}
-                  className="accent-[#E8481A]"
-                />
-                <span className={`font-medium ${deliveryMethod === value ? "text-brand" : "text-ink"}`}>
-                  {DELIVERY_LABELS[value]}
+                  className="accent-[#E8481A]" />
+                <span className={deliveryMethod === value ? "font-bold text-brand" : "text-ink"}>
+                  {label}
                 </span>
-                <span className="ml-auto text-[12px] text-ink-sub">{desc}</span>
               </label>
             ))}
           </div>
-          {(deliveryMethod === "COURIER_PREPAID" || deliveryMethod === "COURIER_COLLECT") && (
-            <Field label="배송지 주소" required>
-              <textarea
-                value={shippingAddress}
-                onChange={(e) => setShippingAddress(e.target.value)}
-                required
-                rows={2}
-                maxLength={500}
-                className="mt-2 w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
-              />
-            </Field>
-          )}
-        </fieldset>
+        </Card>
 
-        <fieldset>
-          <legend className="mb-3 text-[15px] font-bold text-ink">요청사항 (선택)</legend>
-          <textarea
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
-            rows={3}
-            maxLength={2000}
-            placeholder="세금계산서 정보, 작업 요청사항 등을 적어주세요"
-            className="w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
-          />
-        </fieldset>
+        {/* ④ 결제 방법 */}
+        <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>} title="결제 방법">
+          <div className="space-y-2">
+            {([
+              { value: "CARD",     label: "카드 결제" },
+              { value: "TRANSFER", label: "무통장 입금" },
+            ] as { value: PaymentMethod; label: string }[]).map(({ value, label }) => (
+              <label key={value}
+                className={`flex cursor-pointer items-center gap-3 rounded-sm border px-4 py-3 text-[14px] transition-colors ${
+                  paymentMethod === value ? "border-brand bg-brand-light" : "border-line hover:border-ink"
+                }`}>
+                <input type="radio" name="payment" value={value}
+                  checked={paymentMethod === value}
+                  onChange={() => setPaymentMethod(value)}
+                  className="accent-[#E8481A]" />
+                <span className={paymentMethod === value ? "font-bold text-brand" : "text-ink"}>{label}</span>
+              </label>
+            ))}
+          </div>
+        </Card>
+
+        {/* ⑤ 주문 요청 사항 */}
+        <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>} title="주문 요청 사항">
+          <div className="mb-3 rounded-sm bg-bg px-4 py-3 text-[12px] text-ink-sub space-y-1">
+            <p><span className="font-bold text-ink">※세금계산서 요청</span></p>
+            <p>세금계산서 정보를 여기에 직접 입력하시거나 사업자등록증을 이메일로 첨부해서 보내주세요<br/>
+              (<a href="mailto:blackcopy2@naver.com" className="text-brand underline-offset-2 hover:underline">blackcopy2@naver.com</a>)
+            </p>
+            <p className="mt-2"><span className="font-bold text-ink">※작업시 요청사항</span></p>
+            <p>원단종류/금박색상/구멍뚫기 등 요청사항이 있으면 아래 입력란에 입력해주세요.</p>
+          </div>
+          <textarea value={memo} onChange={(e) => setMemo(e.target.value)}
+            rows={4} maxLength={2000}
+            placeholder="세금계산서 정보, 작업 요청사항 등을 입력해 주세요"
+            className={`${input} resize-none`} />
+        </Card>
       </div>
 
+      {/* ── 오른쪽: 주문 요약 ── */}
       <aside className="rounded border border-line bg-white p-6 lg:sticky lg:top-24 lg:h-fit">
         <h2 className="text-[16px] font-bold text-ink">주문 내역</h2>
 
@@ -262,9 +331,7 @@ export function CheckoutForm() {
                   {it.pageCount ? ` · ${it.pageCount}쪽` : ""} · {it.quantity}개
                 </p>
               </div>
-              <p className="shrink-0 font-medium text-ink">
-                {it.subtotal.toLocaleString()}원
-              </p>
+              <p className="shrink-0 font-medium text-ink">{it.subtotal.toLocaleString()}원</p>
             </li>
           ))}
         </ul>
@@ -277,7 +344,9 @@ export function CheckoutForm() {
           <div className="flex justify-between">
             <span className="text-ink-sub">배송비</span>
             <span className="font-medium text-ink">
-              {fee === 0 ? "무료" : `${fee.toLocaleString()}원`}
+              {fee === 0
+                ? (deliveryMethod === "PICKUP" ? "무료" : "착불 별도")
+                : `${fee.toLocaleString()}원`}
             </span>
           </div>
         </div>
@@ -290,40 +359,68 @@ export function CheckoutForm() {
         </div>
 
         {err && (
-          <p className="mt-3 rounded-sm border border-brand bg-brand-light px-3 py-2 text-[12px] text-brand">
-            {err}
-          </p>
+          <p className="mt-3 rounded-sm border border-brand bg-brand-light px-3 py-2 text-[12px] text-brand">{err}</p>
         )}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="mt-4 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {submitting ? "결제 진행 중…" : "결제하기"}
+        <button type="submit" disabled={submitting}
+          className="mt-4 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60">
+          {submitting ? "처리 중…" : "결제하기"}
         </button>
         <p className="mt-2 text-center text-[11px] text-ink-sub">
-          사이다페이로 안전하게 결제됩니다.
+          다음 단계에서 주문 정보를 확인하고 결제까지 완료합니다.
         </p>
       </aside>
     </form>
   );
 }
 
+// ── 공통 스타일 ──
+const input =
+  "w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand";
+
+// ── 섹션 카드 ──
+function Card({
+  icon,
+  title,
+  extra,
+  children,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  extra?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-line bg-white p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink">
+          {icon}
+          {title}
+        </h2>
+        {extra}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── 필드 레이블 ──
 function Field({
   label,
   required,
+  className,
   children,
 }: {
   label: string;
   required?: boolean;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-[12px] font-bold text-ink">
+    <label className={`block ${className ?? ""}`}>
+      <span className="mb-1.5 block text-[13px] font-medium text-ink">
         {label}
-        {required && <span className="ml-1 text-brand">*</span>}
+        {required && <span className="ml-0.5 text-brand">*</span>}
       </span>
       {children}
     </label>

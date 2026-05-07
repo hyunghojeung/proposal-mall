@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m \"*)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(npx next build *)",
+      "Bash(npx prisma generate *)",
+      "Bash(npx prisma db *)",
+      "Bash(pip show *)",
+      "Bash(pip --version)"
+    ]
+  }
+}
