@@ -5,13 +5,31 @@ import { sendOrderConfirmation } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
-// 결제 완료 후 PG가 사용자를 이 URL로 리다이렉트.
-// 성공 시: 주문 상태를 PAID로 갱신 후 /orders/[serial] 로 이동.
-// 실패/취소 시: /checkout?fail=... 로 이동.
-export async function GET(req: NextRequest) {
+// 결제 완료 후 사이다페이가 사용자 브라우저를 이 URL로 리다이렉트 (GET 또는 POST).
+// returnmode="POST" 이므로 POST body에 파라미터가 담겨올 수 있다.
+async function handleReturn(req: NextRequest) {
   const adapter = getPaymentAdapter();
-  const result = adapter.parseReturn(req.nextUrl.searchParams);
   const origin = req.nextUrl.origin;
+
+  // GET: query string / POST: form body 둘 다 지원
+  let params: URLSearchParams;
+  if (req.method === "POST") {
+    const text = await req.text();
+    params = new URLSearchParams(text);
+    // JSON으로 왔을 경우 대비
+    if (text.startsWith("{")) {
+      try {
+        const obj = JSON.parse(text) as Record<string, string>;
+        params = new URLSearchParams(Object.entries(obj).map(([k, v]) => [k, String(v)]));
+      } catch {
+        // 그대로 사용
+      }
+    }
+  } else {
+    params = req.nextUrl.searchParams;
+  }
+
+  const result = adapter.parseReturn(params);
 
   if (!result.orderSerial) {
     return NextResponse.redirect(`${origin}/checkout?fail=missing-order`);
@@ -35,6 +53,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${origin}/checkout?fail=amount-mismatch`);
   }
 
+  // PENDING → PAID (중복 처리 방지)
   if (order.status === "PENDING") {
     const updated = await prisma.order.update({
       where: { id: order.id },
@@ -44,9 +63,12 @@ export async function GET(req: NextRequest) {
       },
       include: { items: true },
     });
-    // Best-effort: Dropbox link + 안내 메일. 실패해도 결제는 이미 확정됨.
+    // best-effort: 이메일/Dropbox 알림
     await sendOrderConfirmation(updated);
   }
 
   return NextResponse.redirect(`${origin}/orders/${order.serial}?paid=1`);
 }
+
+export const GET = handleReturn;
+export const POST = handleReturn;
