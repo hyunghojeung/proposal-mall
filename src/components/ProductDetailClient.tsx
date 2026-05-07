@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ProductCategory } from "@prisma/client";
 import { addToCart } from "@/lib/cart";
 import type { ContentBlock } from "@/components/ProductForm";
@@ -42,6 +43,15 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
   BINDING_PT: "PT용바인더",
   BINDING_HARDCOVER: "하드커버스프링제본",
   PAPER_INNER: "내지 인쇄",
+};
+
+const CATEGORY_PARAMS: Record<ProductCategory, string> = {
+  CARRIER_BOX: "carrier-box",
+  MAGNETIC_BOX: "magnetic-box",
+  BINDING_3_RING: "binding-3-ring",
+  BINDING_PT: "binding-pt",
+  BINDING_HARDCOVER: "binding-hardcover",
+  PAPER_INNER: "paper-inner",
 };
 
 // ── 이미지 갤러리 ──────────────────────────────────────────
@@ -226,9 +236,12 @@ export function ProductDetailClient({ product }: Props) {
 
         {/* 우측: 옵션 + 가격 */}
         <div>
-          <p className="mb-2 text-[12px] font-medium text-brand">
+          <Link
+            href={`/products?cat=${CATEGORY_PARAMS[product.category]}`}
+            className="mb-2 inline-block text-[12px] font-medium text-brand hover:underline"
+          >
             {CATEGORY_LABELS[product.category]}
-          </p>
+          </Link>
           <h1 className="mb-3 text-[24px] font-black tracking-tight text-ink">
             {product.name}
           </h1>
