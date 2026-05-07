@@ -313,28 +313,33 @@ export function ProductDetailClient({ product }: Props) {
             </div>
           )}
 
-          {/* 가격 영역: 기본단가 → 옵션 → 수량 → 합계 */}
+          {/* 가격 영역: 선택 옵션 요약 → 수량 → 합계 */}
           <div className="mt-6 overflow-hidden rounded border border-line">
 
-            {/* 선택된 옵션별 단가 */}
-            {product.optionGroups.map((g) => {
-              const selectedLabel = options[g.name];
-              if (!selectedLabel) return null;
-              const val = g.values.find((v) => v.label === selectedLabel);
-              return (
-                <div key={g.id} className="flex items-center justify-between border-b border-line px-4 py-3">
-                  <span className="text-[13px] text-ink-sub">
-                    {g.name}
-                    <span className="ml-1.5 font-medium text-ink">{selectedLabel}</span>
-                  </span>
-                  <span className="text-[13px] text-ink-sub">
-                    {val && val.priceDelta > 0
-                      ? `+${val.priceDelta.toLocaleString()}원`
-                      : "—"}
-                  </span>
+            {/* 선택된 옵션 — 가로 태그형 한 줄 요약 */}
+            {product.optionGroups.length > 0 && (
+              <div className="border-b border-line px-4 py-2.5">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {product.optionGroups.map((g) => {
+                    const selectedLabel = options[g.name];
+                    if (!selectedLabel) return null;
+                    const val = g.values.find((v) => v.label === selectedLabel);
+                    return (
+                      <span
+                        key={g.id}
+                        className="inline-flex items-center gap-1 rounded-sm bg-bg px-2 py-1 text-[12px] text-ink"
+                      >
+                        <span className="text-ink-sub">{g.name}</span>
+                        <span className="font-medium">{selectedLabel}</span>
+                        {val && val.priceDelta > 0 && (
+                          <span className="text-brand">+{val.priceDelta.toLocaleString()}원</span>
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            )}
 
             {/* 수량 */}
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
