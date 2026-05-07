@@ -259,84 +259,54 @@ export function ProductDetailClient({ product }: Props) {
             </p>
           )}
 
-          {product.optionGroups.length > 0 && (
-            <>
-              <div className="my-6 border-t border-line" />
-              {product.optionGroups.map((g) => (
-                <div key={g.id} className="mb-5">
-                  <label className="mb-2 block text-[13px] font-bold text-ink">
-                    {g.name}
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {g.values.map((v) => {
-                      const selected = options[g.name] === v.label;
-                      return (
-                        <button
-                          key={v.id}
-                          type="button"
-                          onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
-                          className={`rounded-sm border px-3 py-2 text-left text-[13px] transition-colors ${
-                            selected
-                              ? "border-brand bg-brand-light font-bold text-brand"
-                              : "border-line text-ink hover:border-ink"
-                          }`}
-                        >
-                          <span>{v.label}</span>
-                          {v.priceDelta > 0 && (
-                            <span className={`ml-1.5 text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
-                              +{v.priceDelta.toLocaleString()}원
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </>
-          )}
+          {/* 통합 카드: 옵션선택 + 수량 + 가격 */}
+          <div className="mt-5 overflow-hidden rounded border border-line">
 
-          {isPaper && (
-            <div className="mb-5">
-              <label className="mb-2 block text-[13px] font-bold text-ink">페이지 수</label>
-              <input
-                type="number"
-                min={1}
-                max={2000}
-                value={pageCount}
-                onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
-                className="w-32 rounded-sm border border-line px-3 py-2 text-[14px] outline-none focus:border-brand"
-              />
-              <p className="mt-1.5 text-[12px] text-ink-sub">
-                50쪽 이하 / 51~100쪽 / 101쪽 이상 구간으로 단가 적용
-              </p>
-            </div>
-          )}
-
-          {/* 가격 영역: 선택 옵션 요약 → 수량 → 합계 */}
-          <div className="mt-6 overflow-hidden rounded border border-line">
-
-            {/* 선택된 옵션 — 가로 태그형 한 줄 요약 */}
-            {product.optionGroups.length > 0 && (
-              <div className="border-b border-line px-4 py-2.5">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  {product.optionGroups.map((g) => {
-                    const selectedLabel = options[g.name];
-                    if (!selectedLabel) return null;
-                    const val = g.values.find((v) => v.label === selectedLabel);
+            {/* 옵션 그룹 — 카드 안에 통합 */}
+            {product.optionGroups.map((g) => (
+              <div key={g.id} className="border-b border-line px-4 py-3">
+                <p className="mb-2 text-[12px] font-bold text-ink">{g.name}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {g.values.map((v) => {
+                    const selected = options[g.name] === v.label;
                     return (
-                      <span
-                        key={g.id}
-                        className="inline-flex items-center gap-1 rounded-sm bg-bg px-2 py-1 text-[12px] text-ink"
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
+                        className={`rounded-sm border px-3 py-1.5 text-left text-[13px] transition-colors ${
+                          selected
+                            ? "border-brand bg-brand-light font-bold text-brand"
+                            : "border-line text-ink hover:border-ink"
+                        }`}
                       >
-                        <span className="text-ink-sub">{g.name}</span>
-                        <span className="font-medium">{selectedLabel}</span>
-                        {val && val.priceDelta > 0 && (
-                          <span className="text-brand">+{val.priceDelta.toLocaleString()}원</span>
+                        <span>{v.label}</span>
+                        {v.priceDelta > 0 && (
+                          <span className={`ml-1.5 text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
+                            +{v.priceDelta.toLocaleString()}원
+                          </span>
                         )}
-                      </span>
+                      </button>
                     );
                   })}
+                </div>
+              </div>
+            ))}
+
+            {/* 페이지 수 (내지 인쇄) */}
+            {isPaper && (
+              <div className="border-b border-line px-4 py-3">
+                <p className="mb-2 text-[12px] font-bold text-ink">페이지 수</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min={1}
+                    max={2000}
+                    value={pageCount}
+                    onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
+                    className="w-28 rounded-sm border border-line px-3 py-1.5 text-[14px] outline-none focus:border-brand"
+                  />
+                  <span className="text-[12px] text-ink-sub">50 / 51~100 / 101쪽↑ 구간 단가 적용</span>
                 </div>
               </div>
             )}
