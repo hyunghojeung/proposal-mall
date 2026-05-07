@@ -21,8 +21,8 @@ const config: Config = {
           del: "#AAAAAA",
         },
         line: {
-          DEFAULT: "#E5E5E5",
-          strong: "#CCCCCC",
+          DEFAULT: "#CCCCCC",
+          strong: "#AAAAAA",
         },
       },
       fontFamily: {
