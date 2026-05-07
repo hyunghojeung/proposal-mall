@@ -1,13 +1,15 @@
 // 사이다페이 연동 어댑터 (공식 API 문서 기준)
 //
 // 결제 흐름:
-//   1. GET  /oapi/pmember/makeWebKey  → approvalToken(webKey) 발급
-//   2. POST /oapi/payment/request     → payUrl 획득 → 사용자 리다이렉트
+//   1. GET  /oapi/pmember/childToken   → approvalToken + feedbackToken 조회
+//   2. POST /oapi/payment/request      → payUrl 획득 → 사용자 리다이렉트
+//   3. 결제완료 → feedbackurl(POST) 수신 → 주문 PAID 처리
+//   4. 취소 시 → POST /oapi/payment/cancel (feedbackToken + orderNo)
 //
 // 필요 환경변수:
-//   CIDERPAY_DEV_ID    - 개발사 아이디
-//   CIDERPAY_DEV_TOKEN - 개발사 토큰
-//   CIDERPAY_MID       - 가맹점(회원) 아이디 (기본값: 1140456136)
+//   CIDERPAY_DEV_ID    개발사 아이디
+//   CIDERPAY_DEV_TOKEN 개발사 토큰
+//   CIDERPAY_MID       가맹점 회원 아이디 (기본값: 1140456136)
 
 import type {
   PaymentAdapter,
@@ -24,70 +26,72 @@ function requireEnv(name: string): string {
   return v;
 }
 
-function getMerchantId(): string {
+function getMid(): string {
   return process.env.CIDERPAY_MID ?? "1140456136";
 }
 
-// makeWebKey API 호출 → approvalToken 발급
-async function fetchApprovalToken(): Promise<string> {
-  const devID    = requireEnv("CIDERPAY_DEV_ID");
-  const devToken = requireEnv("CIDERPAY_DEV_TOKEN");
-  const memberID = getMerchantId();
+function devHeaders() {
+  return {
+    "accept":     "application/json",
+    "devID":      requireEnv("CIDERPAY_DEV_ID"),
+    "devToken":   requireEnv("CIDERPAY_DEV_TOKEN"),
+  };
+}
 
-  const url = new URL(`${BASE}/oapi/pmember/makeWebKey`);
-  url.searchParams.set("memberID", memberID);
+// GET /oapi/pmember/childToken
+// → data.approvalToken (결제 헤더용)
+// → data.feedbackToken (취소 토큰 — 미리 저장해두면 유용)
+async function fetchChildToken(): Promise<{ approvalToken: string; feedbackToken: string }> {
+  const url = new URL(`${BASE}/oapi/pmember/childToken`);
+  url.searchParams.set("memberID", getMid());
 
   const res = await fetch(url.toString(), {
     method: "GET",
-    headers: {
-      "accept":   "application/json",
-      "devID":    devID,
-      "devToken": devToken,
-    },
+    headers: devHeaders(),
   });
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`사이다페이 makeWebKey 실패 (${res.status}): ${text}`);
+    throw new Error(`사이다페이 childToken 실패 (${res.status}): ${text}`);
   }
 
   const json = await res.json() as {
     success?: boolean;
-    webKey?: string;
-    approvalToken?: string;
-    errCode?: string;
-    message?: string;
+    errorMessage?: string;
+    data?: { approvalToken?: string; feedbackToken?: string };
   };
 
-  const token = json.webKey ?? json.approvalToken;
-  if (!token) {
+  const approvalToken = json.data?.approvalToken;
+  const feedbackToken = json.data?.feedbackToken ?? "";
+
+  if (!approvalToken) {
     throw new Error(
-      json.message
-        ? `사이다페이 makeWebKey 오류 [${json.errCode ?? "?"}]: ${json.message}`
-        : "사이다페이: webKey 없음"
+      json.errorMessage
+        ? `사이다페이 childToken 오류: ${json.errorMessage}`
+        : "사이다페이: approvalToken 없음"
     );
   }
 
-  return token;
+  return { approvalToken, feedbackToken };
 }
 
 export const cidapayAdapter: PaymentAdapter = {
   name: "ciderpay",
 
   async init(input: PaymentInitInput): Promise<PaymentInitResult> {
-    const memberID = getMerchantId();
+    const mid = getMid();
 
-    // 1단계: approvalToken 발급
-    const approvalToken = await fetchApprovalToken();
+    // 1단계: approvalToken 조회
+    const { approvalToken } = await fetchChildToken();
 
-    // returnurl에 주문번호를 파라미터로 포함 → return 핸들러에서 식별
+    // returnurl에 주문번호 포함 → return 핸들러에서 주문 식별
     const origin      = new URL(input.returnUrl).origin;
     const feedbackUrl = `${origin}/api/payment/webhook`;
     const returnUrl   = `${origin}/api/payment/return?order=${encodeURIComponent(input.orderSerial)}`;
 
     // 2단계: 결제 요청
     const paymentData = {
-      memberID,
+      memberID:    mid,
       price:       input.amount,
       goodName:    input.productName,
       mobile:      input.customerPhone.replace(/-/g, ""),
@@ -95,7 +99,7 @@ export const cidapayAdapter: PaymentAdapter = {
       email:       input.customerEmail,
       feedbackurl: feedbackUrl,
       returnurl:   returnUrl,
-      returnmode:  "JUST",          // 결제완료 후 returnurl 즉시 호출 (GET)
+      returnmode:  "JUST",           // 결제완료 후 returnurl 즉시 호출 (GET)
       var1:        input.orderSerial, // feedback 콜백에서 주문 식별
       var2:        "PROPOSAL_MALL",
       smsuse:      "Y",
@@ -107,9 +111,9 @@ export const cidapayAdapter: PaymentAdapter = {
     const res = await fetch(`${BASE}/oapi/payment/request`, {
       method: "POST",
       headers: {
-        "accept":         "application/json",
-        "Content-Type":   "application/json",
-        "approvalToken":  approvalToken,
+        "accept":        "application/json",
+        "Content-Type":  "application/json",
+        "approvalToken": approvalToken,
       },
       body: JSON.stringify(paymentData),
     });
@@ -138,8 +142,8 @@ export const cidapayAdapter: PaymentAdapter = {
     );
   },
 
-  // returnmode=JUST → 결제완료 후 GET으로 returnurl 호출
-  // returnurl 에 ?order=주문번호 를 포함시켰으므로 쿼리파라미터로 식별
+  // returnmode=JUST → 결제완료 후 GET으로 returnurl 즉시 호출
+  // 우리가 returnurl에 ?order=주문번호 를 넣었으므로 쿼리파라미터로 식별
   parseReturn(query: URLSearchParams): PaymentReturnPayload {
     const orderSerial = query.get("order") ?? query.get("var1") ?? "";
     const state       = query.get("paymentState") ?? "";
@@ -155,7 +159,12 @@ export const cidapayAdapter: PaymentAdapter = {
   },
 
   // feedbackurl: 사이다페이 서버 → 우리 서버 POST 통지
-  // 공식 Feedback 필드: var1, paymentState, orderNo, feedbackToken, price, approvalNo, ccname 등
+  // 공식 Feedback 필드:
+  //   memberID, feedbackToken, goodName, price, recvPhone
+  //   paymentState (COMPLETE | CANCEL)
+  //   payType (1:카드 2:핸드폰 3:카카오페이)
+  //   orderNo (주문번호), approvalNo (승인번호), ccname (카드사명)
+  //   var1 (우리가 넣은 orderSerial), var2, cardNum, cardQuota, csturl
   verifyWebhook(rawBody: string, _signature: string | null) {
     try {
       let data: Record<string, string>;
@@ -174,7 +183,7 @@ export const cidapayAdapter: PaymentAdapter = {
         payload: {
           orderSerial:  String(data.var1 ?? ""),
           status:       success ? "success" : cancelled ? "cancelled" : "failed",
-          tid:          data.orderNo    ?? undefined,
+          tid:          data.orderNo     ?? undefined,
           amount:       data.price ? Number(data.price) : undefined,
           errorMessage: data.errorMessage ?? undefined,
         } satisfies PaymentReturnPayload,
@@ -184,3 +193,35 @@ export const cidapayAdapter: PaymentAdapter = {
     }
   },
 };
+
+// ── 결제 취소 유틸 (관리자 패널에서 호출) ──────────────────────────────────
+// POST /oapi/payment/cancel
+// 필드: memberID, orderNo (사이다페이 주문번호 = paymentTid), token (feedbackToken)
+export async function cancelPayment(params: {
+  orderNo: string;       // 사이다페이 orderNo (paymentTid)
+  token: string;         // feedbackToken (feedback 콜백에서 수신한 값)
+  cancelMessage?: string;
+}): Promise<{ success: boolean; errorMessage?: string }> {
+  const mid = getMid();
+
+  const res = await fetch(`${BASE}/oapi/payment/cancel`, {
+    method: "POST",
+    headers: {
+      "accept":        "application/json",
+      "Content-Type":  "application/json",
+    },
+    body: JSON.stringify({
+      memberID:      mid,
+      orderNo:       params.orderNo,
+      token:         params.token,
+      rangeType:     "ALL",
+      cancelMessage: params.cancelMessage ?? "주문 취소",
+    }),
+  });
+
+  const json = await res.json() as { success?: boolean; errorMessage?: string; message?: string };
+  return {
+    success:      json.success === true,
+    errorMessage: json.errorMessage ?? json.message,
+  };
+}
