@@ -209,15 +209,55 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
         if (prePopup && !prePopup.closed) {
           // 미리 열린 팝업을 결제 URL로 이동
           prePopup.location.href = payUrl;
-          // 팝업 닫힘 감지 → 주문 상세 페이지로 이동
-          const timer = setInterval(() => {
+
+          // ── 서버 폴링 ─────────────────────────────────────────────────────
+          // 사이다페이는 결제 완료 후 popup을 직접 window.close() 하거나
+          // returnUrl로 redirect 할 수 있다.
+          // feedbackurl(webhook)로 서버가 PAID 처리하면 우리가 감지해서 이동.
+          // 팝업이 열려 있는 동안 2초마다 주문 상태를 확인한다.
+          let polling = true;
+          const pollTimer = setInterval(async () => {
             try {
-              if (prePopup!.closed) {
-                clearInterval(timer);
-                window.location.href = `/orders/${orderSerial}?paid=1`;
+              // 팝업이 닫혔으면 한 번 더 상태 확인 후 중단
+              const popupClosed = prePopup!.closed;
+
+              const statusRes = await fetch(`/api/orders/${orderSerial}/status`, {
+                credentials: "include",
+              });
+              if (statusRes.ok) {
+                const { status } = (await statusRes.json()) as { status: string };
+                if (status === "PAID" || status === "IN_PRODUCTION" || status === "SHIPPING" || status === "DELIVERED") {
+                  clearInterval(pollTimer);
+                  polling = false;
+                  prePopup?.close();
+                  window.location.href = `/orders/${orderSerial}?paid=1`;
+                  return;
+                }
               }
-            } catch { clearInterval(timer); }
-          }, 800);
+
+              if (popupClosed && polling) {
+                // 팝업은 닫혔는데 아직 PAID 아님 → 3초 더 기다려서 webhook 도착 대기
+                setTimeout(async () => {
+                  clearInterval(pollTimer);
+                  polling = false;
+                  try {
+                    const r2 = await fetch(`/api/orders/${orderSerial}/status`, { credentials: "include" });
+                    if (r2.ok) {
+                      const { status } = (await r2.json()) as { status: string };
+                      if (status === "PAID" || status === "IN_PRODUCTION") {
+                        window.location.href = `/orders/${orderSerial}?paid=1`;
+                        return;
+                      }
+                    }
+                  } catch { /* ignore */ }
+                  // 결제 미완료 → 체크아웃으로 돌아오기
+                  setErr("결제가 완료되지 않았습니다. 다시 시도해 주세요.");
+                  setSubmitting(false);
+                }, 3000);
+              }
+            } catch { /* 네트워크 오류 무시 */ }
+          }, 2000);
+
         } else {
           // 팝업이 차단된 경우 → 전체 페이지 이동으로 fallback
           window.location.href = payUrl;
