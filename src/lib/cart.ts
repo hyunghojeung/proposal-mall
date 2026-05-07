@@ -9,7 +9,8 @@ export interface CartItem {
   quantity: number;
   pageCount?: number;
   unitPrice: number;
-  subtotal: number;
+  subtotal: number;    // VAT 포함 합계
+  vatAmount?: number;  // 부가세
 }
 
 const STORAGE_KEY = "proposal-mall:cart:v1";

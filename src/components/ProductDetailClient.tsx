@@ -215,6 +215,8 @@ export function ProductDetailClient({ product }: Props) {
     const unitPrice = displayUnitPrice;
     const subtotal = displaySubtotal;
     if (!unitPrice || !subtotal) return;
+    const vatAmount = Math.round(subtotal * 0.1);
+    const totalWithVat = Math.round(subtotal * 1.1);
     addToCart({
       productId: product.id,
       slug: product.slug,
@@ -223,7 +225,8 @@ export function ProductDetailClient({ product }: Props) {
       quantity,
       pageCount: isPaper ? pageCount : undefined,
       unitPrice,
-      subtotal,
+      subtotal: totalWithVat,   // 장바구니에는 VAT 포함 합계 저장
+      vatAmount,
     });
     router.push("/cart");
   }
@@ -364,16 +367,35 @@ export function ProductDetailClient({ product }: Props) {
               </div>
             </div>
 
-            {/* 합계 */}
+            {/* 공급가 + 부가세 + 합계 */}
             <div className="bg-bg px-4 py-4">
               {quoteErr && !displaySubtotal ? (
                 <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
               ) : displaySubtotal ? (
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[14px] font-bold text-ink">합계</span>
-                  <span className="text-[24px] font-black tracking-tight text-brand">
-                    {displaySubtotal.toLocaleString()}원
-                  </span>
+                <div className="space-y-2">
+                  {/* 공급가 */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] text-ink-sub">공급가</span>
+                    <span className="text-[13px] text-ink">
+                      {displaySubtotal.toLocaleString()}원
+                    </span>
+                  </div>
+                  {/* 부가세 */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] text-ink-sub">부가세 (VAT 10%)</span>
+                    <span className="text-[13px] text-ink">
+                      {Math.round(displaySubtotal * 0.1).toLocaleString()}원
+                    </span>
+                  </div>
+                  {/* 구분선 */}
+                  <div className="border-t border-line pt-2">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-[14px] font-bold text-ink">합계 (VAT 포함)</span>
+                      <span className="text-[24px] font-black tracking-tight text-brand">
+                        {Math.round(displaySubtotal * 1.1).toLocaleString()}원
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ) : loading ? (
                 <p className="text-[13px] text-ink-sub">계산 중…</p>
