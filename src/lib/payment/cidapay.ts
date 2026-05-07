@@ -196,6 +196,7 @@ export const cidapayAdapter: PaymentAdapter = {
   //   payType (1:카드 2:핸드폰 3:카카오페이)
   //   orderNo (주문번호), approvalNo (승인번호), ccname (카드사명)
   //   var1 (우리가 넣은 orderSerial), var2, cardNum, cardQuota, csturl
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   verifyWebhook(rawBody: string, _signature: string | null) {
     try {
       let data: Record<string, string>;
