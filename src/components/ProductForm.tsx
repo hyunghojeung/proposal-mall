@@ -421,6 +421,19 @@ export function ProductForm({
     setV((prev) => ({ ...prev, [key]: value }));
   }
 
+  // 상품명 → slug 자동 생성 (신규 등록 시)
+  function handleNameChange(name: string) {
+    set("name", name);
+    if (mode === "create" && !v.slug) {
+      // 영문/숫자 있으면 사용, 한글만 있으면 타임스탬프 기반 생성
+      const ascii = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      set("slug", ascii || `product-${Date.now().toString(36)}`);
+    }
+  }
+
   function setGroup(idx: number, patch: Partial<ProductFormValue["optionGroups"][number]>) {
     const next = [...v.optionGroups];
     next[idx] = { ...next[idx], ...patch };
@@ -476,11 +489,15 @@ export function ProductForm({
     start(async () => {
       const url = mode === "create" ? "/api/admin/products" : `/api/admin/products/${v.id}`;
       const method = mode === "create" ? "POST" : "PATCH";
+      // slug 미입력 시 자동 생성 (한글 상품명 대응)
+      const slug = v.slug || `product-${Date.now().toString(36)}`;
       const res = await fetch(url, {
         method,
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...v,
+          slug,
           thumbnail: v.images[0] ?? v.thumbnail ?? undefined,
         }),
       });
@@ -523,7 +540,7 @@ export function ProductForm({
           <Field label="상품명">
             <input
               value={v.name}
-              onChange={(e) => set("name", e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
             />
           </Field>
@@ -701,7 +718,7 @@ export function ProductForm({
       <div className="flex gap-2">
         <button
           type="button"
-          disabled={pending || !v.slug || !v.name}
+          disabled={pending || !v.name}
           onClick={submit}
           className="rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
