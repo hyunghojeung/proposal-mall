@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { ClearCartOnSuccess } from "@/components/ClearCartOnSuccess";
 import { prisma } from "@/lib/prisma";
+import { DELIVERY_LABELS } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -157,7 +158,7 @@ export default async function OrderDetailPage({
             <h2 className="mb-3 text-[15px] font-bold text-ink">결제 / 배송</h2>
             <Row
               label="수령 방식"
-              value={order.deliveryMethod === "COURIER" ? "택배 배송" : "직접 방문 수령"}
+              value={DELIVERY_LABELS[order.deliveryMethod] ?? order.deliveryMethod}
             />
             {order.shippingAddress && <Row label="배송지" value={order.shippingAddress} />}
             <Row label="상품 합계" value={`${(order.totalAmount - order.shippingFee).toLocaleString()}원`} />

@@ -21,7 +21,7 @@ const createOrderSchema = z.object({
   customerPhone: z.string().min(1).max(40),
   customerEmail: z.string().email(),
   company: z.string().max(100).optional(),
-  deliveryMethod: z.enum(["COURIER", "PICKUP"]),
+  deliveryMethod: z.enum(["COURIER_PREPAID", "COURIER_COLLECT", "QUICK_PREPAID", "QUICK_COLLECT", "PICKUP"]),
   shippingAddress: z.string().max(500).optional(),
   memo: z.string().max(2000).optional(),
   items: z.array(orderItemSchema).min(1),

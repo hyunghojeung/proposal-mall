@@ -4,6 +4,7 @@ import { OrderStatus, type Prisma } from "@prisma/client";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { AdminShell } from "@/components/AdminShell";
 import { prisma } from "@/lib/prisma";
+import { DELIVERY_LABELS } from "@/lib/pricing";
 
 export const metadata = { title: "주문현황 | 관리자" };
 export const dynamic = "force-dynamic";
@@ -138,7 +139,7 @@ export default async function AdminOrdersPage({
                   {o.customerEmail}
                 </td>
                 <td className="px-3 py-2.5 text-[12px] text-ink-sub">
-                  {o.deliveryMethod === "COURIER" ? "택배" : "방문"}
+                  {DELIVERY_LABELS[o.deliveryMethod]?.slice(0,2) ?? o.deliveryMethod}
                 </td>
                 <td className="px-3 py-2.5 text-[12px] text-ink-sub">{o.items.length}건</td>
                 <td className="px-3 py-2.5">

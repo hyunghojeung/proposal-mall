@@ -8,7 +8,7 @@ import {
   readCart,
   subscribeCart,
 } from "@/lib/cart";
-import { shippingFee } from "@/lib/pricing";
+import { shippingFee, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
 
 interface CheckoutResp {
   order?: { serial: string; totalAmount: number };
@@ -33,7 +33,7 @@ export function CheckoutForm() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [company, setCompany] = useState("");
-  const [deliveryMethod, setDeliveryMethod] = useState<"COURIER" | "PICKUP">("COURIER");
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("COURIER_PREPAID");
   const [shippingAddress, setShippingAddress] = useState("");
   const [memo, setMemo] = useState("");
 
@@ -69,7 +69,7 @@ export function CheckoutForm() {
           customerEmail,
           company: company || undefined,
           deliveryMethod,
-          shippingAddress: deliveryMethod === "COURIER" ? shippingAddress : undefined,
+          shippingAddress: (deliveryMethod === "COURIER_PREPAID" || deliveryMethod === "COURIER_COLLECT") ? shippingAddress : undefined,
           memo: memo || undefined,
           items: items.map((it) => ({
             slug: it.slug,
@@ -193,30 +193,36 @@ export function CheckoutForm() {
         <fieldset>
           <legend className="mb-3 text-[15px] font-bold text-ink">수령 방식</legend>
           <div className="grid gap-2">
-            <label className="flex cursor-pointer items-center gap-2 rounded-sm border border-line px-4 py-3 text-[14px] hover:border-ink">
-              <input
-                type="radio"
-                name="delivery"
-                checked={deliveryMethod === "COURIER"}
-                onChange={() => setDeliveryMethod("COURIER")}
-                className="accent-[#E8481A]"
-              />
-              <span className="font-medium">택배 배송</span>
-              <span className="ml-auto text-[12px] text-ink-sub">2,500원 (30,000원↑ 무료)</span>
-            </label>
-            <label className="flex cursor-pointer items-center gap-2 rounded-sm border border-line px-4 py-3 text-[14px] hover:border-ink">
-              <input
-                type="radio"
-                name="delivery"
-                checked={deliveryMethod === "PICKUP"}
-                onChange={() => setDeliveryMethod("PICKUP")}
-                className="accent-[#E8481A]"
-              />
-              <span className="font-medium">직접 방문 수령</span>
-              <span className="ml-auto text-[12px] text-ink-sub">무료</span>
-            </label>
+            {(
+              [
+                { value: "COURIER_PREPAID", desc: "3,000원 (30,000원↑ 무료)" },
+                { value: "COURIER_COLLECT", desc: "착불 — 수령 시 지불" },
+                { value: "QUICK_PREPAID",   desc: "실비 별도 안내" },
+                { value: "QUICK_COLLECT",   desc: "착불 — 수령 시 지불" },
+                { value: "PICKUP",          desc: "무료" },
+              ] as { value: DeliveryMethod; desc: string }[]
+            ).map(({ value, desc }) => (
+              <label
+                key={value}
+                className={`flex cursor-pointer items-center gap-2 rounded-sm border px-4 py-3 text-[14px] transition-colors hover:border-ink ${
+                  deliveryMethod === value ? "border-brand bg-brand-light" : "border-line"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="delivery"
+                  checked={deliveryMethod === value}
+                  onChange={() => setDeliveryMethod(value)}
+                  className="accent-[#E8481A]"
+                />
+                <span className={`font-medium ${deliveryMethod === value ? "text-brand" : "text-ink"}`}>
+                  {DELIVERY_LABELS[value]}
+                </span>
+                <span className="ml-auto text-[12px] text-ink-sub">{desc}</span>
+              </label>
+            ))}
           </div>
-          {deliveryMethod === "COURIER" && (
+          {(deliveryMethod === "COURIER_PREPAID" || deliveryMethod === "COURIER_COLLECT") && (
             <Field label="배송지 주소" required>
               <textarea
                 value={shippingAddress}

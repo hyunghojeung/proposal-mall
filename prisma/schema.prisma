@@ -46,7 +46,10 @@ enum OrderStatus {
 }
 
 enum DeliveryMethod {
-  COURIER
+  COURIER_PREPAID
+  COURIER_COLLECT
+  QUICK_PREPAID
+  QUICK_COLLECT
   PICKUP
 }
 

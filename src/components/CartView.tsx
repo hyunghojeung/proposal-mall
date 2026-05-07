@@ -11,13 +11,13 @@ import {
   subscribeCart,
   updateCartQuantity,
 } from "@/lib/cart";
-import { shippingFee, FREE_SHIPPING_THRESHOLD } from "@/lib/pricing";
+import { shippingFee, FREE_SHIPPING_THRESHOLD, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
 
 export function CartView() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  const [delivery, setDelivery] = useState<"COURIER" | "PICKUP">("COURIER");
+  const [delivery, setDelivery] = useState<DeliveryMethod>("COURIER_PREPAID");
 
   useEffect(() => {
     setItems(readCart());
@@ -120,35 +120,41 @@ export function CartView() {
               {fee === 0 ? "무료" : `${fee.toLocaleString()}원`}
             </span>
           </div>
-          {delivery === "COURIER" && subtotal < FREE_SHIPPING_THRESHOLD && (
+          {delivery === "COURIER_PREPAID" && subtotal < FREE_SHIPPING_THRESHOLD && (
             <p className="text-[11px] text-ink-sub">
               {(FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString()}원 추가 시 무료배송
             </p>
           )}
+          {(delivery === "COURIER_COLLECT" || delivery === "QUICK_COLLECT" || delivery === "QUICK_PREPAID") && (
+            <p className="text-[11px] text-ink-sub">배송비는 수령 시 별도 적용됩니다.</p>
+          )}
         </div>
 
         <fieldset className="mt-5 border-t border-line pt-5">
-          <legend className="mb-2 text-[13px] font-bold text-ink">수령 방식</legend>
-          <label className="mb-1.5 flex cursor-pointer items-center gap-2 text-[13px]">
-            <input
-              type="radio"
-              name="delivery"
-              checked={delivery === "COURIER"}
-              onChange={() => setDelivery("COURIER")}
-              className="accent-[#E8481A]"
-            />
-            택배 배송 (2,500원, 30,000원↑ 무료)
-          </label>
-          <label className="flex cursor-pointer items-center gap-2 text-[13px]">
-            <input
-              type="radio"
-              name="delivery"
-              checked={delivery === "PICKUP"}
-              onChange={() => setDelivery("PICKUP")}
-              className="accent-[#E8481A]"
-            />
-            직접 방문 수령 (무료)
-          </label>
+          <legend className="mb-3 text-[13px] font-bold text-ink">수령 방식</legend>
+          <div className="space-y-2">
+            {(
+              [
+                { value: "COURIER_PREPAID", desc: "3,000원 (30,000원↑ 무료)" },
+                { value: "COURIER_COLLECT", desc: "착불 — 수령 시 지불" },
+                { value: "QUICK_PREPAID",   desc: "실비 — 별도 안내" },
+                { value: "QUICK_COLLECT",   desc: "착불 — 수령 시 지불" },
+                { value: "PICKUP",          desc: "무료" },
+              ] as { value: DeliveryMethod; desc: string }[]
+            ).map(({ value, desc }) => (
+              <label key={value} className="flex cursor-pointer items-center gap-2 text-[13px]">
+                <input
+                  type="radio"
+                  name="delivery"
+                  checked={delivery === value}
+                  onChange={() => setDelivery(value)}
+                  className="accent-[#E8481A]"
+                />
+                <span className="font-medium text-ink">{DELIVERY_LABELS[value]}</span>
+                <span className="text-ink-sub">({desc})</span>
+              </label>
+            ))}
+          </div>
         </fieldset>
 
         <div className="mt-5 flex items-baseline justify-between border-t border-line pt-5">

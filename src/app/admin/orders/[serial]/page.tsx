@@ -4,6 +4,7 @@ import { isAdminAuthenticated } from "@/lib/auth";
 import { AdminShell } from "@/components/AdminShell";
 import { OrderAdminActions } from "@/components/OrderAdminActions";
 import { prisma } from "@/lib/prisma";
+import { DELIVERY_LABELS } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +79,7 @@ export default async function AdminOrderDetail({
               {order.company && <Row label="회사" value={order.company} />}
               <Row
                 label="수령 방식"
-                value={order.deliveryMethod === "COURIER" ? "택배 배송" : "직접 방문 수령"}
+                value={DELIVERY_LABELS[order.deliveryMethod] ?? order.deliveryMethod}
               />
               {order.shippingAddress && <Row label="배송지" value={order.shippingAddress} />}
             </dl>

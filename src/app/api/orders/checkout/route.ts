@@ -20,7 +20,7 @@ const checkoutSchema = z.object({
   customerPhone: z.string().min(1).max(40),
   customerEmail: z.string().email(),
   company: z.string().max(100).optional(),
-  deliveryMethod: z.enum(["COURIER", "PICKUP"]),
+  deliveryMethod: z.enum(["COURIER_PREPAID", "COURIER_COLLECT", "QUICK_PREPAID", "QUICK_COLLECT", "PICKUP"]),
   shippingAddress: z.string().max(500).optional(),
   memo: z.string().max(2000).optional(),
   items: z.array(cartItemSchema).min(1),
@@ -37,7 +37,8 @@ export async function POST(req: NextRequest) {
   }
   const data = parsed.data;
 
-  if (data.deliveryMethod === "COURIER" && !data.shippingAddress?.trim()) {
+  const needsAddress = data.deliveryMethod === "COURIER_PREPAID" || data.deliveryMethod === "COURIER_COLLECT";
+  if (needsAddress && !data.shippingAddress?.trim()) {
     return NextResponse.json(
       { error: "택배 배송은 배송지 주소가 필요합니다" },
       { status: 400 },

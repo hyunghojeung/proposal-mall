@@ -10,6 +10,7 @@ import type { Order, OrderItem } from "@prisma/client";
 import { prisma } from "./prisma";
 import { createOrderFileRequest } from "./dropbox";
 import { getEmailSender } from "./email";
+import { DELIVERY_LABELS } from "./pricing";
 
 type OrderWithItems = Order & { items: OrderItem[] };
 
@@ -99,7 +100,7 @@ function renderOrderConfirmationText({
   }
   lines.push("");
   lines.push(
-    `▶ 수령: ${order.deliveryMethod === "COURIER" ? "택배 배송" : "직접 방문 수령"}`,
+    `▶ 수령: ${DELIVERY_LABELS[order.deliveryMethod] ?? order.deliveryMethod}`,
   );
   if (order.shippingAddress) lines.push(`주소: ${order.shippingAddress}`);
   lines.push("");
@@ -177,7 +178,7 @@ function renderOrderConfirmationHtml({
 
           <h2 style="margin:24px 0 8px;font-size:14px;font-weight:700;color:#1A1A1A;">수령 정보</h2>
           <p style="margin:0;font-size:13px;color:#1A1A1A;line-height:1.7;">
-            ${order.deliveryMethod === "COURIER" ? "택배 배송" : "직접 방문 수령"}${
+            ${DELIVERY_LABELS[order.deliveryMethod] ?? order.deliveryMethod}${
               order.shippingAddress
                 ? `<br><span style="color:#888;">${escapeHtml(order.shippingAddress)}</span>`
                 : ""
