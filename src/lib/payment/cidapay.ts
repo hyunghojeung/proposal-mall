@@ -1,8 +1,9 @@
 // 사이다페이 연동 어댑터 (공식 API 문서 기준)
 //
 // 결제 흐름:
-//   1. GET  /oapi/pmember/childToken   → approvalToken + feedbackToken 조회
-//   2. POST /oapi/payment/request      → payUrl 획득 → 사용자 리다이렉트
+//   0. POST /oapi/pv/payment/setPayTokenYn/{memberID}  → 토큰 결제 활성화
+//   1. GET  /oapi/pmember/childToken                   → approvalToken + feedbackToken 조회
+//   2. POST /oapi/payment/request                      → payUrl 획득 → 사용자 리다이렉트
 //   3. 결제완료 → feedbackurl(POST) 수신 → 주문 PAID 처리
 //   4. 취소 시 → POST /oapi/payment/cancel (feedbackToken + orderNo)
 //
@@ -36,6 +37,33 @@ function devHeaders() {
     "devID":      requireEnv("CIDERPAY_DEV_ID"),
     "devToken":   requireEnv("CIDERPAY_DEV_TOKEN"),
   };
+}
+
+// POST /oapi/pv/payment/setPayTokenYn/{memberID}
+// 토큰 결제 활성화 — childToken 호출 전 반드시 선행
+// 헤더: devID, devToken
+// 바디: multipart form-data  payTokenYn=Y
+async function setPayTokenYn(yn: "Y" | "N" = "Y"): Promise<void> {
+  const mid = getMid();
+
+  const form = new FormData();
+  form.append("payTokenYn", yn);
+
+  const res = await fetch(`${BASE}/oapi/pv/payment/setPayTokenYn/${mid}`, {
+    method: "POST",
+    headers: devHeaders(),   // accept + devID + devToken (Content-Type은 FormData가 자동 설정)
+    body: form,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`사이다페이 setPayTokenYn 실패 (${res.status}): ${text}`);
+  }
+
+  const json = await res.json() as { success?: boolean; errorMessage?: string };
+  if (json.success === false) {
+    throw new Error(`사이다페이 setPayTokenYn 오류: ${json.errorMessage ?? "알 수 없는 오류"}`);
+  }
 }
 
 // GET /oapi/pmember/childToken
@@ -80,6 +108,9 @@ export const cidapayAdapter: PaymentAdapter = {
 
   async init(input: PaymentInitInput): Promise<PaymentInitResult> {
     const mid = getMid();
+
+    // 0단계: 토큰 결제 활성화 (childToken 사용 전 필수)
+    await setPayTokenYn("Y");
 
     // 1단계: approvalToken 조회
     const { approvalToken } = await fetchChildToken();
