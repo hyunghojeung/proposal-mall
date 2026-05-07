@@ -211,14 +211,18 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
           prePopup.location.href = payUrl;
 
           // ── 서버 폴링 ─────────────────────────────────────────────────────
-          // 사이다페이는 결제 완료 후 popup을 직접 window.close() 하거나
-          // returnUrl로 redirect 할 수 있다.
-          // feedbackurl(webhook)로 서버가 PAID 처리하면 우리가 감지해서 이동.
-          // 팝업이 열려 있는 동안 2초마다 주문 상태를 확인한다.
+          // 사이다페이는 결제 완료 후 feedbackurl(webhook)로 서버에 통지한다.
+          // webhook이 도착해 주문이 PAID가 되면 폴링이 감지해 주문 상세로 이동.
+          // 팝업이 닫혀도 webhook이 늦게 올 수 있으므로 최대 60초까지 대기.
           let polling = true;
+          let pollCount = 0;
+          const MAX_POLLS = 30; // 2s × 30 = 60초 최대 대기
+
           const pollTimer = setInterval(async () => {
+            if (!polling) return;
+            pollCount++;
+
             try {
-              // 팝업이 닫혔으면 한 번 더 상태 확인 후 중단
               const popupClosed = prePopup!.closed;
 
               const statusRes = await fetch(`/api/orders/${orderSerial}/status`, {
@@ -226,7 +230,8 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
               });
               if (statusRes.ok) {
                 const { status } = (await statusRes.json()) as { status: string };
-                if (status === "PAID" || status === "IN_PRODUCTION" || status === "SHIPPING" || status === "DELIVERED") {
+                const isPaid = status === "PAID" || status === "IN_PRODUCTION" || status === "SHIPPING" || status === "DELIVERED";
+                if (isPaid) {
                   clearInterval(pollTimer);
                   polling = false;
                   prePopup?.close();
@@ -235,25 +240,21 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 }
               }
 
+              // 팝업이 닫혔으면 주문 상세 페이지로 이동 (webhook이 나중에 올 수 있음)
+              // 주문 상세 페이지에서 상태를 보여주고, 필요 시 새로고침 유도
               if (popupClosed && polling) {
-                // 팝업은 닫혔는데 아직 PAID 아님 → 3초 더 기다려서 webhook 도착 대기
-                setTimeout(async () => {
-                  clearInterval(pollTimer);
-                  polling = false;
-                  try {
-                    const r2 = await fetch(`/api/orders/${orderSerial}/status`, { credentials: "include" });
-                    if (r2.ok) {
-                      const { status } = (await r2.json()) as { status: string };
-                      if (status === "PAID" || status === "IN_PRODUCTION") {
-                        window.location.href = `/orders/${orderSerial}?paid=1`;
-                        return;
-                      }
-                    }
-                  } catch { /* ignore */ }
-                  // 결제 미완료 → 체크아웃으로 돌아오기
-                  setErr("결제가 완료되지 않았습니다. 다시 시도해 주세요.");
-                  setSubmitting(false);
-                }, 3000);
+                polling = false; // 중복 진입 방지
+                clearInterval(pollTimer);
+                // 결제했을 가능성이 있으므로 주문 상세로 이동 (checking=1 파라미터로 안내 표시)
+                window.location.href = `/orders/${orderSerial}?checking=1`;
+                return;
+              }
+
+              // 최대 대기 시간 초과 → 주문 상세로 이동
+              if (pollCount >= MAX_POLLS) {
+                polling = false;
+                clearInterval(pollTimer);
+                window.location.href = `/orders/${orderSerial}?checking=1`;
               }
             } catch { /* 네트워크 오류 무시 */ }
           }, 2000);

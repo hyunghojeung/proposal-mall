@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { ClearCartOnSuccess } from "@/components/ClearCartOnSuccess";
+import { OrderCheckingBanner } from "@/components/OrderCheckingBanner";
 import { prisma } from "@/lib/prisma";
 import { DELIVERY_LABELS } from "@/lib/pricing";
 
@@ -27,7 +28,7 @@ export default async function OrderDetailPage({
   searchParams,
 }: {
   params: { serial: string };
-  searchParams: { paid?: string };
+  searchParams: { paid?: string; checking?: string };
 }) {
   const order = await prisma.order
     .findUnique({
@@ -39,6 +40,8 @@ export default async function OrderDetailPage({
   if (!order) notFound();
 
   const justPaid = searchParams.paid === "1" && order.status === "PAID";
+  // checking=1: 팝업이 닫혔지만 결제 여부 불확실한 상태 (webhook 대기 중일 수 있음)
+  const checking = searchParams.checking === "1" && order.status === "PENDING";
   const items = order.items;
 
   return (
@@ -66,6 +69,8 @@ export default async function OrderDetailPage({
             </p>
           </div>
         )}
+
+        {checking && <OrderCheckingBanner serial={order.serial} />}
 
         {order.status !== "CANCELLED" && (
           <section className="mb-8 rounded border border-line bg-white p-5">
