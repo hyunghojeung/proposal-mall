@@ -5,26 +5,20 @@ import { sendOrderConfirmation } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
-// 결제 완료 후 사이다페이가 사용자 브라우저를 이 URL로 리다이렉트 (GET 또는 POST).
-// returnmode="POST" 이므로 POST body에 파라미터가 담겨올 수 있다.
+// 결제 완료 후 사이다페이가 사용자 브라우저를 이 URL로 리다이렉트
+// returnmode=JUST → GET 요청으로 호출됨
+// returnurl 에 ?order=Pro-0001 를 넣었으므로 쿼리파라미터로 주문번호 식별
 async function handleReturn(req: NextRequest) {
   const adapter = getPaymentAdapter();
   const origin = req.nextUrl.origin;
 
-  // GET: query string / POST: form body 둘 다 지원
   let params: URLSearchParams;
   if (req.method === "POST") {
+    // 혹시 POST로 오는 경우 대비
     const text = await req.text();
     params = new URLSearchParams(text);
-    // JSON으로 왔을 경우 대비
-    if (text.startsWith("{")) {
-      try {
-        const obj = JSON.parse(text) as Record<string, string>;
-        params = new URLSearchParams(Object.entries(obj).map(([k, v]) => [k, String(v)]));
-      } catch {
-        // 그대로 사용
-      }
-    }
+    // returnurl의 쿼리파라미터도 병합
+    req.nextUrl.searchParams.forEach((v, k) => params.set(k, v));
   } else {
     params = req.nextUrl.searchParams;
   }
@@ -35,9 +29,13 @@ async function handleReturn(req: NextRequest) {
     return NextResponse.redirect(`${origin}/checkout?fail=missing-order`);
   }
 
-  if (result.status !== "success") {
+  if (result.status === "cancelled") {
+    return NextResponse.redirect(`${origin}/checkout?fail=cancelled`);
+  }
+
+  if (result.status === "failed") {
     return NextResponse.redirect(
-      `${origin}/checkout?fail=${encodeURIComponent(result.status)}`,
+      `${origin}/checkout?fail=${encodeURIComponent(result.errorMessage ?? "failed")}`,
     );
   }
 
@@ -48,12 +46,7 @@ async function handleReturn(req: NextRequest) {
     return NextResponse.redirect(`${origin}/checkout?fail=order-not-found`);
   }
 
-  // 금액 검증 — 변조 방지
-  if (typeof result.amount === "number" && result.amount !== order.totalAmount) {
-    return NextResponse.redirect(`${origin}/checkout?fail=amount-mismatch`);
-  }
-
-  // PENDING → PAID (중복 처리 방지)
+  // feedback(webhook)이 먼저 도착해서 이미 PAID일 수 있음 — 중복 처리 방지
   if (order.status === "PENDING") {
     const updated = await prisma.order.update({
       where: { id: order.id },
@@ -63,7 +56,6 @@ async function handleReturn(req: NextRequest) {
       },
       include: { items: true },
     });
-    // best-effort: 이메일/Dropbox 알림
     await sendOrderConfirmation(updated);
   }
 
