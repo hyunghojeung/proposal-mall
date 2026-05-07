@@ -83,21 +83,38 @@ export function CheckoutForm() {
   const fee = shippingFee(subtotal, deliveryMethod);
   const total = subtotal + fee;
 
-  // 다음 주소 검색 (카카오 Postcode API)
+  // 카카오 우편번호 서비스 (다음 주소 검색)
   function handleAddressSearch() {
     if (typeof window === "undefined") return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const daum = (window as any).daum;
-    if (daum?.Postcode) {
-      new daum.Postcode({
-        oncomplete: (data: { address: string; buildingName?: string }) => {
-          setAddress(data.address + (data.buildingName ? ` (${data.buildingName})` : ""));
-        },
-      }).open();
-    } else {
-      // API 미로드 시 직접 입력 안내
-      alert("주소를 직접 입력해 주세요.");
+    if (!daum?.Postcode) {
+      alert("주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
+      return;
     }
+    new daum.Postcode({
+      oncomplete(data: {
+        userSelectedType: string;   // R: 도로명, J: 지번
+        roadAddress: string;        // 도로명 주소
+        jibunAddress: string;       // 지번 주소
+        buildingName: string;       // 건물명
+        apartment: string;          // 아파트 여부
+        zonecode: string;           // 우편번호
+      }) {
+        // 도로명 우선, 없으면 지번
+        const base =
+          data.userSelectedType === "R" ? data.roadAddress : data.jibunAddress;
+        const building = data.buildingName
+          ? ` (${data.buildingName})`
+          : "";
+        setAddress(`[${data.zonecode}] ${base}${building}`);
+        setAddressDetail(""); // 상세주소 초기화 후 포커스
+        // 상세주소 input에 포커스 (약간의 딜레이 필요)
+        setTimeout(() => {
+          document.getElementById("address-detail")?.focus();
+        }, 100);
+      },
+    }).open();
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -247,8 +264,8 @@ export function CheckoutForm() {
                 </div>
               </Field>
               <Field label="상세주소">
-                <input value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)}
-                  maxLength={200} placeholder="동, 호수 등 상세주소"
+                <input id="address-detail" value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)}
+                  maxLength={200} placeholder="동, 호수 등 상세주소를 입력하세요"
                   className={input} />
               </Field>
             </div>
