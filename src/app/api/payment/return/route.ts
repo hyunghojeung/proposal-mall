@@ -29,14 +29,9 @@ async function handleReturn(req: NextRequest) {
     return NextResponse.redirect(`${origin}/checkout?fail=missing-order`);
   }
 
-  if (result.status === "cancelled") {
-    return NextResponse.redirect(`${origin}/checkout?fail=cancelled`);
-  }
-
-  if (result.status === "failed") {
-    return NextResponse.redirect(
-      `${origin}/checkout?fail=${encodeURIComponent(result.errorMessage ?? "failed")}`,
-    );
+  if (result.status === "cancelled" || result.status === "failed") {
+    const p = new URLSearchParams({ status: result.status });
+    return NextResponse.redirect(`${origin}/payment/complete?${p}`);
   }
 
   const order = await prisma.order.findUnique({
@@ -59,7 +54,14 @@ async function handleReturn(req: NextRequest) {
     await sendOrderConfirmation(updated);
   }
 
-  return NextResponse.redirect(`${origin}/orders/${order.serial}?paid=1`);
+  // 팝업 창에서 호출되는 경우 → 결제완료 팝업 페이지로 이동
+  // 팝업 닫힘 감지 시 부모 창이 /orders/{serial}?paid=1 로 이동
+  const completeParams = new URLSearchParams({
+    serial: order.serial,
+    amount: String(order.totalAmount),
+    status: "success",
+  });
+  return NextResponse.redirect(`${origin}/payment/complete?${completeParams}`);
 }
 
 export const GET = handleReturn;

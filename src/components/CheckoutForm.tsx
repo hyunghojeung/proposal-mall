@@ -166,9 +166,36 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
       const data = (await res.json()) as CheckoutResp;
       if (!res.ok) { setErr(data.error ?? "결제 요청 실패"); setSubmitting(false); return; }
       const payment = data.payment;
+      const orderSerial = data.order?.serial ?? "";
       if (!payment) { setErr("결제 정보가 없습니다"); setSubmitting(false); return; }
+
+      // stub 모드 — 팝업 없이 바로 이동
       if (payment.testCompletedUrl) { window.location.href = payment.testCompletedUrl; return; }
-      if (payment.redirectUrl) { window.location.href = payment.redirectUrl; return; }
+
+      // 사이다페이 — 팝업으로 결제창 열기 (백업 사이트와 동일)
+      const payUrl = payment.redirectUrl;
+      if (payUrl) {
+        const popup = window.open(
+          payUrl,
+          "ciderpay_payment",
+          "width=430,height=720,scrollbars=no,resizable=yes,toolbar=no,menubar=no,location=no,status=no"
+        );
+        if (popup) {
+          // 팝업 닫힘 감지 → 주문 상세 페이지로 이동
+          const timer = setInterval(() => {
+            if (popup.closed) {
+              clearInterval(timer);
+              window.location.href = `/orders/${orderSerial}?paid=1`;
+            }
+          }, 800);
+        } else {
+          // 팝업 차단 시 전체 페이지 이동으로 fallback
+          alert("팝업이 차단되었습니다. 팝업 차단을 해제한 후 다시 시도해 주세요.\n(허용 후 아래 결제하기 버튼을 다시 눌러주세요)");
+          setSubmitting(false);
+        }
+        return;
+      }
+
       if (payment.formAction) {
         const form = document.createElement("form");
         form.action = payment.formAction.url;

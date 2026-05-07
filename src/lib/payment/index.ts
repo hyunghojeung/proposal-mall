@@ -7,7 +7,11 @@ import { stubAdapter } from "./stub";
 import type { PaymentAdapter } from "./types";
 
 export function getPaymentAdapter(): PaymentAdapter {
-  if (process.env.CIDERPAY_DEV_ID && process.env.CIDERPAY_DEV_TOKEN) {
+  // CIDERPAY_API_KEY (정적 토큰) 또는 CIDERPAY_DEV_ID + CIDERPAY_DEV_TOKEN (동적 조회) 중 하나 설정 시 실제 결제
+  if (
+    process.env.CIDERPAY_API_KEY ||
+    (process.env.CIDERPAY_DEV_ID && process.env.CIDERPAY_DEV_TOKEN)
+  ) {
     return cidapayAdapter;
   }
   return stubAdapter;

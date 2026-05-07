@@ -109,11 +109,20 @@ export const cidapayAdapter: PaymentAdapter = {
   async init(input: PaymentInitInput): Promise<PaymentInitResult> {
     const mid = getMid();
 
-    // 0단계: 토큰 결제 활성화 (childToken 사용 전 필수)
-    await setPayTokenYn("Y");
-
-    // 1단계: approvalToken 조회
-    const { approvalToken } = await fetchChildToken();
+    // approvalToken 획득 방법 선택
+    // - CIDERPAY_API_KEY 가 설정된 경우 → 정적 토큰으로 바로 사용 (백업 사이트 방식)
+    // - CIDERPAY_DEV_ID + CIDERPAY_DEV_TOKEN 이 설정된 경우 → childToken API 동적 조회
+    let approvalToken: string;
+    const staticKey = process.env.CIDERPAY_API_KEY;
+    if (staticKey) {
+      approvalToken = staticKey;
+    } else {
+      // 0단계: 토큰 결제 활성화 (childToken 사용 전 필수)
+      await setPayTokenYn("Y");
+      // 1단계: approvalToken 동적 조회
+      const tokenResult = await fetchChildToken();
+      approvalToken = tokenResult.approvalToken;
+    }
 
     // returnurl에 주문번호 포함 → return 핸들러에서 주문 식별
     const origin      = new URL(input.returnUrl).origin;
