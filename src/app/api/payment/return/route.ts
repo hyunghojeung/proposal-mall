@@ -23,15 +23,24 @@ async function handleReturn(req: NextRequest) {
     params = req.nextUrl.searchParams;
   }
 
+  // 수신 파라미터 전체 로그 (디버깅용)
+  console.log("[payment/return] 수신 파라미터:", Object.fromEntries(params.entries()));
+
   try {
     const result = adapter.parseReturn(params);
+    console.log("[payment/return] 파싱 결과:", result);
 
     if (!result.orderSerial) {
+      console.warn("[payment/return] orderSerial 없음");
       return NextResponse.redirect(`${origin}/checkout?fail=missing-order`);
     }
 
     if (result.status === "cancelled" || result.status === "failed") {
-      const p = new URLSearchParams({ status: result.status });
+      console.warn("[payment/return] 결제 취소/실패:", result.status, result.errorMessage);
+      const p = new URLSearchParams({
+        status: result.status,
+        msg: result.errorMessage ?? "",
+      });
       return NextResponse.redirect(`${origin}/payment/complete?${p}`);
     }
 
