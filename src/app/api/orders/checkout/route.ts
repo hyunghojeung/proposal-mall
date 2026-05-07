@@ -134,16 +134,23 @@ export async function POST(req: NextRequest) {
   // PG 결제 초기화
   const adapter = getPaymentAdapter();
   const origin = req.nextUrl.origin;
-  const paymentInit = await adapter.init({
-    orderSerial: order.serial,
-    amount: order.totalAmount,
-    customerName: order.customerName,
-    customerEmail: order.customerEmail,
-    customerPhone: order.customerPhone,
-    productName: `제안서몰 주문 (${order.items.length}건)`,
-    returnUrl: `${origin}/api/payment/return`,
-    notifyUrl: `${origin}/api/payment/webhook`,
-  });
+  let paymentInit;
+  try {
+    paymentInit = await adapter.init({
+      orderSerial: order.serial,
+      amount: order.totalAmount,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      customerPhone: order.customerPhone,
+      productName: `제안서몰 주문 (${order.items.length}건)`,
+      returnUrl: `${origin}/api/payment/return`,
+      notifyUrl: `${origin}/api/payment/webhook`,
+    });
+  } catch (pgErr) {
+    const msg = pgErr instanceof Error ? pgErr.message : "결제 초기화 실패";
+    console.error("[checkout] PG 초기화 오류:", msg);
+    return NextResponse.json({ error: `결제 오류: ${msg}` }, { status: 502 });
+  }
 
   return NextResponse.json({
     order: {
