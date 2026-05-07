@@ -13,7 +13,7 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-page items-center gap-6 px-6">
         <Link
           href="/"
-          className="shrink-0 text-[22px] font-black italic tracking-tight text-brand"
+          className="shrink-0 text-[24px] font-black italic tracking-tight text-brand"
         >
           제안서몰
         </Link>
@@ -26,7 +26,7 @@ export function Header() {
             type="search"
             name="q"
             placeholder="찾으시는 상품을 검색하세요"
-            className="min-w-0 flex-1 border-0 bg-transparent px-3.5 py-2 text-[13px] text-ink outline-none"
+            className="min-w-0 flex-1 border-0 bg-transparent px-3.5 py-2 text-[14px] text-ink outline-none"
           />
           <button
             type="submit"
@@ -54,7 +54,7 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="whitespace-nowrap rounded-sm px-4 py-2 text-[14px] font-bold text-ink transition-colors hover:text-brand"
+              className="whitespace-nowrap rounded-sm px-4 py-2 text-[15px] font-bold text-ink transition-colors hover:text-brand"
             >
               {item.label}
             </Link>

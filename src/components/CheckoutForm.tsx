@@ -94,22 +94,18 @@ export function CheckoutForm() {
     }
     new daum.Postcode({
       oncomplete(data: {
-        userSelectedType: string;   // R: 도로명, J: 지번
-        roadAddress: string;        // 도로명 주소
-        jibunAddress: string;       // 지번 주소
-        buildingName: string;       // 건물명
-        apartment: string;          // 아파트 여부
-        zonecode: string;           // 우편번호
+        userSelectedType: string;
+        roadAddress: string;
+        jibunAddress: string;
+        buildingName: string;
+        apartment: string;
+        zonecode: string;
       }) {
-        // 도로명 우선, 없으면 지번
         const base =
           data.userSelectedType === "R" ? data.roadAddress : data.jibunAddress;
-        const building = data.buildingName
-          ? ` (${data.buildingName})`
-          : "";
+        const building = data.buildingName ? ` (${data.buildingName})` : "";
         setAddress(`[${data.zonecode}] ${base}${building}`);
-        setAddressDetail(""); // 상세주소 초기화 후 포커스
-        // 상세주소 input에 포커스 (약간의 딜레이 필요)
+        setAddressDetail("");
         setTimeout(() => {
           document.getElementById("address-detail")?.focus();
         }, 100);
@@ -177,9 +173,9 @@ export function CheckoutForm() {
   if (hydrated && items.length === 0) {
     return (
       <div className="py-20 text-center">
-        <p className="mb-4 text-[15px] text-ink-sub">장바구니가 비어 결제할 수 없습니다.</p>
+        <p className="mb-4 text-[16px] text-ink-sub">장바구니가 비어 결제할 수 없습니다.</p>
         <button type="button" onClick={() => router.push("/products")}
-          className="rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark">
+          className="rounded-sm bg-brand px-5 py-2.5 text-[15px] font-bold text-white hover:bg-brand-dark">
           상품 둘러보기
         </button>
       </div>
@@ -191,7 +187,7 @@ export function CheckoutForm() {
       {/* ── 왼쪽: 입력 섹션 ── */}
       <div className="space-y-5">
         {failReason && (
-          <div className="rounded border border-brand bg-brand-light px-4 py-3 text-[13px] text-brand">
+          <div className="rounded border border-brand bg-brand-light px-4 py-3 text-[14px] text-brand">
             결제가 완료되지 않았습니다 ({failReason}). 다시 시도해 주세요.
           </div>
         )}
@@ -227,7 +223,7 @@ export function CheckoutForm() {
           icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>}
           title="배송 정보"
           extra={
-            <label className="flex cursor-pointer items-center gap-1.5 text-[12px] text-ink-sub">
+            <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-ink-sub">
               <input type="checkbox" checked={sameAsOrderer}
                 onChange={(e) => setSameAsOrderer(e.target.checked)}
                 className="accent-[#E8481A]" />
@@ -255,7 +251,7 @@ export function CheckoutForm() {
                     required placeholder="주소 검색 버튼을 클릭하세요"
                     className={`${input} flex-1`} readOnly onClick={handleAddressSearch} />
                   <button type="button" onClick={handleAddressSearch}
-                    className="flex shrink-0 items-center gap-1 rounded-sm border border-line px-3 py-2 text-[13px] text-ink-sub hover:border-brand hover:text-brand">
+                    className="flex shrink-0 items-center gap-1 rounded-sm border border-line px-3 py-2 text-[14px] text-ink-sub hover:border-brand hover:text-brand">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
                     </svg>
@@ -283,7 +279,7 @@ export function CheckoutForm() {
         <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} title="배송방법">
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             {DELIVERY_OPTIONS.map(({ value, label }) => (
-              <label key={value} className="flex cursor-pointer items-center gap-2 text-[14px]">
+              <label key={value} className="flex cursor-pointer items-center gap-2 text-[15px]">
                 <input type="radio" name="delivery" value={value}
                   checked={deliveryMethod === value}
                   onChange={() => setDeliveryMethod(value)}
@@ -304,7 +300,7 @@ export function CheckoutForm() {
               { value: "TRANSFER", label: "무통장 입금" },
             ] as { value: PaymentMethod; label: string }[]).map(({ value, label }) => (
               <label key={value}
-                className={`flex cursor-pointer items-center gap-3 rounded-sm border px-4 py-3 text-[14px] transition-colors ${
+                className={`flex cursor-pointer items-center gap-3 rounded-sm border px-4 py-3 text-[15px] transition-colors ${
                   paymentMethod === value ? "border-brand bg-brand-light" : "border-line hover:border-ink"
                 }`}>
                 <input type="radio" name="payment" value={value}
@@ -319,7 +315,7 @@ export function CheckoutForm() {
 
         {/* ⑤ 주문 요청 사항 */}
         <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>} title="주문 요청 사항">
-          <div className="mb-3 rounded-sm bg-bg px-4 py-3 text-[12px] text-ink-sub space-y-1">
+          <div className="mb-3 rounded-sm bg-bg px-4 py-3 text-[13px] text-ink-sub space-y-1">
             <p><span className="font-bold text-ink">※세금계산서 요청</span></p>
             <p>세금계산서 정보를 여기에 직접 입력하시거나 사업자등록증을 이메일로 첨부해서 보내주세요<br/>
               (<a href="mailto:blackcopy2@naver.com" className="text-brand underline-offset-2 hover:underline">blackcopy2@naver.com</a>)
@@ -336,14 +332,14 @@ export function CheckoutForm() {
 
       {/* ── 오른쪽: 주문 요약 ── */}
       <aside className="rounded border border-line bg-white p-6 lg:sticky lg:top-24 lg:h-fit">
-        <h2 className="text-[16px] font-bold text-ink">주문 내역</h2>
+        <h2 className="text-[17px] font-bold text-ink">주문 내역</h2>
 
-        <ul className="mt-4 space-y-3 border-t border-line pt-4 text-[13px]">
+        <ul className="mt-4 space-y-3 border-t border-line pt-4 text-[14px]">
           {items.map((it) => (
             <li key={it.id} className="flex justify-between gap-3">
               <div>
                 <p className="font-medium text-ink">{it.productName}</p>
-                <p className="mt-0.5 text-[11px] text-ink-sub">
+                <p className="mt-0.5 text-[12px] text-ink-sub">
                   {Object.entries(it.options).map(([k, v]) => `${k}: ${v}`).join(" · ")}
                   {it.pageCount ? ` · ${it.pageCount}쪽` : ""} · {it.quantity}개
                 </p>
@@ -353,7 +349,7 @@ export function CheckoutForm() {
           ))}
         </ul>
 
-        <div className="mt-4 space-y-1.5 border-t border-line pt-4 text-[13px]">
+        <div className="mt-4 space-y-1.5 border-t border-line pt-4 text-[14px]">
           <div className="flex justify-between">
             <span className="text-ink-sub">상품 합계</span>
             <span className="font-medium text-ink">{subtotal.toLocaleString()}원</span>
@@ -369,21 +365,21 @@ export function CheckoutForm() {
         </div>
 
         <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
-          <span className="text-[14px] font-bold text-ink">결제 금액</span>
-          <span className="text-[22px] font-black tracking-tight text-brand">
+          <span className="text-[15px] font-bold text-ink">결제 금액</span>
+          <span className="text-[24px] font-black tracking-tight text-brand">
             {total.toLocaleString()}원
           </span>
         </div>
 
         {err && (
-          <p className="mt-3 rounded-sm border border-brand bg-brand-light px-3 py-2 text-[12px] text-brand">{err}</p>
+          <p className="mt-3 rounded-sm border border-brand bg-brand-light px-3 py-2 text-[13px] text-brand">{err}</p>
         )}
 
         <button type="submit" disabled={submitting}
-          className="mt-4 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60">
+          className="mt-4 w-full rounded-sm bg-brand py-3.5 text-[16px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60">
           {submitting ? "처리 중…" : "결제하기"}
         </button>
-        <p className="mt-2 text-center text-[11px] text-ink-sub">
+        <p className="mt-2 text-center text-[12px] text-ink-sub">
           다음 단계에서 주문 정보를 확인하고 결제까지 완료합니다.
         </p>
       </aside>
@@ -393,7 +389,7 @@ export function CheckoutForm() {
 
 // ── 공통 스타일 ──
 const input =
-  "w-full rounded-sm border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand";
+  "w-full rounded-sm border border-line px-3 py-2.5 text-[15px] outline-none focus:border-brand";
 
 // ── 섹션 카드 ──
 function Card({
@@ -410,7 +406,7 @@ function Card({
   return (
     <div className="rounded-lg border border-line bg-white p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink">
+        <h2 className="flex items-center gap-2 text-[16px] font-bold text-ink">
           {icon}
           {title}
         </h2>
@@ -435,7 +431,7 @@ function Field({
 }) {
   return (
     <label className={`block ${className ?? ""}`}>
-      <span className="mb-1.5 block text-[13px] font-medium text-ink">
+      <span className="mb-1.5 block text-[14px] font-medium text-ink">
         {label}
         {required && <span className="ml-0.5 text-brand">*</span>}
       </span>

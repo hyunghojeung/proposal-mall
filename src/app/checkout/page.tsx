@@ -18,12 +18,12 @@ export default function CheckoutPage() {
       <NoticeBar />
       <Header />
       <main className="mx-auto min-h-[60vh] max-w-page px-6 py-10">
-        <h1 className="border-b border-line pb-5 text-[24px] font-black tracking-tight text-ink">
+        <h1 className="border-b border-line pb-5 text-[26px] font-black tracking-tight text-ink">
           결제
         </h1>
         <div className="mt-8">
           <Suspense
-            fallback={<p className="py-10 text-center text-[14px] text-ink-sub">불러오는 중…</p>}
+            fallback={<p className="py-10 text-center text-[15px] text-ink-sub">불러오는 중…</p>}
           >
             <CheckoutForm />
           </Suspense>
