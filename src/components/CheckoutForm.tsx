@@ -23,6 +23,20 @@ interface CheckoutResp {
 
 type PaymentMethod = "CARD" | "TRANSFER";
 
+// 관리자 테스트용 더미 데이터
+const TEST_DATA = {
+  customerName: "테스트주문자",
+  customerPhone: "010-1234-5678",
+  customerEmail: "test@blackcopy.co.kr",
+  company: "블랙카피",
+  recipientName: "테스트수령인",
+  recipientPhone: "010-1234-5678",
+  address: "[06164] 서울 강남구 테헤란로 131 (한국타이어빌딩)",
+  addressDetail: "10층 블랙카피",
+  shippingMemo: "테스트 배송 메모",
+  memo: "테스트 주문입니다. 실제 처리하지 마세요.",
+} as const;
+
 const DELIVERY_OPTIONS: { value: DeliveryMethod; label: string }[] = [
   { value: "COURIER_PREPAID", label: "택배선불" },
   { value: "COURIER_COLLECT", label: "택배착불" },
@@ -33,7 +47,7 @@ const DELIVERY_OPTIONS: { value: DeliveryMethod; label: string }[] = [
 const needsAddress = (m: DeliveryMethod) =>
   m === "COURIER_PREPAID" || m === "COURIER_COLLECT" || m === "QUICK_COLLECT";
 
-export function CheckoutForm() {
+export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const failReason = searchParams.get("fail");
@@ -42,25 +56,25 @@ export function CheckoutForm() {
   const [hydrated, setHydrated] = useState(false);
 
   // 주문자 정보
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [company, setCompany] = useState("");
+  const [customerName, setCustomerName] = useState(isAdmin ? TEST_DATA.customerName : "");
+  const [customerPhone, setCustomerPhone] = useState(isAdmin ? TEST_DATA.customerPhone : "");
+  const [customerEmail, setCustomerEmail] = useState(isAdmin ? TEST_DATA.customerEmail : "");
+  const [company, setCompany] = useState(isAdmin ? TEST_DATA.company : "");
 
   // 배송 정보
   const [sameAsOrderer, setSameAsOrderer] = useState(false);
-  const [recipientName, setRecipientName] = useState("");
-  const [recipientPhone, setRecipientPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [addressDetail, setAddressDetail] = useState("");
-  const [shippingMemo, setShippingMemo] = useState("");
+  const [recipientName, setRecipientName] = useState(isAdmin ? TEST_DATA.recipientName : "");
+  const [recipientPhone, setRecipientPhone] = useState(isAdmin ? TEST_DATA.recipientPhone : "");
+  const [address, setAddress] = useState(isAdmin ? TEST_DATA.address : "");
+  const [addressDetail, setAddressDetail] = useState(isAdmin ? TEST_DATA.addressDetail : "");
+  const [shippingMemo, setShippingMemo] = useState(isAdmin ? TEST_DATA.shippingMemo : "");
 
   // 배송방법 / 결제방법
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("COURIER_PREPAID");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CARD");
 
   // 주문 요청사항
-  const [memo, setMemo] = useState("");
+  const [memo, setMemo] = useState(isAdmin ? TEST_DATA.memo : "");
 
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
