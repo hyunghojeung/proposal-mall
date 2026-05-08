@@ -322,34 +322,30 @@ export default async function AdminOrdersPage({
                       className="border-t border-[#1e2840] bg-[#141b2d]"
                     >
                       <td />
-                      <td colSpan={7} className="px-5 py-2.5 text-[12px]">
-                        {isPickup ? (
-                          /* 직접방문 */
-                          <span className="text-[#7888a4]">
-                            <span className="font-semibold text-[#9ba8c4]">수령:</span>{" "}
-                            직접 방문 수령
-                            {o.memo && (
-                              <span className="ml-4">
-                                <span className="font-semibold text-[#9ba8c4]">메모:</span>{" "}
-                                {o.memo}
-                              </span>
-                            )}
+                      <td colSpan={7} className="px-5 py-3 text-[12px]">
+                        <div className="flex flex-wrap gap-x-6 gap-y-1">
+                          {/* 수령인 */}
+                          <span>
+                            <span className="font-semibold text-[#8899b0]">수령인:</span>{" "}
+                            <span className="text-[#c5d1e8]">
+                              {o.company ? `${o.company} (${o.customerName})` : o.customerName}
+                            </span>
                           </span>
-                        ) : (
-                          /* 택배/퀵 */
-                          <div className="space-y-0.5">
-                            {shippingLine && (
-                              <p className="text-[#9ba8c4]">
-                                <span className="font-semibold">배송:</span>{" "}
-                                {shippingLine}
-                              </p>
-                            )}
-                            <p className="text-[#7888a4]">
-                              <span className="font-semibold text-[#8899b0]">배송메모:</span>{" "}
-                              {o.memo ?? ""}
-                            </p>
-                          </div>
-                        )}
+                          {/* 주소 */}
+                          <span>
+                            <span className="font-semibold text-[#8899b0]">주소:</span>{" "}
+                            <span className="text-[#c5d1e8]">
+                              {isPickup ? "직접 방문 수령" : (o.shippingAddress ?? "-")}
+                            </span>
+                          </span>
+                          {/* 배송메모 */}
+                          <span>
+                            <span className="font-semibold text-[#8899b0]">배송메모:</span>{" "}
+                            <span className={o.memo ? "text-[#c5d1e8]" : "text-[#4b5568]"}>
+                              {o.memo ?? "없음"}
+                            </span>
+                          </span>
+                        </div>
                       </td>
                     </tr>
                   </>
