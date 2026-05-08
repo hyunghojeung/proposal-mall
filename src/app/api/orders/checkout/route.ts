@@ -20,6 +20,7 @@ const checkoutSchema = z.object({
   customerPhone: z.string().min(1).max(40),
   customerEmail: z.string().email(),
   company: z.string().max(100).optional(),
+  paymentMethod: z.enum(["CARD", "TRANSFER"]).default("CARD"),
   deliveryMethod: z.enum(["COURIER_PREPAID", "COURIER_COLLECT", "QUICK_PREPAID", "QUICK_COLLECT", "PICKUP"]),
   shippingAddress: z.string().max(500).optional(),
   memo: z.string().max(2000).optional(),
@@ -131,7 +132,22 @@ export async function POST(req: NextRequest) {
     });
   });
 
-  // PG 결제 초기화
+  // 무통장 입금 → PG 건너뜀, 주문은 PENDING 상태 유지
+  if (data.paymentMethod === "TRANSFER") {
+    return NextResponse.json({
+      order: {
+        serial: order.serial,
+        totalAmount: order.totalAmount,
+        shippingFee: order.shippingFee,
+        itemCount: order.items.length,
+        createdAt: order.createdAt,
+        productNames: order.items.map((it) => it.productName),
+      },
+      payment: { adapter: "transfer" },
+    });
+  }
+
+  // PG 결제 초기화 (카드)
   const adapter = getPaymentAdapter();
 
   // Railway 리버스 프록시 환경에서 req.nextUrl.origin 이 localhost:8080 으로 잘못 인식되는 문제 방지.
