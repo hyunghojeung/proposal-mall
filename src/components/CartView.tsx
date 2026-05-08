@@ -22,8 +22,16 @@ export function CartView() {
   useEffect(() => {
     setItems(readCart());
     setHydrated(true);
+    // localStorage에서 이전에 선택한 배송방법 복원
+    const saved = localStorage.getItem("cart_delivery") as DeliveryMethod | null;
+    if (saved) setDelivery(saved);
     return subscribeCart(() => setItems(readCart()));
   }, []);
+
+  // 배송방법 변경 시 localStorage에 저장
+  useEffect(() => {
+    if (hydrated) localStorage.setItem("cart_delivery", delivery);
+  }, [delivery, hydrated]);
 
   if (!hydrated) {
     return <p className="py-16 text-center text-[14px] text-ink-sub">불러오는 중…</p>;
