@@ -1,11 +1,11 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ProductCategory } from "@prisma/client";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { prisma } from "@/lib/prisma";
 
-export const metadata = { title: "전체상품 | 제안서몰" };
+export const metadata = { title: "전체상품 | 제안서박스몰" };
 export const dynamic = "force-dynamic";
 
 const CATEGORY_PARAMS: Record<string, ProductCategory> = {

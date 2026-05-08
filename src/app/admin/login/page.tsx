@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
         className="w-full max-w-sm rounded border border-line bg-white p-8 shadow-sm"
       >
         <h1 className="text-[20px] font-black text-ink">관리자 로그인</h1>
-        <p className="mt-1 text-[13px] text-ink-sub">제안서몰 관리 패널</p>
+        <p className="mt-1 text-[13px] text-ink-sub">제안서박스몰 관리 패널</p>
 
         <label className="mt-6 block">
           <span className="mb-1.5 block text-[13px] font-bold text-ink">비밀번호</span>

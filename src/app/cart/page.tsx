@@ -1,9 +1,9 @@
-import { Header } from "@/components/Header";
+﻿import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { CartView } from "@/components/CartView";
 
-export const metadata = { title: "장바구니 | 제안서몰" };
+export const metadata = { title: "장바구니 | 제안서박스몰" };
 
 export default function CartPage() {
   return (

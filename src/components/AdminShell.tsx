@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { LogoutButton } from "./LogoutButton";
 
 const NAV = [
@@ -25,7 +25,7 @@ export function AdminShell({
       <header className="border-b border-line bg-white">
         <div className="mx-auto flex h-[72px] max-w-[1800px] items-center justify-between px-8">
           <Link href="/admin" className="text-[24px] font-black italic text-brand">
-            제안서몰 · 관리자
+            제안서박스몰 · 관리자
           </Link>
           <div className="flex items-center gap-5">
             <Link href="/" className="text-[16px] text-ink-sub hover:text-ink">

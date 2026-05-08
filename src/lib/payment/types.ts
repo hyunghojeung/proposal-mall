@@ -1,4 +1,4 @@
-// 결제 어댑터 인터페이스. 사이다페이는 별도 어댑터로 구현 (lib/payment/cidapay.ts).
+﻿// 결제 어댑터 인터페이스. 사이다페이는 별도 어댑터로 구현 (lib/payment/cidapay.ts).
 // 개발 환경에선 stub 어댑터가 즉시 성공으로 처리한다.
 
 export interface PaymentInitInput {
@@ -7,7 +7,7 @@ export interface PaymentInitInput {
   customerName: string;
   customerEmail: string;
   customerPhone: string;
-  productName: string;     // 결제창 표시용 (예: "제안서몰 주문 (3건)")
+  productName: string;     // 결제창 표시용 (예: "제안서박스몰 주문 (3건)")
   returnUrl: string;       // 결제 완료 후 사용자 리다이렉트
   notifyUrl: string;       // 서버-서버 웹훅 URL
 }

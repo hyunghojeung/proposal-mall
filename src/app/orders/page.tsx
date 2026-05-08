@@ -1,11 +1,11 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { prisma } from "@/lib/prisma";
 import { DELIVERY_LABELS } from "@/lib/pricing";
 
-export const metadata = { title: "주문현황 | 제안서몰" };
+export const metadata = { title: "주문현황 | 제안서박스몰" };
 export const dynamic = "force-dynamic";
 
 /* ──────────────────────────────────────────

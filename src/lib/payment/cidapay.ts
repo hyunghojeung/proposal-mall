@@ -1,4 +1,4 @@
-// 사이다페이 연동 어댑터 (공식 API 문서 기준)
+﻿// 사이다페이 연동 어댑터 (공식 API 문서 기준)
 //
 // 결제 흐름:
 //   1. GET  /oapi/pmember/makeWebKey                   → approvalToken 동적 발급
@@ -208,7 +208,7 @@ export const cidapayAdapter: PaymentAdapter = {
       var2:        "PROPOSAL_MALL",
       smsuse:      "Y",
       whereFrom:   "PROPOSAL_MALL_WEBSITE",
-      sellerMemo:  "제안서몰 주문 결제",
+      sellerMemo:  "제안서박스몰 주문 결제",
       makeQr:      "false",
       charSet:     "UTF-8",
       goods: [

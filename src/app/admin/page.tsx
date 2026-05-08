@@ -1,10 +1,10 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import Link from "next/link";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { AdminShell } from "@/components/AdminShell";
 import { prisma } from "@/lib/prisma";
 
-export const metadata = { title: "관리자 | 제안서몰" };
+export const metadata = { title: "관리자 | 제안서박스몰" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {

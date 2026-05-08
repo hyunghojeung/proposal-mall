@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export function Footer() {
   return (
@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto max-w-page px-6 py-14">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           <div>
-            <h2 className="text-[22px] font-black italic text-brand">제안서몰</h2>
+            <h2 className="text-[22px] font-black italic text-brand">제안서박스몰</h2>
             <p className="mt-3 text-[15px] leading-7 text-ink-sub">
               B2B 제안서 인쇄·제본·박스 전문 쇼핑몰
               <br />
@@ -55,7 +55,7 @@ export function Footer() {
           <Link href="/admin" className="transition-colors hover:text-ink-sub">
             © {new Date().getFullYear()} 블랙카피
           </Link>{" "}
-          · 제안서몰. All rights reserved.
+          · 제안서박스몰. All rights reserved.
         </div>
       </div>
     </footer>

@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+﻿import { Suspense } from "react";
 import Script from "next/script";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -6,7 +6,7 @@ import { NoticeBar } from "@/components/NoticeBar";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { isAdminAuthenticated } from "@/lib/auth";
 
-export const metadata = { title: "결제 | 제안서몰" };
+export const metadata = { title: "결제 | 제안서박스몰" };
 
 export default function CheckoutPage() {
   const isAdmin = isAdminAuthenticated();

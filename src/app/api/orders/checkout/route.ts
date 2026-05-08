@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
       customerName: order.customerName,
       customerEmail: order.customerEmail,
       customerPhone: order.customerPhone,
-      productName: `제안서몰 주문 (${order.items.length}건)`,
+      productName: `제안서박스몰 주문 (${order.items.length}건)`,
       returnUrl: `${origin}/api/payment/return`,
       notifyUrl: `${origin}/api/payment/webhook`,
     });

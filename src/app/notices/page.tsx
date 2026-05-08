@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = { title: "공지사항 | 제안서몰" };
+export const metadata: Metadata = { title: "공지사항 | 제안서박스몰" };
 export const dynamic = "force-dynamic";
 
 export default async function NoticesPage() {
@@ -24,7 +24,7 @@ export default async function NoticesPage() {
         {/* 페이지 타이틀 */}
         <div className="mb-8 border-b border-line pb-5">
           <h1 className="text-[26px] font-black tracking-tight text-ink">공지사항</h1>
-          <p className="mt-1.5 text-[13px] text-ink-sub">제안서몰의 새소식과 안내를 확인하세요.</p>
+          <p className="mt-1.5 text-[13px] text-ink-sub">제안서박스몰의 새소식과 안내를 확인하세요.</p>
         </div>
 
         {/* 목록 */}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 
@@ -421,7 +421,7 @@ export function ContactView() {
                 </div>
                 <div className="flex-1">
                   <p className="text-[13.5px] font-bold text-ink">카카오채널 채팅</p>
-                  <p className="text-[12px] text-ink-sub">@제안서몰 · 평일 09~18시</p>
+                  <p className="text-[12px] text-ink-sub">@제안서박스몰 · 평일 09~18시</p>
                 </div>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
                   <polyline points="9 18 15 12 9 6" />

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 const NAV = [
   { href: "/products", label: "전체상품" },
@@ -15,7 +15,7 @@ export function Header() {
           href="/"
           className="shrink-0 text-[26px] font-black italic tracking-tight text-brand"
         >
-          제안서몰
+          제안서박스몰
         </Link>
 
         <form

@@ -1,4 +1,4 @@
-// 결제 완료 시:
+﻿// 결제 완료 시:
 //   1) Dropbox 파일 요청 URL 생성 → order.fileLink 저장
 //   2) 고객에게 안내 메일 (주문 요약 + Dropbox 링크 + 대안 이메일 안내)
 //   3) 운영자(blackcopy2@naver.com)에게 BCC 사본
@@ -42,7 +42,7 @@ export async function sendOrderConfirmation(order: OrderWithItems): Promise<void
     const result = await sender.send({
       to: order.customerEmail,
       bcc: process.env.SMTP_FROM ?? "blackcopy2@naver.com",
-      subject: `[제안서몰] 주문 ${order.serial} 결제 완료 안내`,
+      subject: `[제안서박스몰] 주문 ${order.serial} 결제 완료 안내`,
       html,
       text: renderOrderConfirmationText({ order, fileLink }),
     });
@@ -68,10 +68,10 @@ function renderOrderConfirmationText({
   fileLink: string | null;
 }): string {
   const lines: string[] = [];
-  lines.push(`[제안서몰] 주문 ${order.serial} 결제 완료 안내`);
+  lines.push(`[제안서박스몰] 주문 ${order.serial} 결제 완료 안내`);
   lines.push("");
   lines.push(`${order.customerName}님, 안녕하세요.`);
-  lines.push("제안서몰에서 주문해 주셔서 감사합니다.");
+  lines.push("제안서박스몰에서 주문해 주셔서 감사합니다.");
   lines.push("");
   lines.push(`▶ 주문번호: ${order.serial}`);
   lines.push(`▶ 결제 금액: ${formatWon(order.totalAmount)}`);
@@ -154,7 +154,7 @@ function renderOrderConfirmationHtml({
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:10px;overflow:hidden;max-width:600px;width:100%;">
         <tr><td style="background:#E8481A;padding:24px 32px;">
-          <div style="font-size:20px;font-weight:900;color:#fff;font-style:italic;">제안서몰</div>
+          <div style="font-size:20px;font-weight:900;color:#fff;font-style:italic;">제안서박스몰</div>
         </td></tr>
 
         <tr><td style="padding:32px;">
@@ -192,7 +192,7 @@ function renderOrderConfirmationHtml({
         </td></tr>
 
         <tr><td style="background:#F5F5F5;padding:18px 32px;text-align:center;font-size:11px;color:#AAA;">
-          © 블랙카피 · 제안서몰 · proposal.blackcopy.co.kr
+          © 블랙카피 · 제안서박스몰 · proposal.blackcopy.co.kr
         </td></tr>
       </table>
     </td></tr>

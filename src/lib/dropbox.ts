@@ -1,4 +1,4 @@
-// Dropbox 파일 요청(File Request) 헬퍼.
+﻿// Dropbox 파일 요청(File Request) 헬퍼.
 // 주문마다 고유 업로드 링크를 생성 → 고객은 로그인 없이 파일을 우리 Dropbox 폴더로 드롭.
 //
 // 환경변수:
@@ -146,7 +146,7 @@ export async function createOrderFileRequest(opts: {
   const folder =
     process.env.DROPBOX_DEST_FOLDER?.replace(/\/$/, "") ?? "/proposal-mall-orders";
   const destination = `${folder}/${opts.orderSerial}`;
-  const title = `[제안서몰] 주문 ${opts.orderSerial} — ${opts.customerName}`;
+  const title = `[제안서박스몰] 주문 ${opts.orderSerial} — ${opts.customerName}`;
 
   const token = await getAccessToken();
   const res = await fetch(`${DROPBOX_API}/file_requests/create`, {
