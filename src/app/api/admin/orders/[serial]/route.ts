@@ -28,3 +28,19 @@ export async function PATCH(
   });
   return NextResponse.json({ order });
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { serial: string } },
+) {
+  if (!isAdminRequest(req)) return adminUnauthorized();
+  try {
+    // 주문 상품 먼저 삭제 후 주문 삭제
+    await prisma.orderItem.deleteMany({ where: { order: { serial: params.serial } } });
+    await prisma.order.delete({ where: { serial: params.serial } });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("[DELETE /api/admin/orders] 삭제 실패:", e);
+    return NextResponse.json({ error: "삭제 실패" }, { status: 500 });
+  }
+}

@@ -3,57 +3,82 @@ import Link from "next/link";
 import { OrderStatus } from "@prisma/client";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { AdminShell } from "@/components/AdminShell";
+import { OrdersListActions } from "@/components/OrdersListActions";
 import { prisma } from "@/lib/prisma";
 import { DELIVERY_LABELS } from "@/lib/pricing";
 
 export const metadata = { title: "주문현황 | 관리자" };
 export const dynamic = "force-dynamic";
 
+/* ─────────────── 상태 필터 ─────────────── */
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "ALL",           label: "전체" },
   { value: "PENDING",       label: "결제대기" },
   { value: "PAID",          label: "결제완료" },
   { value: "IN_PRODUCTION", label: "제작중" },
   { value: "SHIPPING",      label: "배송중" },
-  { value: "DELIVERED",     label: "배송완료" },
+  { value: "DELIVERED",     label: "발송완료" },
   { value: "CANCELLED",     label: "취소" },
 ];
 
-const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  PENDING:       { label: "결제대기", cls: "bg-yellow-50 text-yellow-700 border border-yellow-200" },
-  PAID:          { label: "결제완료", cls: "bg-blue-50 text-blue-700 border border-blue-200" },
-  IN_PRODUCTION: { label: "제작중",   cls: "bg-orange-50 text-orange-700 border border-orange-200" },
-  SHIPPING:      { label: "배송중",   cls: "bg-purple-50 text-purple-700 border border-purple-200" },
-  DELIVERED:     { label: "발송완료", cls: "bg-green-50 text-green-700 border border-green-200" },
-  CANCELLED:     { label: "취소",     cls: "bg-gray-100 text-gray-500 border border-gray-200" },
+/* ─────────────── 배지 정의 ─────────────── */
+// 주문 진행 상태 (주문상태 컬럼)
+const ORDER_STATUS_BADGE: Record<string, { label: string; cls: string }> = {
+  PENDING:       { label: "결제대기", cls: "bg-[#f59e0b]" },
+  PAID:          { label: "결제완료", cls: "bg-[#22c55e]" },
+  IN_PRODUCTION: { label: "제작중",   cls: "bg-[#f97316]" },
+  SHIPPING:      { label: "배송중",   cls: "bg-[#3b82f6]" },
+  DELIVERED:     { label: "발송완료", cls: "bg-[#10b981]" },
+  CANCELLED:     { label: "취소",     cls: "bg-[#6b7280]" },
 };
 
-// Raw SQL 결과 타입
+/* 결제 완료 여부 (결제상태 컬럼) */
+function payStatusBadge(status: string) {
+  if (["PAID","IN_PRODUCTION","SHIPPING","DELIVERED"].includes(status)) {
+    return { label: "결제완료", cls: "bg-[#22c55e]" };
+  }
+  if (status === "CANCELLED") {
+    return { label: "취소",     cls: "bg-[#6b7280]" };
+  }
+  return { label: "결제대기", cls: "bg-[#f59e0b]" };
+}
+
+/* ─────────────── Raw SQL 결과 타입 ─────────────── */
 interface OrderRow {
-  id:             bigint;
-  serial:         string;
-  customerName:   string;
-  customerPhone:  string;
-  customerEmail:  string;
-  company:        string | null;
-  deliveryMethod: string;
-  totalAmount:    bigint;
-  shippingFee:    bigint;
-  status:         string;
-  paymentTid:     string | null;
-  createdAt:      Date;
-  itemCount:      bigint;
-  productNames:   string | null;
+  id:              bigint;
+  serial:          string;
+  customerName:    string;
+  customerPhone:   string;
+  customerEmail:   string;
+  company:         string | null;
+  deliveryMethod:  string;
+  shippingAddress: string | null;
+  totalAmount:     bigint;
+  shippingFee:     bigint;
+  status:          string;
+  paymentTid:      string | null;
+  createdAt:       Date;
+  itemCount:       bigint;
+  productNames:    string | null;
 }
 
-function PayBadge({ hasTid }: { hasTid: boolean }) {
-  return hasTid ? (
-    <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[15px] font-bold text-blue-700">카드</span>
-  ) : (
-    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[15px] font-bold text-amber-700">무통장</span>
-  );
+/* ─────────────── 결제수단 셀 ─────────────── */
+function PayMethodCell({ hasTid, tid }: { hasTid: boolean; tid: string | null }) {
+  if (hasTid) {
+    return (
+      <div>
+        <div className="flex items-center gap-1">
+          <span className="text-[#4ade80] text-[13px]">✓</span>
+          <span className="text-white text-[14px] font-medium">카드결제</span>
+        </div>
+        <p className="mt-0.5 text-[12px] text-[#9ba8c4]">{tid}</p>
+      </div>
+    );
+  }
+  return <span className="text-[14px] text-[#c5d1e8]">무통장입금</span>;
 }
 
+/* ─────────────── 페이지 컴포넌트 ─────────────── */
 export default async function AdminOrdersPage({
   searchParams,
 }: {
@@ -63,9 +88,9 @@ export default async function AdminOrdersPage({
 
   const statusParam = searchParams.status ?? "ALL";
   const q = searchParams.q?.trim() ?? "";
-
   const statusValid = Object.values(OrderStatus).includes(statusParam as OrderStatus);
 
+  /* 주문 목록 */
   const orders = await prisma.$queryRaw<OrderRow[]>`
     SELECT
       o.id,
@@ -75,23 +100,24 @@ export default async function AdminOrdersPage({
       o."customerEmail",
       o.company,
       o."deliveryMethod",
+      o."shippingAddress",
       o."totalAmount",
       o."shippingFee",
       o.status,
       o."paymentTid",
       o."createdAt",
-      COUNT(oi.id)                          AS "itemCount",
-      STRING_AGG(oi."productName", ', ')    AS "productNames"
+      COUNT(oi.id)                        AS "itemCount",
+      STRING_AGG(oi."productName", ', ')  AS "productNames"
     FROM orders o
     LEFT JOIN order_items oi ON oi."orderId" = o.id
     WHERE
       (${statusParam} = 'ALL' OR o.status::text = ${statusParam})
       AND (
         ${q} = ''
-        OR o.serial        ILIKE ${'%' + q + '%'}
-        OR o."customerName" ILIKE ${'%' + q + '%'}
+        OR o.serial         ILIKE ${'%' + q + '%'}
+        OR o."customerName"  ILIKE ${'%' + q + '%'}
         OR o."customerEmail" ILIKE ${'%' + q + '%'}
-        OR o."customerPhone" LIKE ${'%' + q + '%'}
+        OR o."customerPhone" LIKE  ${'%' + q + '%'}
       )
     GROUP BY o.id
     ORDER BY o."createdAt" DESC
@@ -101,6 +127,7 @@ export default async function AdminOrdersPage({
     return [] as OrderRow[];
   });
 
+  /* 상태별 카운트 */
   const countRows = await prisma.$queryRaw<{ status: string; cnt: bigint }[]>`
     SELECT status::text, COUNT(*) AS cnt FROM orders GROUP BY status
   `.catch(() => [] as { status: string; cnt: bigint }[]);
@@ -112,21 +139,24 @@ export default async function AdminOrdersPage({
     totalCount += Number(r.cnt);
   }
 
+  /* 총 주문 금액 (현재 필터 기준) */
+  const grandTotal = orders.reduce((s, o) => s + Number(o.totalAmount), 0);
+
   return (
     <AdminShell active="orders" title="주문현황">
 
-      {/* 상태 필터 탭 */}
+      {/* ── 상태 필터 탭 + 검색 ── */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           {STATUS_FILTERS.map((f) => {
             const active = statusParam === f.value;
             const href = f.value === "ALL" ? "/admin/orders" : `/admin/orders?status=${f.value}`;
-            const cnt = f.value === "ALL" ? totalCount : (countMap[f.value] ?? 0);
+            const cnt  = f.value === "ALL" ? totalCount : (countMap[f.value] ?? 0);
             return (
               <Link
                 key={f.value}
                 href={href}
-                className={`rounded border px-5 py-2.5 text-[16px] transition-colors ${
+                className={`rounded border px-5 py-2.5 text-[15px] transition-colors ${
                   active
                     ? "border-brand bg-brand-light font-bold text-brand"
                     : "border-line text-ink hover:border-ink"
@@ -134,7 +164,7 @@ export default async function AdminOrdersPage({
               >
                 {f.label}
                 {cnt > 0 && (
-                  <span className={`ml-2 rounded-full px-2 py-0.5 text-[13px] font-bold ${
+                  <span className={`ml-2 rounded-full px-2 py-0.5 text-[12px] font-bold ${
                     active ? "bg-brand text-white" : "bg-bg text-ink-sub"
                   }`}>
                     {cnt}
@@ -145,7 +175,6 @@ export default async function AdminOrdersPage({
           })}
         </div>
 
-        {/* 검색 */}
         <form action="/admin/orders" className="flex gap-2">
           {statusParam !== "ALL" && statusValid && (
             <input type="hidden" name="status" value={statusParam} />
@@ -154,18 +183,18 @@ export default async function AdminOrdersPage({
             name="q"
             defaultValue={q}
             placeholder="주문번호 / 이름 / 연락처 / 이메일"
-            className="w-80 rounded border border-line px-4 py-2.5 text-[16px] outline-none focus:border-brand"
+            className="w-80 rounded border border-line px-4 py-2.5 text-[15px] outline-none focus:border-brand"
           />
           <button
             type="submit"
-            className="rounded bg-ink px-5 py-2.5 text-[16px] font-medium text-white hover:bg-black"
+            className="rounded bg-ink px-5 py-2.5 text-[15px] font-medium text-white hover:bg-black"
           >
             검색
           </button>
           {q && (
             <Link
               href={statusParam !== "ALL" && statusValid ? `/admin/orders?status=${statusParam}` : "/admin/orders"}
-              className="rounded border border-line px-4 py-2.5 text-[16px] text-ink-sub hover:border-ink"
+              className="rounded border border-line px-4 py-2.5 text-[15px] text-ink-sub hover:border-ink"
             >
               초기화
             </Link>
@@ -173,78 +202,159 @@ export default async function AdminOrdersPage({
         </form>
       </div>
 
-      {/* 주문 테이블 */}
+      {/* ── 다크 테이블 영역 ── */}
       {orders.length === 0 ? (
-        <div className="rounded border border-line bg-bg px-4 py-16 text-center">
-          <p className="text-[18px] text-ink-sub">
+        <div className="rounded-xl border border-line bg-bg px-4 py-16 text-center">
+          <p className="text-[17px] text-ink-sub">
             {q ? `"${q}" 검색 결과가 없습니다.` : "주문이 없습니다."}
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-[16px]">
+        <div className="overflow-x-auto rounded-xl bg-[#1a2236]">
+          {/* 테이블 헤더 바 */}
+          <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#2a3350]">
+            <p className="text-[15px] font-bold text-white">
+              주문 목록{" "}
+              <span className="ml-1.5 rounded-full bg-[#2a3350] px-2.5 py-0.5 text-[13px] text-[#9ba8c4]">
+                {orders.length}건
+              </span>
+            </p>
+            <p className="text-[14px] text-[#9ba8c4]">
+              총 주문 금액:{" "}
+              <span className="ml-1 font-bold text-white">
+                ₩{grandTotal.toLocaleString()}
+              </span>
+            </p>
+          </div>
+
+          <table className="w-full border-collapse text-[14px]">
             <thead>
-              <tr className="border-y border-line bg-bg text-left text-[15px] text-ink-sub">
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">주문번호</th>
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">주문자</th>
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">연락처 / 이메일</th>
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">결제</th>
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">상품</th>
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">수령</th>
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">상태</th>
-                <th className="whitespace-nowrap px-4 py-4 text-right font-semibold">금액</th>
-                <th className="whitespace-nowrap px-4 py-4 font-semibold">주문일시</th>
+              <tr className="bg-[#141b2d] text-[13px] text-[#8899b0]">
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">번호</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">고객정보</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">결제상태</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">결제수단</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문상태</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-right font-semibold">결제금액</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문일</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">관리</th>
               </tr>
             </thead>
             <tbody>
               {orders.map((o) => {
-                const badge = STATUS_BADGE[o.status] ?? { label: o.status, cls: "bg-bg text-ink-sub border border-line" };
-                const names = o.productNames ?? "";
+                const orderBadge = ORDER_STATUS_BADGE[o.status] ??
+                  { label: o.status, cls: "bg-[#6b7280]" };
+                const payBadge = payStatusBadge(o.status);
+
+                const names        = o.productNames ?? "";
                 const firstProduct = names.split(", ")[0] ?? "";
-                const extraCount = Number(o.itemCount) - 1;
+                const extraCount   = Number(o.itemCount) - 1;
                 const productSummary = firstProduct
                   ? extraCount > 0 ? `${firstProduct} 외 ${extraCount}건` : firstProduct
                   : `${Number(o.itemCount)}건`;
 
+                const deliveryLabel = DELIVERY_LABELS[o.deliveryMethod as keyof typeof DELIVERY_LABELS]
+                  ?? o.deliveryMethod;
+
+                const hasShipping =
+                  o.deliveryMethod !== "PICKUP" &&
+                  (o.shippingAddress || o.customerPhone);
+
                 return (
-                  <tr key={o.serial} className="border-b border-line align-middle">
-                    <td className="whitespace-nowrap px-4 py-4">
-                      <Link href={`/admin/orders/${o.serial}`} className="font-bold text-brand hover:underline">
-                        {o.serial}
-                      </Link>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4">
-                      <span className="font-medium text-ink">{o.customerName}</span>
-                      {o.company && <p className="mt-0.5 text-[14px] text-ink-sub">{o.company}</p>}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-[15px] text-ink-sub">
-                      <p>{o.customerPhone}</p>
-                      <p className="mt-0.5">{o.customerEmail}</p>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4">
-                      <PayBadge hasTid={!!o.paymentTid} />
-                    </td>
-                    <td className="px-4 py-4 max-w-[260px]">
-                      <span className="block truncate text-[15px] text-ink-sub">{productSummary}</span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-[15px] text-ink-sub">
-                      {DELIVERY_LABELS[o.deliveryMethod as keyof typeof DELIVERY_LABELS] ?? o.deliveryMethod}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4">
-                      <span className={`inline-block rounded-full px-3 py-1 text-[14px] font-bold ${badge.cls}`}>
-                        {badge.label}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right font-bold text-ink">
-                      {Number(o.totalAmount).toLocaleString()}원
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-[14px] text-ink-sub">
-                      {new Date(o.createdAt).toLocaleString("ko-KR", {
-                        month: "2-digit", day: "2-digit",
-                        hour: "2-digit", minute: "2-digit",
-                      })}
-                    </td>
-                  </tr>
+                  <>
+                    {/* ── 메인 행 ── */}
+                    <tr
+                      key={o.serial}
+                      className="border-t border-[#2a3350] align-middle transition-colors hover:bg-[#202b42]"
+                    >
+                      {/* 번호 */}
+                      <td className="whitespace-nowrap px-5 py-3.5">
+                        <Link
+                          href={`/admin/orders/${o.serial}`}
+                          className="font-bold text-[#60a5fa] hover:underline"
+                        >
+                          {o.serial}
+                        </Link>
+                      </td>
+
+                      {/* 고객정보 */}
+                      <td className="px-5 py-3.5">
+                        <p className="font-bold text-white">{o.customerName}</p>
+                        {o.company && (
+                          <p className="text-[12px] text-[#9ba8c4]">{o.company}</p>
+                        )}
+                        <p className="text-[12px] text-[#9ba8c4]">{o.customerEmail}</p>
+                        <p className="text-[12px] text-[#9ba8c4]">{o.customerPhone}</p>
+                      </td>
+
+                      {/* 상품 */}
+                      <td className="px-5 py-3.5">
+                        <p className="max-w-[220px] truncate text-[14px] text-[#c5d1e8]">
+                          {productSummary}
+                        </p>
+                        <p className="mt-0.5 text-[12px] text-[#7888a4]">{deliveryLabel}</p>
+                      </td>
+
+                      {/* 결제상태 */}
+                      <td className="whitespace-nowrap px-5 py-3.5">
+                        <span className={`inline-block rounded px-2.5 py-1 text-[12px] font-bold text-white ${payBadge.cls}`}>
+                          {payBadge.label}
+                        </span>
+                      </td>
+
+                      {/* 결제수단 */}
+                      <td className="whitespace-nowrap px-5 py-3.5">
+                        <PayMethodCell hasTid={!!o.paymentTid} tid={o.paymentTid} />
+                      </td>
+
+                      {/* 주문상태 */}
+                      <td className="whitespace-nowrap px-5 py-3.5">
+                        <span className={`inline-block rounded px-2.5 py-1 text-[12px] font-bold text-white ${orderBadge.cls}`}>
+                          {orderBadge.label}
+                        </span>
+                      </td>
+
+                      {/* 결제금액 */}
+                      <td className="whitespace-nowrap px-5 py-3.5 text-right">
+                        <span className="font-bold text-white">
+                          ₩{Number(o.totalAmount).toLocaleString()}
+                        </span>
+                      </td>
+
+                      {/* 주문일 */}
+                      <td className="whitespace-nowrap px-5 py-3.5 text-[13px] text-[#9ba8c4]">
+                        {new Date(o.createdAt).toLocaleString("ko-KR", {
+                          year:   "numeric",
+                          month:  "2-digit",
+                          day:    "2-digit",
+                          hour:   "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+
+                      {/* 관리 */}
+                      <td className="whitespace-nowrap px-5 py-3.5">
+                        <OrdersListActions serial={o.serial} status={o.status} />
+                      </td>
+                    </tr>
+
+                    {/* ── 배송지 서브 행 ── */}
+                    {hasShipping && (
+                      <tr
+                        key={`${o.serial}-addr`}
+                        className="border-t border-[#1e2840] bg-[#141b2d]"
+                      >
+                        <td />
+                        <td colSpan={8} className="px-5 py-2 text-[12px] text-[#7888a4]">
+                          <span className="mr-1 font-semibold text-[#9ba8c4]">배송:</span>
+                          {o.customerName}
+                          {o.customerPhone && ` | ${o.customerPhone}`}
+                          {o.shippingAddress && ` | ${o.shippingAddress}`}
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 );
               })}
             </tbody>
