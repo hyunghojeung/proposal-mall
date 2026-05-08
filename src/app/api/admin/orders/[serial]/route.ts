@@ -5,6 +5,31 @@ import { adminUnauthorized, isAdminRequest } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { serial: string } },
+) {
+  if (!isAdminRequest(req)) return adminUnauthorized();
+  const order = await prisma.order
+    .findUnique({ where: { serial: params.serial }, include: { items: true } })
+    .catch(() => null);
+  if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // BigInt → number 직렬화
+  const serialized = {
+    ...order,
+    totalAmount:  Number(order.totalAmount),
+    shippingFee:  Number(order.shippingFee),
+    createdAt:    order.createdAt.toISOString(),
+    items: order.items.map((it) => ({
+      ...it,
+      unitPrice: Number(it.unitPrice),
+      subtotal:  Number(it.subtotal),
+    })),
+  };
+  return NextResponse.json({ order: serialized });
+}
+
 const patchSchema = z.object({
   status: z
     .enum(["PENDING", "PAID", "IN_PRODUCTION", "SHIPPING", "DELIVERED", "CANCELLED"])

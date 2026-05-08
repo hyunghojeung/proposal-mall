@@ -21,26 +21,28 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "CANCELLED",     label: "취소" },
 ];
 
-/* ─────────────── 배지 정의 ─────────────── */
-// 주문 진행 상태 (주문상태 컬럼)
-const ORDER_STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  PENDING:       { label: "결제대기", cls: "bg-[#f59e0b]" },
-  PAID:          { label: "결제완료", cls: "bg-[#22c55e]" },
-  IN_PRODUCTION: { label: "제작중",   cls: "bg-[#f97316]" },
-  SHIPPING:      { label: "배송중",   cls: "bg-[#3b82f6]" },
-  DELIVERED:     { label: "발송완료", cls: "bg-[#10b981]" },
-  CANCELLED:     { label: "취소",     cls: "bg-[#6b7280]" },
+/* ─────────────── 공통 배지 색상 (결제상태·주문상태 통일) ─────────────── */
+// 사각형(rounded-sm) + 동일 컬러 팔레트
+const BADGE_BASE = "inline-block rounded-sm px-3 py-1 text-[13px] font-bold text-white whitespace-nowrap";
+
+const ORDER_STATUS_BADGE: Record<string, { label: string; color: string }> = {
+  PENDING:       { label: "결제대기", color: "bg-[#f59e0b]" },
+  PAID:          { label: "결제완료", color: "bg-[#22c55e]" },
+  IN_PRODUCTION: { label: "제작중",   color: "bg-[#E8481A]" },
+  SHIPPING:      { label: "배송중",   color: "bg-[#3b82f6]" },
+  DELIVERED:     { label: "발송완료", color: "bg-[#10b981]" },
+  CANCELLED:     { label: "취소",     color: "bg-[#6b7280]" },
 };
 
-/* 결제 완료 여부 (결제상태 컬럼) */
-function payStatusBadge(status: string) {
+/* 결제 완료 여부 (결제상태 컬럼) — 동일 색상 팔레트 사용 */
+function payStatusBadge(status: string): { label: string; color: string } {
   if (["PAID","IN_PRODUCTION","SHIPPING","DELIVERED"].includes(status)) {
-    return { label: "결제완료", cls: "bg-[#22c55e]" };
+    return { label: "결제완료", color: "bg-[#22c55e]" };
   }
   if (status === "CANCELLED") {
-    return { label: "취소",     cls: "bg-[#6b7280]" };
+    return { label: "취소",     color: "bg-[#6b7280]" };
   }
-  return { label: "결제대기", cls: "bg-[#f59e0b]" };
+  return { label: "결제대기", color: "bg-[#f59e0b]" };
 }
 
 /* ─────────────── Raw SQL 결과 타입 ─────────────── */
@@ -53,6 +55,7 @@ interface OrderRow {
   company:         string | null;
   deliveryMethod:  string;
   shippingAddress: string | null;
+  memo:            string | null;
   totalAmount:     bigint;
   shippingFee:     bigint;
   status:          string;
@@ -101,6 +104,7 @@ export default async function AdminOrdersPage({
       o.company,
       o."deliveryMethod",
       o."shippingAddress",
+      o.memo,
       o."totalAmount",
       o."shippingFee",
       o.status,
@@ -233,7 +237,6 @@ export default async function AdminOrdersPage({
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">번호</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">고객정보</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">결제상태</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">결제수단</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문상태</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-right font-semibold">결제금액</th>
@@ -244,7 +247,7 @@ export default async function AdminOrdersPage({
             <tbody>
               {orders.map((o) => {
                 const orderBadge = ORDER_STATUS_BADGE[o.status] ??
-                  { label: o.status, cls: "bg-[#6b7280]" };
+                  { label: o.status, color: "bg-[#6b7280]" };
                 const payBadge = payStatusBadge(o.status);
 
                 const names        = o.productNames ?? "";
@@ -257,9 +260,18 @@ export default async function AdminOrdersPage({
                 const deliveryLabel = DELIVERY_LABELS[o.deliveryMethod as keyof typeof DELIVERY_LABELS]
                   ?? o.deliveryMethod;
 
-                const hasShipping =
-                  o.deliveryMethod !== "PICKUP" &&
-                  (o.shippingAddress || o.customerPhone);
+                const isPickup = o.deliveryMethod === "PICKUP";
+
+                // 배송지 라인: 수령인 | 연락처 | 주소
+                const shippingLine = isPickup
+                  ? null
+                  : [
+                      o.company ?? o.customerName,
+                      o.customerPhone,
+                      o.shippingAddress,
+                    ]
+                      .filter(Boolean)
+                      .join(" | ");
 
                 return (
                   <>
@@ -296,13 +308,6 @@ export default async function AdminOrdersPage({
                         <p className="mt-0.5 text-[12px] text-[#7888a4]">{deliveryLabel}</p>
                       </td>
 
-                      {/* 결제상태 */}
-                      <td className="whitespace-nowrap px-5 py-3.5">
-                        <span className={`inline-block rounded px-2.5 py-1 text-[12px] font-bold text-white ${payBadge.cls}`}>
-                          {payBadge.label}
-                        </span>
-                      </td>
-
                       {/* 결제수단 */}
                       <td className="whitespace-nowrap px-5 py-3.5">
                         <PayMethodCell hasTid={!!o.paymentTid} tid={o.paymentTid} />
@@ -310,7 +315,7 @@ export default async function AdminOrdersPage({
 
                       {/* 주문상태 */}
                       <td className="whitespace-nowrap px-5 py-3.5">
-                        <span className={`inline-block rounded px-2.5 py-1 text-[12px] font-bold text-white ${orderBadge.cls}`}>
+                        <span className={`${BADGE_BASE} ${orderBadge.color}`}>
                           {orderBadge.label}
                         </span>
                       </td>
@@ -340,20 +345,41 @@ export default async function AdminOrdersPage({
                     </tr>
 
                     {/* ── 배송지 서브 행 ── */}
-                    {hasShipping && (
-                      <tr
-                        key={`${o.serial}-addr`}
-                        className="border-t border-[#1e2840] bg-[#141b2d]"
-                      >
-                        <td />
-                        <td colSpan={8} className="px-5 py-2 text-[12px] text-[#7888a4]">
-                          <span className="mr-1 font-semibold text-[#9ba8c4]">배송:</span>
-                          {o.customerName}
-                          {o.customerPhone && ` | ${o.customerPhone}`}
-                          {o.shippingAddress && ` | ${o.shippingAddress}`}
-                        </td>
-                      </tr>
-                    )}
+                    <tr
+                      key={`${o.serial}-sub`}
+                      className="border-t border-[#1e2840] bg-[#141b2d]"
+                    >
+                      <td />
+                      <td colSpan={7} className="px-5 py-2.5 text-[12px]">
+                        {isPickup ? (
+                          /* 직접방문 */
+                          <span className="text-[#7888a4]">
+                            <span className="font-semibold text-[#9ba8c4]">수령:</span>{" "}
+                            직접 방문 수령
+                            {o.memo && (
+                              <span className="ml-4">
+                                <span className="font-semibold text-[#9ba8c4]">메모:</span>{" "}
+                                {o.memo}
+                              </span>
+                            )}
+                          </span>
+                        ) : (
+                          /* 택배/퀵 */
+                          <div className="space-y-0.5">
+                            {shippingLine && (
+                              <p className="text-[#9ba8c4]">
+                                <span className="font-semibold">배송:</span>{" "}
+                                {shippingLine}
+                              </p>
+                            )}
+                            <p className="text-[#7888a4]">
+                              <span className="font-semibold text-[#8899b0]">배송메모:</span>{" "}
+                              {o.memo ?? ""}
+                            </p>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
                   </>
                 );
               })}
