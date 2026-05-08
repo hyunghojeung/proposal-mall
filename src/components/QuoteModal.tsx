@@ -105,11 +105,16 @@ export function QuoteModal({ items, delivery, onClose }: QuoteModalProps) {
                 <div className="col-span-2"><span className="text-ink-sub">사업자번호:</span> 114-04-56136</div>
                 <div className="col-span-2"><span className="text-ink-sub">주소:</span> 서울특별시 용산구 한강대로 40길 33 성산빌딩 2층 인쇄의창</div>
               </div>
-              {/* 직인 원형 */}
+              {/* 직인 이미지 */}
               <div className="ml-4 shrink-0">
-                <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-brand text-center text-[11px] font-bold leading-tight text-brand">
-                  인쇄의창<br/>인&nbsp;(印)
-                </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/stamp.png"
+                  alt="직인"
+                  width={88}
+                  height={88}
+                  style={{ objectFit: "contain" }}
+                />
               </div>
             </div>
           </div>
@@ -126,7 +131,7 @@ export function QuoteModal({ items, delivery, onClose }: QuoteModalProps) {
                       {it.quantity > 1 ? ` — ${it.productName} ${it.quantity}개` : ""}
                     </p>
                     <p className="shrink-0 text-[15px] font-bold text-ink">
-                      ¥{it.subtotal.toLocaleString()}
+                      {it.subtotal.toLocaleString()}원
                     </p>
                   </div>
                   {(Object.keys(it.options).length > 0 || it.pageCount) && (
