@@ -124,6 +124,9 @@ export default async function OrdersPage({
             <p className="mt-1 text-[14px] text-ink-sub">
               실시간 제작·배송 현황을 확인하세요. 개인정보는 일부 가려져 표시됩니다.
             </p>
+            <p className="mt-1 text-[13px] text-brand font-medium">
+              주문번호를 클릭하시면 주문 내용을 확인 하실수 있습니다.
+            </p>
           </div>
 
           {/* 검색 */}
@@ -243,9 +246,12 @@ export default async function OrdersPage({
 
                       {/* 상품 */}
                       <td className="px-5 py-4">
-                        <span className="block max-w-[220px] truncate text-[14px] text-ink">
+                        <Link
+                          href={`/orders/${o.serial}`}
+                          className="block max-w-[220px] truncate text-[14px] text-ink hover:text-brand hover:underline"
+                        >
                           {summary}
-                        </span>
+                        </Link>
                       </td>
 
                       {/* 수령 */}
