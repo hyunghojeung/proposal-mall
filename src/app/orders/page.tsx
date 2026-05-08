@@ -40,17 +40,17 @@ function maskEmail(email: string): string {
    상태 배지 정의 (서비스 색상 통일)
 ────────────────────────────────────────── */
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  PENDING:       { label: "결제대기", cls: "bg-amber-500/20  border border-amber-400/60  text-amber-300" },
-  PAID:          { label: "결제완료", cls: "bg-blue-500/20   border border-blue-400/60   text-blue-300"  },
-  IN_PRODUCTION: { label: "제작중",   cls: "bg-brand/20      border border-brand/60      text-[#ff7a55]"  },
-  SHIPPING:      { label: "배송중",   cls: "bg-purple-500/20 border border-purple-400/60 text-purple-300" },
-  DELIVERED:     { label: "발송완료", cls: "bg-green-500/20  border border-green-400/60  text-green-300"  },
-  CANCELLED:     { label: "취소",     cls: "bg-gray-500/20   border border-gray-400/60   text-gray-400"   },
+  PENDING:       { label: "결제대기", cls: "bg-amber-50  border border-amber-300  text-amber-700" },
+  PAID:          { label: "결제완료", cls: "bg-blue-50   border border-blue-300   text-blue-700"  },
+  IN_PRODUCTION: { label: "제작중",   cls: "bg-orange-50 border border-orange-300 text-[#E8481A]"  },
+  SHIPPING:      { label: "배송중",   cls: "bg-purple-50 border border-purple-300 text-purple-700" },
+  DELIVERED:     { label: "발송완료", cls: "bg-green-50  border border-green-300  text-green-700"  },
+  CANCELLED:     { label: "취소",     cls: "bg-gray-100  border border-gray-300   text-gray-500"   },
 };
 
 const PAY_BADGE: Record<string, string> = {
-  card:    "bg-blue-500/20  border border-blue-400/60  text-blue-300",
-  bank:    "bg-amber-500/20 border border-amber-400/60 text-amber-300",
+  card: "bg-blue-50  border border-blue-300  text-blue-700",
+  bank: "bg-amber-50 border border-amber-300 text-amber-700",
 };
 
 /* ──────────────────────────────────────────
@@ -159,46 +159,46 @@ export default async function OrdersPage({
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl bg-[#111827]">
+          <div className="overflow-x-auto rounded-xl border border-line bg-white shadow-sm">
             {/* 상단 바 */}
-            <div className="flex items-center justify-between border-b border-[#1f2937] px-6 py-3.5">
-              <p className="text-[14px] text-gray-400">
+            <div className="flex items-center justify-between border-b border-line bg-bg px-6 py-3.5">
+              <p className="text-[14px] text-ink-sub">
                 총{" "}
-                <span className="font-bold text-white">{orders.length}건</span>
+                <span className="font-bold text-ink">{orders.length}건</span>
                 의 주문 (최근 200건)
               </p>
-              <p className="text-[13px] text-gray-500">
+              <p className="text-[13px] text-ink-del">
                 ※ 이름·연락처·이메일은 개인정보 보호를 위해 일부 가려집니다
               </p>
             </div>
 
             <table className="w-full border-collapse text-[14px]">
               <thead>
-                <tr className="border-b border-[#1f2937] bg-[#0f172a] text-[13px] text-gray-500">
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">주문번호</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">주문자</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">연락처 / 이메일</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">결제</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">상품</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">수령</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">상태</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-right font-semibold">금액</th>
-                  <th className="whitespace-nowrap px-5 py-4 text-left font-semibold">주문일시</th>
+                <tr className="border-b border-line bg-bg text-[13px] text-ink-sub">
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문번호</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문자</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">연락처 / 이메일</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">결제</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">수령</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상태</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-right font-semibold">금액</th>
+                  <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문일시</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((o) => {
                   const badge = STATUS_BADGE[o.status] ??
-                    { label: o.status, cls: "bg-gray-500/20 border border-gray-400/40 text-gray-400" };
+                    { label: o.status, cls: "bg-gray-100 border border-gray-300 text-gray-500" };
 
-                  const payKey  = o.paymentTid ? "card" : "bank";
+                  const payKey   = o.paymentTid ? "card" : "bank";
                   const payLabel = o.paymentTid ? "카드" : "무통장";
                   const payCls   = PAY_BADGE[payKey];
 
-                  const names    = o.productNames ?? "";
-                  const first    = names.split(", ")[0] ?? "";
-                  const extra    = Number(o.itemCount) - 1;
-                  const summary  = first
+                  const names   = o.productNames ?? "";
+                  const first   = names.split(", ")[0] ?? "";
+                  const extra   = Number(o.itemCount) - 1;
+                  const summary = first
                     ? extra > 0 ? `${first} 외 ${extra}건` : first
                     : `${Number(o.itemCount)}건`;
 
@@ -208,7 +208,7 @@ export default async function OrdersPage({
                   return (
                     <tr
                       key={o.serial}
-                      className="border-b border-[#1f2937] transition-colors hover:bg-[#1a2233]"
+                      className="border-b border-line transition-colors hover:bg-[#fff8f6]"
                     >
                       {/* 주문번호 */}
                       <td className="whitespace-nowrap px-5 py-4">
@@ -222,16 +222,16 @@ export default async function OrdersPage({
 
                       {/* 주문자 */}
                       <td className="whitespace-nowrap px-5 py-4">
-                        <p className="font-bold text-white">{maskName(o.customerName)}</p>
+                        <p className="font-bold text-ink">{maskName(o.customerName)}</p>
                         {o.company && (
-                          <p className="mt-0.5 text-[12px] text-gray-500">{o.company}</p>
+                          <p className="mt-0.5 text-[12px] text-ink-sub">{o.company}</p>
                         )}
                       </td>
 
                       {/* 연락처 / 이메일 */}
                       <td className="whitespace-nowrap px-5 py-4">
-                        <p className="text-gray-400">{maskPhone(o.customerPhone)}</p>
-                        <p className="mt-0.5 text-[12px] text-gray-500">{maskEmail(o.customerEmail)}</p>
+                        <p className="text-ink-sub">{maskPhone(o.customerPhone)}</p>
+                        <p className="mt-0.5 text-[12px] text-ink-del">{maskEmail(o.customerEmail)}</p>
                       </td>
 
                       {/* 결제 */}
@@ -243,13 +243,13 @@ export default async function OrdersPage({
 
                       {/* 상품 */}
                       <td className="px-5 py-4">
-                        <span className="block max-w-[220px] truncate text-[14px] text-gray-300">
+                        <span className="block max-w-[220px] truncate text-[14px] text-ink">
                           {summary}
                         </span>
                       </td>
 
                       {/* 수령 */}
-                      <td className="whitespace-nowrap px-5 py-4 text-[13px] text-gray-400">
+                      <td className="whitespace-nowrap px-5 py-4 text-[13px] text-ink-sub">
                         {delivery}
                       </td>
 
@@ -262,13 +262,13 @@ export default async function OrdersPage({
 
                       {/* 금액 */}
                       <td className="whitespace-nowrap px-5 py-4 text-right">
-                        <span className="font-bold text-white">
+                        <span className="font-bold text-ink">
                           {Number(o.totalAmount).toLocaleString()}원
                         </span>
                       </td>
 
                       {/* 주문일시 */}
-                      <td className="whitespace-nowrap px-5 py-4 text-[13px] text-gray-500">
+                      <td className="whitespace-nowrap px-5 py-4 text-[13px] text-ink-del">
                         {new Date(o.createdAt).toLocaleString("ko-KR", {
                           month:  "2-digit",
                           day:    "2-digit",
