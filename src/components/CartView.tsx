@@ -12,12 +12,14 @@ import {
   updateCartQuantity,
 } from "@/lib/cart";
 import { shippingFee, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
+import { QuoteModal } from "@/components/QuoteModal";
 
 export function CartView() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
   const [delivery, setDelivery] = useState<DeliveryMethod>("COURIER_PREPAID");
+  const [showQuote, setShowQuote] = useState(false);
 
   useEffect(() => {
     setItems(readCart());
@@ -174,7 +176,30 @@ export function CartView() {
         <p className="mt-2 text-center text-[13px] text-ink-sub">
           다음 단계에서 주문자 정보를 입력하고 결제까지 완료합니다.
         </p>
+
+        <button
+          type="button"
+          onClick={() => setShowQuote(true)}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded border border-line py-3 text-[15px] font-medium text-ink transition-colors hover:border-brand hover:text-brand"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+          견적서 출력
+        </button>
       </aside>
+
+      {showQuote && (
+        <QuoteModal
+          items={items}
+          delivery={delivery}
+          onClose={() => setShowQuote(false)}
+        />
+      )}
     </div>
   );
 }
