@@ -373,7 +373,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
           </button>
           <button
             type="button"
-            onClick={() => router.push("/inquiries")}
+            onClick={() => router.push("/contact")}
             className="flex items-center gap-2 rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
