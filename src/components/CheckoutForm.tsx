@@ -8,7 +8,7 @@ import {
   readCart,
   subscribeCart,
 } from "@/lib/cart";
-import { shippingFee, type DeliveryMethod } from "@/lib/pricing";
+import { shippingFee, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
 
 interface CheckoutResp {
   order?: { serial: string; totalAmount: number };
@@ -37,13 +37,6 @@ const TEST_DATA = {
   memo: "테스트 주문입니다. 실제 처리하지 마세요.",
 } as const;
 
-const DELIVERY_OPTIONS: { value: DeliveryMethod; label: string }[] = [
-  { value: "COURIER_PREPAID", label: "택배선불" },
-  { value: "COURIER_COLLECT", label: "택배착불" },
-  { value: "QUICK_COLLECT",   label: "퀵(착불)" },
-  { value: "PICKUP",          label: "직접수령" },
-];
-
 const needsAddress = (m: DeliveryMethod) =>
   m === "COURIER_PREPAID" || m === "COURIER_COLLECT" || m === "QUICK_COLLECT";
 
@@ -69,9 +62,14 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
   const [addressDetail, setAddressDetail] = useState(isAdmin ? TEST_DATA.addressDetail : "");
   const [shippingMemo, setShippingMemo] = useState(isAdmin ? TEST_DATA.shippingMemo : "");
 
-  // 배송방법 / 결제방법
+  // 배송방법: 장바구니에서 선택한 값을 localStorage에서 읽어옴
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("COURIER_PREPAID");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CARD");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("delivery_method") as DeliveryMethod | null;
+    if (saved) setDeliveryMethod(saved);
+  }, []);
 
   // 주문 요청사항
   const [memo, setMemo] = useState(isAdmin ? TEST_DATA.memo : "");
@@ -386,24 +384,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
         </Card>
 
-        {/* ③ 배송방법 — 가로 심플 라디오 */}
-        <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>} title="배송방법">
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            {DELIVERY_OPTIONS.map(({ value, label }) => (
-              <label key={value} className="flex cursor-pointer items-center gap-2 text-[15px]">
-                <input type="radio" name="delivery" value={value}
-                  checked={deliveryMethod === value}
-                  onChange={() => setDeliveryMethod(value)}
-                  className="accent-[#E8481A]" />
-                <span className={deliveryMethod === value ? "font-bold text-brand" : "text-ink"}>
-                  {label}
-                </span>
-              </label>
-            ))}
-          </div>
-        </Card>
-
-        {/* ④ 결제 방법 */}
+        {/* ③ 결제 방법 */}
         <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>} title="결제 방법">
           <div className="space-y-2">
             {([
@@ -464,6 +445,10 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
           <div className="flex justify-between">
             <span className="text-ink-sub">상품 합계</span>
             <span className="font-medium text-ink">{subtotal.toLocaleString()}원</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-ink-sub">수령 방식</span>
+            <span className="font-medium text-ink">{DELIVERY_LABELS[deliveryMethod] ?? deliveryMethod}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-ink-sub">배송비</span>

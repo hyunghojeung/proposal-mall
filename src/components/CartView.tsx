@@ -22,8 +22,16 @@ export function CartView() {
   useEffect(() => {
     setItems(readCart());
     setHydrated(true);
+    // localStorage에서 이전 선택 복원
+    const saved = localStorage.getItem("delivery_method") as DeliveryMethod | null;
+    if (saved) setDelivery(saved);
     return subscribeCart(() => setItems(readCart()));
   }, []);
+
+  function handleDeliveryChange(value: DeliveryMethod) {
+    setDelivery(value);
+    localStorage.setItem("delivery_method", value);
+  }
 
   if (!hydrated) {
     return <p className="py-16 text-center text-[14px] text-ink-sub">불러오는 중…</p>;
@@ -147,7 +155,7 @@ export function CartView() {
                   type="radio"
                   name="delivery"
                   checked={delivery === value}
-                  onChange={() => setDelivery(value)}
+                  onChange={() => handleDeliveryChange(value)}
                   className="accent-[#E8481A]"
                 />
                 <span className="font-medium text-ink">{DELIVERY_LABELS[value]}</span>
