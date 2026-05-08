@@ -313,7 +313,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
 
   // ── 무통장 입금 완료 화면 ──────────────────────────────────────────────────
   if (transferComplete) {
-    const { serial, total: orderTotal, productNames, createdAt } = transferComplete;
+    const { total: orderTotal, productNames, createdAt } = transferComplete;
     const dateStr = new Date(createdAt).toLocaleString("ko-KR");
     const productLabel = productNames.join(", ");
 
