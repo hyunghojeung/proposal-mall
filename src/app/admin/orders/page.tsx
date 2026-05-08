@@ -236,17 +236,6 @@ export default async function AdminOrdersPage({
 
                 const isPickup = o.deliveryMethod === "PICKUP";
 
-                // 배송지 라인: 수령인 | 연락처 | 주소
-                const shippingLine = isPickup
-                  ? null
-                  : [
-                      o.company ?? o.customerName,
-                      o.customerPhone,
-                      o.shippingAddress,
-                    ]
-                      .filter(Boolean)
-                      .join(" | ");
-
                 return (
                   <>
                     {/* ── 메인 행 ── */}

@@ -38,36 +38,68 @@ const STATUS_LABEL: Record<string, string> = {
   DELIVERED:     "발송완료",
   CANCELLED:     "취소",
 };
-const STATUS_COLOR: Record<string, string> = {
-  PENDING:       "bg-amber-100 text-amber-700 border border-amber-300",
-  PAID:          "bg-green-100 text-green-700 border border-green-300",
-  IN_PRODUCTION: "bg-orange-100 text-orange-700 border border-orange-300",
-  SHIPPING:      "bg-blue-100 text-blue-700 border border-blue-300",
-  DELIVERED:     "bg-emerald-100 text-emerald-700 border border-emerald-300",
-  CANCELLED:     "bg-gray-100 text-gray-500 border border-gray-300",
+const STATUS_COLOR: Record<string, React.CSSProperties> = {
+  PENDING:       { backgroundColor: "#fef3c7", color: "#b45309", border: "1px solid #fcd34d" },
+  PAID:          { backgroundColor: "#dcfce7", color: "#15803d", border: "1px solid #86efac" },
+  IN_PRODUCTION: { backgroundColor: "#ffedd5", color: "#c2410c", border: "1px solid #fdba74" },
+  SHIPPING:      { backgroundColor: "#dbeafe", color: "#1d4ed8", border: "1px solid #93c5fd" },
+  DELIVERED:     { backgroundColor: "#d1fae5", color: "#065f46", border: "1px solid #6ee7b7" },
+  CANCELLED:     { backgroundColor: "#f3f4f6", color: "#6b7280", border: "1px solid #d1d5db" },
 };
 
-/* ── 공통 테이블 셀 ── */
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-[13px] font-semibold text-gray-600 whitespace-nowrap w-[120px]">
-      {children}
-    </th>
-  );
-}
-function Td({ children, colSpan, className = "" }: { children: React.ReactNode; colSpan?: number; className?: string }) {
-  return (
-    <td colSpan={colSpan} className={`border border-gray-200 bg-white px-4 py-2.5 text-[14px] text-gray-800 ${className}`}>
-      {children}
-    </td>
-  );
-}
+/* ── 인라인 스타일 상수 (admin-dark CSS 덮어쓰기 방지) ── */
+const S = {
+  thCell: {
+    backgroundColor: "#f9fafb",
+    color: "#4b5563",
+    border: "1px solid #e5e7eb",
+    padding: "10px 16px",
+    fontSize: 13,
+    fontWeight: 600,
+    whiteSpace: "nowrap" as const,
+    width: 120,
+    textAlign: "left" as const,
+  },
+  tdCell: {
+    backgroundColor: "#ffffff",
+    color: "#1f2937",
+    border: "1px solid #e5e7eb",
+    padding: "10px 16px",
+    fontSize: 14,
+  },
+  tdCellRight: {
+    backgroundColor: "#ffffff",
+    color: "#1f2937",
+    border: "1px solid #e5e7eb",
+    padding: "10px 16px",
+    fontSize: 14,
+    textAlign: "right" as const,
+    fontWeight: 500,
+  },
+  tdAccent: {
+    backgroundColor: "#fff1ec",
+    color: "#e8481a",
+    border: "1px solid #e5e7eb",
+    padding: "14px 16px",
+    fontSize: 14,
+    fontWeight: 900,
+  },
+  tdAccentRight: {
+    backgroundColor: "#fff1ec",
+    color: "#e8481a",
+    border: "1px solid #e5e7eb",
+    padding: "14px 16px",
+    fontSize: 20,
+    fontWeight: 900,
+    textAlign: "right" as const,
+  },
+};
 
 /* ── 섹션 타이틀 ── */
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3 mt-7 border-b-2 border-brand pb-1.5 first:mt-0">
-      <h2 className="text-[15px] font-bold text-ink">{children}</h2>
+    <div style={{ marginTop: 28, marginBottom: 10, borderBottom: "2px solid #e8481a", paddingBottom: 6 }}>
+      <h2 style={{ fontSize: 15, fontWeight: 700, color: "#1a1a1a", margin: 0 }}>{children}</h2>
     </div>
   );
 }
@@ -117,20 +149,29 @@ export function AdminOrderPrintModal({ serial, onClose }: { serial: string; onCl
       {/* 오버레이 */}
       <div
         id="order-modal-root"
-        className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 py-8"
+        className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8"
+        style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
         onClick={e => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="modal-paper relative mx-4 w-full max-w-[800px] overflow-hidden rounded-xl bg-white shadow-2xl">
+        <div
+          className="modal-paper relative mx-4 w-full max-w-[800px] overflow-hidden rounded-xl shadow-2xl"
+          style={{ backgroundColor: "#ffffff" }}
+        >
 
           {/* ── 헤더 ── */}
-          <div className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 px-10 py-7 text-center">
-            <h1 className="text-[28px] font-black tracking-widest text-ink">주 문 서</h1>
+          <div
+            className="border-b px-10 py-7 text-center"
+            style={{ backgroundColor: "#f9fafb", borderColor: "#e5e7eb" }}
+          >
+            <h1 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "0.15em", color: "#1a1a1a", margin: 0 }}>
+              주 문 서
+            </h1>
             {order && (
-              <div className="mt-2.5 flex flex-wrap items-center justify-center gap-3 text-[13px] text-gray-500">
-                <span>주문번호: <b className="text-brand">{order.serial}</b></span>
-                <span className="text-gray-300">·</span>
+              <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "center", gap: 12, fontSize: 13, color: "#6b7280" }}>
+                <span>주문번호: <b style={{ color: "#e8481a" }}>{order.serial}</b></span>
+                <span style={{ color: "#d1d5db" }}>·</span>
                 <span>발행일: {new Date(order.createdAt).toLocaleDateString("ko-KR")}</span>
-                <span className={`rounded-full px-3 py-0.5 text-[12px] font-bold ${STATUS_COLOR[order.status] ?? "bg-gray-100 text-gray-500"}`}>
+                <span style={{ borderRadius: 9999, padding: "2px 12px", fontSize: 12, fontWeight: 700, ...(STATUS_COLOR[order.status] ?? STATUS_COLOR.CANCELLED) }}>
                   {STATUS_LABEL[order.status] ?? order.status}
                 </span>
               </div>
@@ -138,98 +179,100 @@ export function AdminOrderPrintModal({ serial, onClose }: { serial: string; onCl
           </div>
 
           {/* ── 컨텐츠 ── */}
-          <div className="bg-white px-10 pb-6 pt-2">
+          <div style={{ backgroundColor: "#ffffff", padding: "8px 40px 24px" }}>
 
             {loading && (
-              <div className="flex items-center justify-center py-20 text-gray-400">
-                <svg className="mr-2 animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round"/></svg>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "80px 0", color: "#9ca3af" }}>
+                <svg className="mr-2 animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round"/>
+                </svg>
                 불러오는 중…
               </div>
             )}
             {error && (
-              <p className="py-16 text-center text-[15px] text-red-500">{error}</p>
+              <p style={{ padding: "64px 0", textAlign: "center", fontSize: 15, color: "#ef4444" }}>{error}</p>
             )}
 
             {order && (
               <>
                 {/* 주문 정보 */}
                 <SectionTitle>주문 정보</SectionTitle>
-                <table className="w-full border-collapse overflow-hidden rounded-lg border border-gray-200">
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <tbody>
                     <tr>
-                      <Th>고객명</Th>
-                      <Td>{order.customerName}</Td>
-                      <Th>회사명</Th>
-                      <Td>{order.company ?? "-"}</Td>
+                      <th style={S.thCell}>고객명</th>
+                      <td style={S.tdCell}>{order.customerName}</td>
+                      <th style={S.thCell}>회사명</th>
+                      <td style={S.tdCell}>{order.company ?? "-"}</td>
                     </tr>
                     <tr>
-                      <Th>연락처</Th>
-                      <Td>{order.customerPhone}</Td>
-                      <Th>이메일</Th>
-                      <Td>{order.customerEmail}</Td>
+                      <th style={S.thCell}>연락처</th>
+                      <td style={S.tdCell}>{order.customerPhone}</td>
+                      <th style={S.thCell}>이메일</th>
+                      <td style={S.tdCell}>{order.customerEmail}</td>
                     </tr>
                     <tr>
-                      <Th>주문일</Th>
-                      <Td>{new Date(order.createdAt).toLocaleDateString("ko-KR")}</Td>
-                      <Th>결제방법</Th>
-                      <Td>
+                      <th style={S.thCell}>주문일</th>
+                      <td style={S.tdCell}>{new Date(order.createdAt).toLocaleDateString("ko-KR")}</td>
+                      <th style={S.thCell}>결제방법</th>
+                      <td style={S.tdCell}>
                         {order.paymentTid
-                          ? <span className="font-medium text-blue-600">카드결제 <span className="text-[12px] text-gray-400">({order.paymentTid})</span></span>
-                          : <span className="font-medium text-amber-600">계좌이체</span>
+                          ? <span style={{ fontWeight: 500, color: "#2563eb" }}>카드결제 <span style={{ fontSize: 12, color: "#9ca3af" }}>({order.paymentTid})</span></span>
+                          : <span style={{ fontWeight: 500, color: "#d97706" }}>계좌이체</span>
                         }
-                      </Td>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
 
                 {/* 주문 상품 목록 */}
                 <SectionTitle>주문 상품 목록 (총 {order.items.length}개)</SectionTitle>
-                <div className="space-y-3">
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {order.items.map((it, idx) => {
                     const opts = it.optionsJson && typeof it.optionsJson === "object"
                       ? Object.entries(it.optionsJson as Record<string, string>)
                       : [];
                     return (
-                      <div key={it.id} className="overflow-hidden rounded-lg border border-gray-200">
+                      <div key={it.id} style={{ border: "1px solid #e5e7eb", borderRadius: 8, overflow: "hidden" }}>
                         {/* 상품 번호 */}
-                        <div className="border-b border-gray-200 bg-brand-light px-5 py-2.5">
-                          <p className="text-[14px] font-bold text-brand">
+                        <div style={{ backgroundColor: "#fff1ec", borderBottom: "1px solid #e5e7eb", padding: "10px 20px" }}>
+                          <p style={{ fontSize: 14, fontWeight: 700, color: "#e8481a", margin: 0 }}>
                             {idx + 1}. {it.productName}
                           </p>
                         </div>
-                        <table className="w-full border-collapse bg-white">
+                        <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "#ffffff" }}>
                           <tbody>
                             <tr>
-                              <Th>상품명</Th>
-                              <Td colSpan={3}>{it.productName}</Td>
+                              <th style={S.thCell}>상품명</th>
+                              <td colSpan={3} style={S.tdCell}>{it.productName}</td>
                             </tr>
                             <tr>
-                              <Th>수량</Th>
-                              <Td>{it.quantity}개</Td>
-                              <Th>금액</Th>
-                              <Td className="font-bold text-brand">
+                              <th style={S.thCell}>수량</th>
+                              <td style={S.tdCell}>{it.quantity}개</td>
+                              <th style={S.thCell}>금액</th>
+                              <td style={{ ...S.tdCell, fontWeight: 700, color: "#e8481a" }}>
                                 ₩{it.subtotal.toLocaleString()}
-                              </Td>
+                              </td>
                             </tr>
                             {(opts.length > 0 || it.pageCount) && (
                               <tr>
-                                <Th>상세 정보</Th>
-                                <Td colSpan={3}>
-                                  <ul className="space-y-1">
+                                <th style={S.thCell}>상세 정보</th>
+                                <td colSpan={3} style={S.tdCell}>
+                                  <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }}>
                                     {opts.map(([k, v]) => (
-                                      <li key={k} className="flex gap-2 text-[13px]">
-                                        <span className="font-semibold text-gray-500">{k}:</span>
-                                        <span className="text-gray-800">{v}</span>
+                                      <li key={k} style={{ display: "flex", gap: 8, fontSize: 13 }}>
+                                        <span style={{ fontWeight: 600, color: "#6b7280" }}>{k}:</span>
+                                        <span style={{ color: "#1f2937" }}>{v}</span>
                                       </li>
                                     ))}
                                     {it.pageCount && (
-                                      <li className="flex gap-2 text-[13px]">
-                                        <span className="font-semibold text-gray-500">페이지 수:</span>
-                                        <span className="text-gray-800">{it.pageCount}쪽</span>
+                                      <li style={{ display: "flex", gap: 8, fontSize: 13 }}>
+                                        <span style={{ fontWeight: 600, color: "#6b7280" }}>페이지 수:</span>
+                                        <span style={{ color: "#1f2937" }}>{it.pageCount}쪽</span>
                                       </li>
                                     )}
                                   </ul>
-                                </Td>
+                                </td>
                               </tr>
                             )}
                           </tbody>
@@ -241,31 +284,25 @@ export function AdminOrderPrintModal({ serial, onClose }: { serial: string; onCl
 
                 {/* 결제 내역 */}
                 <SectionTitle>결제 내역</SectionTitle>
-                <table className="w-full border-collapse overflow-hidden rounded-lg border border-gray-200">
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <tbody>
                     {order.items.map((it, idx) => (
                       <tr key={it.id}>
-                        <Th>{idx + 1}. {it.productName}</Th>
-                        <Td className="text-right font-medium">
-                          ₩{it.subtotal.toLocaleString()}
-                        </Td>
+                        <th style={S.thCell}>{idx + 1}. {it.productName}</th>
+                        <td style={S.tdCellRight}>₩{it.subtotal.toLocaleString()}</td>
                       </tr>
                     ))}
                     <tr>
-                      <Th>배송비</Th>
-                      <Td className="text-right font-medium">
+                      <th style={S.thCell}>배송비</th>
+                      <td style={S.tdCellRight}>
                         {DELIVERY_LABELS[order.deliveryMethod as keyof typeof DELIVERY_LABELS] ?? order.deliveryMethod}
                         {" / "}
                         {order.shippingFee === 0 ? "무료" : `₩${order.shippingFee.toLocaleString()}`}
-                      </Td>
+                      </td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-200 bg-brand-light px-4 py-3.5 text-[14px] font-black text-brand">
-                        최종금액
-                      </td>
-                      <td className="border border-gray-200 bg-brand-light px-4 py-3.5 text-right text-[20px] font-black text-brand">
-                        ₩{order.totalAmount.toLocaleString()}
-                      </td>
+                      <td style={S.tdAccent}>최종금액</td>
+                      <td style={S.tdAccentRight}>₩{order.totalAmount.toLocaleString()}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -274,21 +311,21 @@ export function AdminOrderPrintModal({ serial, onClose }: { serial: string; onCl
                 {order.deliveryMethod !== "PICKUP" && (
                   <>
                     <SectionTitle>배송 정보</SectionTitle>
-                    <table className="w-full border-collapse overflow-hidden rounded-lg border border-gray-200">
+                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
                       <tbody>
                         <tr>
-                          <Th>수령인</Th>
-                          <Td>{order.customerName}</Td>
-                          <Th>연락처</Th>
-                          <Td>{order.customerPhone}</Td>
+                          <th style={S.thCell}>수령인</th>
+                          <td style={S.tdCell}>{order.customerName}</td>
+                          <th style={S.thCell}>연락처</th>
+                          <td style={S.tdCell}>{order.customerPhone}</td>
                         </tr>
                         <tr>
-                          <Th>주소</Th>
-                          <Td colSpan={3}>{order.shippingAddress ?? "-"}</Td>
+                          <th style={S.thCell}>주소</th>
+                          <td colSpan={3} style={S.tdCell}>{order.shippingAddress ?? "-"}</td>
                         </tr>
                         <tr>
-                          <Th>배송메모</Th>
-                          <Td colSpan={3} className="text-gray-500">{order.memo ?? "없음"}</Td>
+                          <th style={S.thCell}>배송메모</th>
+                          <td colSpan={3} style={{ ...S.tdCell, color: "#6b7280" }}>{order.memo ?? "없음"}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -299,7 +336,7 @@ export function AdminOrderPrintModal({ serial, onClose }: { serial: string; onCl
                 {order.deliveryMethod === "PICKUP" && (
                   <>
                     <SectionTitle>요청사항</SectionTitle>
-                    <div className="rounded-lg border border-gray-200 bg-gray-50 px-5 py-4 text-[14px] text-gray-600">
+                    <div style={{ border: "1px solid #e5e7eb", borderRadius: 8, backgroundColor: "#f9fafb", padding: "16px 20px", fontSize: 14, color: "#4b5563" }}>
                       {order.memo || "없음"}
                     </div>
                   </>
@@ -309,12 +346,15 @@ export function AdminOrderPrintModal({ serial, onClose }: { serial: string; onCl
           </div>
 
           {/* ── 버튼 ── */}
-          <div className="no-print flex justify-center gap-3 border-t border-gray-200 bg-gray-50 px-10 py-5">
+          <div
+            className="no-print flex justify-center gap-3 px-10 py-5"
+            style={{ borderTop: "1px solid #e5e7eb", backgroundColor: "#f9fafb" }}
+          >
             <button
               type="button"
               onClick={() => window.print()}
               disabled={!order}
-              className="flex items-center gap-2 rounded-lg bg-brand px-8 py-3 text-[15px] font-bold text-white hover:bg-brand-dark disabled:opacity-40"
+              style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "#e8481a", color: "#ffffff", border: "none", borderRadius: 8, padding: "12px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", opacity: order ? 1 : 0.4 }}
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 6 2 18 2 18 9"/>
@@ -326,7 +366,7 @@ export function AdminOrderPrintModal({ serial, onClose }: { serial: string; onCl
             <button
               type="button"
               onClick={onClose}
-              className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-8 py-3 text-[15px] font-medium text-gray-600 hover:bg-gray-50"
+              style={{ display: "flex", alignItems: "center", gap: 8, backgroundColor: "#ffffff", color: "#4b5563", border: "1px solid #d1d5db", borderRadius: 8, padding: "12px 32px", fontSize: 15, fontWeight: 500, cursor: "pointer" }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"/>
