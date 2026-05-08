@@ -22,8 +22,6 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "CANCELLED",     label: "취소" },
 ];
 
-/* 결제수단 배지 색상 */
-const BADGE_BASE = "inline-block rounded-sm px-3 py-1 text-[13px] font-bold text-white whitespace-nowrap";
 
 /* ─────────────── Raw SQL 결과 타입 ─────────────── */
 interface OrderRow {
