@@ -72,7 +72,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
 
   // 배송방법 / 결제방법
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("COURIER_PREPAID");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CARD");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("TRANSFER");
 
   // 주문 요청사항
   const [memo, setMemo] = useState(isAdmin ? TEST_DATA.memo : "");
