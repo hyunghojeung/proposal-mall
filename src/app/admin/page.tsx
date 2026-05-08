@@ -49,11 +49,11 @@ export default async function AdminHome() {
           <table className="w-full border-collapse text-[16px]">
             <thead className="border-y border-line bg-bg">
               <tr className="text-left text-[15px] text-ink-sub">
-                <th className="px-4 py-3.5 font-semibold">주문번호</th>
-                <th className="px-4 py-3.5 font-semibold">주문자</th>
-                <th className="px-4 py-3.5 font-semibold">상태</th>
-                <th className="px-4 py-3.5 text-right font-semibold">금액</th>
-                <th className="px-4 py-3.5 font-semibold">일시</th>
+                <th className="whitespace-nowrap px-4 py-3.5 font-semibold">주문번호</th>
+                <th className="whitespace-nowrap px-4 py-3.5 font-semibold">주문자</th>
+                <th className="whitespace-nowrap px-4 py-3.5 font-semibold">상태</th>
+                <th className="whitespace-nowrap px-4 py-3.5 text-right font-semibold">금액</th>
+                <th className="whitespace-nowrap px-4 py-3.5 font-semibold">일시</th>
               </tr>
             </thead>
             <tbody>

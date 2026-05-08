@@ -10,32 +10,32 @@ const NAV = [
 export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white">
-      <div className="mx-auto flex h-16 max-w-page items-center gap-6 px-6">
+      <div className="mx-auto flex h-[70px] max-w-page items-center gap-6 px-6">
         <Link
           href="/"
-          className="shrink-0 text-[24px] font-black italic tracking-tight text-brand"
+          className="shrink-0 text-[26px] font-black italic tracking-tight text-brand"
         >
           제안서몰
         </Link>
 
         <form
           action="/products"
-          className="flex max-w-[280px] flex-1 items-center overflow-hidden rounded-full border-[1.5px] border-brand"
+          className="flex max-w-[320px] flex-1 items-center overflow-hidden rounded-full border-[1.5px] border-brand"
         >
           <input
             type="search"
             name="q"
             placeholder="찾으시는 상품을 검색하세요"
-            className="min-w-0 flex-1 border-0 bg-transparent px-3.5 py-2 text-[14px] text-ink outline-none"
+            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-2.5 text-[15px] text-ink outline-none"
           />
           <button
             type="submit"
             aria-label="검색"
-            className="flex shrink-0 items-center bg-brand px-3.5 py-2 text-[15px] text-white transition-colors hover:bg-brand-dark"
+            className="flex shrink-0 items-center bg-brand px-4 py-2.5 text-white transition-colors hover:bg-brand-dark"
           >
             <svg
-              width="16"
-              height="16"
+              width="17"
+              height="17"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -54,7 +54,7 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="whitespace-nowrap rounded-sm px-4 py-2 text-[15px] font-bold text-ink transition-colors hover:text-brand"
+              className="whitespace-nowrap rounded px-4 py-2 text-[16px] font-bold text-ink transition-colors hover:text-brand"
             >
               {item.label}
             </Link>
@@ -63,11 +63,11 @@ export function Header() {
             href="/admin"
             aria-label="관리자"
             title="관리자"
-            className="ml-1 flex h-8 w-8 items-center justify-center rounded-full border border-line text-ink-sub transition-colors hover:border-brand hover:text-brand"
+            className="ml-2 flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink-sub transition-colors hover:border-brand hover:text-brand"
           >
             <svg
-              width="14"
-              height="14"
+              width="15"
+              height="15"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"

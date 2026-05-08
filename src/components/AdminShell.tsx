@@ -23,7 +23,7 @@ export function AdminShell({
   return (
     <div className="min-h-screen bg-bg">
       <header className="border-b border-line bg-white">
-        <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between px-8">
+        <div className="mx-auto flex h-[72px] max-w-[1800px] items-center justify-between px-8">
           <Link href="/admin" className="text-[24px] font-black italic text-brand">
             제안서몰 · 관리자
           </Link>
@@ -36,7 +36,7 @@ export function AdminShell({
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1400px] gap-8 px-8 py-8">
+      <div className="mx-auto flex max-w-[1800px] gap-8 px-8 py-8">
         <aside className="w-60 shrink-0">
           <nav className="space-y-1.5">
             {NAV.map((item) => {

@@ -22,28 +22,26 @@ export function CartView() {
   useEffect(() => {
     setItems(readCart());
     setHydrated(true);
-    // localStorage에서 이전에 선택한 배송방법 복원
     const saved = localStorage.getItem("cart_delivery") as DeliveryMethod | null;
     if (saved) setDelivery(saved);
     return subscribeCart(() => setItems(readCart()));
   }, []);
 
-  // 배송방법 변경 시 localStorage에 저장
   useEffect(() => {
     if (hydrated) localStorage.setItem("cart_delivery", delivery);
   }, [delivery, hydrated]);
 
   if (!hydrated) {
-    return <p className="py-16 text-center text-[14px] text-ink-sub">불러오는 중…</p>;
+    return <p className="py-16 text-center text-[16px] text-ink-sub">불러오는 중…</p>;
   }
 
   if (items.length === 0) {
     return (
       <div className="py-20 text-center">
-        <p className="mb-4 text-[15px] text-ink-sub">장바구니가 비어 있습니다.</p>
+        <p className="mb-5 text-[17px] text-ink-sub">장바구니가 비어 있습니다.</p>
         <Link
           href="/products"
-          className="inline-block rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark"
+          className="inline-block rounded bg-brand px-6 py-3 text-[16px] font-bold text-white hover:bg-brand-dark"
         >
           상품 둘러보기
         </Link>
@@ -57,55 +55,55 @@ export function CartView() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-      <ul className="space-y-3">
+      <ul className="space-y-4">
         {items.map((it) => (
           <li
             key={it.id}
-            className="rounded border border-line bg-white p-5 sm:flex sm:items-start sm:gap-5"
+            className="rounded border border-line bg-white p-6 sm:flex sm:items-start sm:gap-5"
           >
             <div className="flex-1">
-              <h3 className="text-[15px] font-bold text-ink">{it.productName}</h3>
-              <p className="mt-1 text-[12px] text-ink-sub">
+              <h3 className="text-[17px] font-bold text-ink">{it.productName}</h3>
+              <p className="mt-1.5 text-[14px] text-ink-sub">
                 {Object.entries(it.options)
                   .map(([k, v]) => `${k}: ${v}`)
                   .join(" · ")}
                 {it.pageCount ? ` · ${it.pageCount}쪽` : ""}
               </p>
 
-              <div className="mt-3 flex items-stretch overflow-hidden rounded-sm border border-line w-fit">
+              <div className="mt-4 flex items-stretch overflow-hidden rounded border border-line w-fit">
                 <button
                   type="button"
                   onClick={() => updateCartQuantity(it.id, it.quantity - 1)}
-                  className="px-3 py-1.5 text-ink hover:bg-bg"
+                  className="px-4 py-2 text-[16px] text-ink hover:bg-bg"
                   aria-label="수량 감소"
                 >
                   −
                 </button>
-                <span className="flex w-12 items-center justify-center text-[13px]">
+                <span className="flex w-14 items-center justify-center text-[15px]">
                   {it.quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => updateCartQuantity(it.id, it.quantity + 1)}
-                  className="px-3 py-1.5 text-ink hover:bg-bg"
+                  className="px-4 py-2 text-[16px] text-ink hover:bg-bg"
                   aria-label="수량 증가"
                 >
                   +
                 </button>
               </div>
-              <p className="mt-2 text-[11px] text-ink-del">
+              <p className="mt-2 text-[13px] text-ink-del">
                 ※ 수량 변경 시 단가 재계산은 다음 단계에서 적용됩니다 (현재는 단가 고정).
               </p>
             </div>
 
             <div className="mt-4 flex items-center justify-between sm:mt-0 sm:flex-col sm:items-end">
-              <p className="text-[16px] font-bold text-ink">
+              <p className="text-[18px] font-bold text-ink">
                 {it.subtotal.toLocaleString()}원
               </p>
               <button
                 type="button"
                 onClick={() => removeFromCart(it.id)}
-                className="mt-2 text-[12px] text-ink-sub underline-offset-2 hover:text-brand hover:underline"
+                className="mt-2 text-[14px] text-ink-sub underline-offset-2 hover:text-brand hover:underline"
               >
                 삭제
               </button>
@@ -114,10 +112,10 @@ export function CartView() {
         ))}
       </ul>
 
-      <aside className="rounded border border-line bg-white p-6">
-        <h2 className="text-[16px] font-bold text-ink">주문 요약</h2>
+      <aside className="rounded border border-line bg-white p-7">
+        <h2 className="text-[20px] font-bold text-ink">주문 요약</h2>
 
-        <div className="mt-5 space-y-2 border-t border-line pt-5 text-[13px]">
+        <div className="mt-5 space-y-3 border-t border-line pt-5 text-[15px]">
           <div className="flex justify-between">
             <span className="text-ink-sub">상품 합계</span>
             <span className="font-medium text-ink">{subtotal.toLocaleString()}원</span>
@@ -129,13 +127,13 @@ export function CartView() {
             </span>
           </div>
           {(delivery === "COURIER_COLLECT" || delivery === "QUICK_COLLECT") && (
-            <p className="text-[11px] text-ink-sub">배송비는 수령 시 별도 적용됩니다.</p>
+            <p className="text-[13px] text-ink-sub">배송비는 수령 시 별도 적용됩니다.</p>
           )}
         </div>
 
         <fieldset className="mt-5 border-t border-line pt-5">
-          <legend className="mb-3 text-[13px] font-bold text-ink">수령 방식</legend>
-          <div className="space-y-2">
+          <legend className="mb-3 text-[15px] font-bold text-ink">수령 방식</legend>
+          <div className="space-y-2.5">
             {(
               [
                 { value: "COURIER_PREPAID", desc: "5,000원" },
@@ -144,7 +142,7 @@ export function CartView() {
                 { value: "PICKUP",          desc: "무료" },
               ] as { value: DeliveryMethod; desc: string }[]
             ).map(({ value, desc }) => (
-              <label key={value} className="flex cursor-pointer items-center gap-2 text-[13px]">
+              <label key={value} className="flex cursor-pointer items-center gap-2.5 text-[15px]">
                 <input
                   type="radio"
                   name="delivery"
@@ -160,8 +158,8 @@ export function CartView() {
         </fieldset>
 
         <div className="mt-5 flex items-baseline justify-between border-t border-line pt-5">
-          <span className="text-[14px] font-bold text-ink">총 결제 금액</span>
-          <span className="text-[22px] font-black tracking-tight text-brand">
+          <span className="text-[16px] font-bold text-ink">총 결제 금액</span>
+          <span className="text-[26px] font-black tracking-tight text-brand">
             {total.toLocaleString()}원
           </span>
         </div>
@@ -169,11 +167,11 @@ export function CartView() {
         <button
           type="button"
           onClick={() => router.push("/checkout")}
-          className="mt-5 w-full rounded-sm bg-brand py-3 text-[14px] font-bold text-white transition-colors hover:bg-brand-dark"
+          className="mt-5 w-full rounded bg-brand py-3.5 text-[16px] font-bold text-white transition-colors hover:bg-brand-dark"
         >
           결제하기
         </button>
-        <p className="mt-2 text-center text-[11px] text-ink-sub">
+        <p className="mt-2 text-center text-[13px] text-ink-sub">
           다음 단계에서 주문자 정보를 입력하고 결제까지 완료합니다.
         </p>
       </aside>

@@ -65,7 +65,7 @@ export default async function ProductDetailPage({
       <Header />
 
       <main className="mx-auto min-h-[60vh] max-w-page px-6 py-10">
-        <nav className="flex flex-wrap items-center gap-1 pb-5 text-[13px] text-ink-sub">
+        <nav className="flex flex-wrap items-center gap-1 pb-5 text-[15px] text-ink-sub">
           <Link href="/" className="hover:text-ink">홈</Link>
           <span className="mx-1.5 text-ink-del">›</span>
           <Link href="/products" className="hover:text-ink">전체상품</Link>

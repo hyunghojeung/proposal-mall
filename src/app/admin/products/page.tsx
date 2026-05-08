@@ -50,14 +50,14 @@ export default async function AdminProductsPage() {
         <table className="w-full border-collapse text-[16px]">
           <thead className="border-y border-line bg-bg text-left text-[15px] text-ink-sub">
             <tr>
-              <th className="px-4 py-3.5 font-semibold">slug</th>
-              <th className="px-4 py-3.5 font-semibold">상품명</th>
-              <th className="px-4 py-3.5 font-semibold">카테고리</th>
-              <th className="px-4 py-3.5 text-center font-semibold">옵션 그룹</th>
-              <th className="px-4 py-3.5 text-center font-semibold">주문 이력</th>
-              <th className="px-4 py-3.5 text-center font-semibold">정렬</th>
-              <th className="px-4 py-3.5 text-center font-semibold">노출</th>
-              <th className="px-4 py-3.5 text-right font-semibold">액션</th>
+              <th className="whitespace-nowrap px-4 py-3.5 font-semibold">slug</th>
+              <th className="whitespace-nowrap px-4 py-3.5 font-semibold">상품명</th>
+              <th className="whitespace-nowrap px-4 py-3.5 font-semibold">카테고리</th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-semibold">옵션 그룹</th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-semibold">주문 이력</th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-semibold">정렬</th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-center font-semibold">노출</th>
+              <th className="whitespace-nowrap px-4 py-3.5 text-right font-semibold">액션</th>
             </tr>
           </thead>
           <tbody>
@@ -66,16 +66,16 @@ export default async function AdminProductsPage() {
                 key={p.id}
                 className={`border-b border-line align-middle ${p.isActive ? "" : "opacity-60"}`}
               >
-                <td className="px-4 py-3.5 font-mono text-[14px] text-ink-sub">{p.slug}</td>
-                <td className="px-4 py-3.5 font-medium text-ink">
+                <td className="whitespace-nowrap px-4 py-3.5 font-mono text-[14px] text-ink-sub">{p.slug}</td>
+                <td className="whitespace-nowrap px-4 py-3.5 font-medium text-ink">
                   <Link href={`/admin/products/${p.id}`} className="hover:text-brand">
                     {p.name}
                   </Link>
                 </td>
-                <td className="px-4 py-3.5 text-ink-sub">{CATEGORY_LABELS[p.category]}</td>
-                <td className="px-4 py-3.5 text-center text-ink-sub">{p._count.optionGroups}</td>
-                <td className="px-4 py-3.5 text-center text-ink-sub">{p._count.orderItems}</td>
-                <td className="px-4 py-3.5 text-center text-ink-sub">{p.sortOrder}</td>
+                <td className="whitespace-nowrap px-4 py-3.5 text-ink-sub">{CATEGORY_LABELS[p.category]}</td>
+                <td className="whitespace-nowrap px-4 py-3.5 text-center text-ink-sub">{p._count.optionGroups}</td>
+                <td className="whitespace-nowrap px-4 py-3.5 text-center text-ink-sub">{p._count.orderItems}</td>
+                <td className="whitespace-nowrap px-4 py-3.5 text-center text-ink-sub">{p.sortOrder}</td>
                 <td className="px-4 py-3.5 text-center">
                   <ProductRowActions
                     id={p.id}

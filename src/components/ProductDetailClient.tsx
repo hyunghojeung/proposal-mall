@@ -60,16 +60,15 @@ function ImageGallery({ images }: { images: string[] }) {
 
   if (images.length === 0) {
     return (
-      <div className="w-full rounded border border-line bg-bg flex items-center justify-center" style={{ height: 420 }}>
-        <span className="text-[13px] text-ink-sub">이미지 없음</span>
+      <div className="w-full rounded border border-line bg-bg flex items-center justify-center" style={{ height: 460 }}>
+        <span className="text-[15px] text-ink-sub">이미지 없음</span>
       </div>
     );
   }
 
   return (
     <div>
-      {/* 메인 이미지 — 고정 높이로 오른쪽 옵션 영역과 균형 맞춤 */}
-      <div className="w-full overflow-hidden rounded border border-line bg-bg" style={{ height: 420 }}>
+      <div className="w-full overflow-hidden rounded border border-line bg-bg" style={{ height: 460 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={images[active]}
@@ -77,16 +76,14 @@ function ImageGallery({ images }: { images: string[] }) {
           className="h-full w-full object-contain"
         />
       </div>
-
-      {/* 썸네일 목록 */}
       {images.length > 1 && (
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
           {images.map((url, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setActive(i)}
-              className={`h-16 w-16 shrink-0 overflow-hidden rounded border-2 transition-colors ${
+              className={`h-18 w-18 shrink-0 overflow-hidden rounded border-2 transition-colors ${
                 i === active ? "border-brand" : "border-line"
               }`}
             >
@@ -106,8 +103,8 @@ function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
 
   return (
     <section className="mt-14 border-t border-line pt-10">
-      <h2 className="mb-8 text-[18px] font-black tracking-tight text-ink">상품 상세 설명</h2>
-      <div className="space-y-6 text-[14px] leading-relaxed text-ink">
+      <h2 className="mb-8 text-[22px] font-black tracking-tight text-ink">상품 상세 설명</h2>
+      <div className="space-y-6 text-[16px] leading-relaxed text-ink">
         {blocks.map((block, i) => {
           if (block.type === "text") {
             return (
@@ -125,7 +122,7 @@ function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
                 className="w-full rounded border border-line object-contain"
               />
               {block.caption && (
-                <figcaption className="mt-2 text-center text-[12px] text-ink-sub">
+                <figcaption className="mt-2 text-center text-[14px] text-ink-sub">
                   {block.caption}
                 </figcaption>
               )}
@@ -157,7 +154,6 @@ export function ProductDetailClient({ product }: Props) {
   const [quoteErr, setQuoteErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 클라이언트 즉시 계산: basePrice + 선택 옵션 priceDelta 합산
   const localUnitPrice = useMemo(() => {
     let price = product.basePrice;
     for (const g of product.optionGroups) {
@@ -169,7 +165,6 @@ export function ProductDetailClient({ product }: Props) {
     return price;
   }, [product.basePrice, product.optionGroups, options]);
 
-  // 표시할 단가·합계: 단가표 API 결과 우선, 없으면 클라이언트 계산 사용
   const displayUnitPrice = quote?.unitPrice ?? (localUnitPrice > 0 ? localUnitPrice : null);
   const displaySubtotal = quote?.subtotal ?? (localUnitPrice > 0 ? localUnitPrice * quantity : null);
 
@@ -225,7 +220,7 @@ export function ProductDetailClient({ product }: Props) {
       quantity,
       pageCount: isPaper ? pageCount : undefined,
       unitPrice,
-      subtotal: totalWithVat,   // 장바구니에는 VAT 포함 합계 저장
+      subtotal: totalWithVat,
       vatAmount,
     });
     router.push("/cart");
@@ -241,20 +236,20 @@ export function ProductDetailClient({ product }: Props) {
         <div>
           <Link
             href={`/products?cat=${CATEGORY_PARAMS[product.category]}`}
-            className="mb-2 inline-block text-[12px] font-medium text-brand hover:underline"
+            className="mb-2 inline-block text-[14px] font-medium text-brand hover:underline"
           >
             {CATEGORY_LABELS[product.category]}
           </Link>
-          <h1 className="mb-3 text-[24px] font-black tracking-tight text-ink">
+          <h1 className="mb-3 text-[28px] font-black tracking-tight text-ink">
             {product.name}
           </h1>
           {product.description && (
-            <p className="text-[13px] leading-relaxed text-ink-sub">
+            <p className="text-[15px] leading-relaxed text-ink-sub">
               {product.description}
             </p>
           )}
           {product.basePrice > 0 && (
-            <p className="mt-3 text-[22px] font-black tracking-tight text-ink">
+            <p className="mt-3 text-[24px] font-black tracking-tight text-ink">
               {product.basePrice.toLocaleString()}원
             </p>
           )}
@@ -262,20 +257,17 @@ export function ProductDetailClient({ product }: Props) {
           {/* 통합 카드: 옵션선택 + 수량 + 가격 */}
           <div className="mt-5 overflow-hidden rounded border border-line">
 
-            {/* 옵션 그룹 — 그룹명 | 버튼들 수평 한 줄 배치 */}
+            {/* 옵션 그룹 */}
             {product.optionGroups.map((g) => (
               <div
                 key={g.id}
-                className="flex items-center gap-3 border-b border-line px-4 py-2.5"
+                className="flex items-center gap-3 border-b border-line px-4 py-3"
               >
-                {/* 그룹명 — 고정 너비 */}
-                <span className="w-[90px] shrink-0 text-[12px] font-bold text-ink">
+                <span className="w-[100px] shrink-0 text-[14px] font-bold text-ink">
                   {g.name}
                 </span>
-                {/* 구분선 */}
                 <span className="h-4 w-px shrink-0 bg-line" />
-                {/* 옵션 버튼들 */}
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {g.values.map((v) => {
                     const selected = options[g.name] === v.label;
                     return (
@@ -283,7 +275,7 @@ export function ProductDetailClient({ product }: Props) {
                         key={v.id}
                         type="button"
                         onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
-                        className={`flex items-center gap-1 rounded-sm border px-2.5 py-1 text-[12.5px] transition-colors ${
+                        className={`flex items-center gap-1 rounded border px-3 py-1.5 text-[14px] transition-colors ${
                           selected
                             ? "border-brand bg-brand-light font-bold text-brand"
                             : "border-line text-ink hover:border-brand/60 hover:text-brand"
@@ -291,7 +283,7 @@ export function ProductDetailClient({ product }: Props) {
                       >
                         {v.label}
                         {v.priceDelta > 0 && (
-                          <span className={`text-[11px] ${selected ? "text-brand" : "text-ink-sub"}`}>
+                          <span className={`text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
                             +{v.priceDelta.toLocaleString()}원
                           </span>
                         )}
@@ -304,8 +296,8 @@ export function ProductDetailClient({ product }: Props) {
 
             {/* 페이지 수 (내지 인쇄) */}
             {isPaper && (
-              <div className="flex items-center gap-3 border-b border-line px-4 py-2.5">
-                <span className="w-[90px] shrink-0 text-[12px] font-bold text-ink">페이지 수</span>
+              <div className="flex items-center gap-3 border-b border-line px-4 py-3">
+                <span className="w-[100px] shrink-0 text-[14px] font-bold text-ink">페이지 수</span>
                 <span className="h-4 w-px shrink-0 bg-line" />
                 <input
                   type="number"
@@ -313,21 +305,21 @@ export function ProductDetailClient({ product }: Props) {
                   max={2000}
                   value={pageCount}
                   onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
-                  className="w-24 rounded-sm border border-line px-2.5 py-1 text-[13px] outline-none focus:border-brand"
+                  className="w-24 rounded border border-line px-3 py-1.5 text-[15px] outline-none focus:border-brand"
                 />
-                <span className="text-[12px] text-ink-sub">50 / 51~100 / 101쪽↑ 구간 적용</span>
+                <span className="text-[13px] text-ink-sub">50 / 51~100 / 101쪽↑ 구간 적용</span>
               </div>
             )}
 
             {/* 수량 */}
-            <div className="flex items-center gap-3 border-b border-line px-4 py-2.5">
-              <span className="w-[90px] shrink-0 text-[12px] font-bold text-ink">수량</span>
+            <div className="flex items-center gap-3 border-b border-line px-4 py-3">
+              <span className="w-[100px] shrink-0 text-[14px] font-bold text-ink">수량</span>
               <span className="h-4 w-px shrink-0 bg-line" />
-              <div className="flex items-stretch overflow-hidden rounded-sm border border-line">
+              <div className="flex items-stretch overflow-hidden rounded border border-line">
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-3 py-1.5 text-[13px] text-ink hover:bg-bg"
+                  className="px-4 py-2 text-[16px] text-ink hover:bg-bg"
                   aria-label="수량 감소"
                 >
                   −
@@ -338,12 +330,12 @@ export function ProductDetailClient({ product }: Props) {
                   max={10000}
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                  className="w-14 border-0 bg-transparent text-center text-[13px] outline-none"
+                  className="w-16 border-0 bg-transparent text-center text-[15px] outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="px-3 py-1.5 text-[13px] text-ink hover:bg-bg"
+                  className="px-4 py-2 text-[16px] text-ink hover:bg-bg"
                   aria-label="수량 증가"
                 >
                   +
@@ -352,39 +344,36 @@ export function ProductDetailClient({ product }: Props) {
             </div>
 
             {/* 공급가 + 부가세 + 합계 */}
-            <div className="bg-bg px-4 py-4">
+            <div className="bg-bg px-5 py-5">
               {quoteErr && !displaySubtotal ? (
-                <p className="text-[13px] font-medium text-brand">{quoteErr}</p>
+                <p className="text-[15px] font-medium text-brand">{quoteErr}</p>
               ) : displaySubtotal ? (
-                <div className="space-y-2">
-                  {/* 공급가 */}
+                <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-ink-sub">공급가</span>
-                    <span className="text-[13px] text-ink">
+                    <span className="text-[15px] text-ink-sub">공급가</span>
+                    <span className="text-[15px] text-ink">
                       {displaySubtotal.toLocaleString()}원
                     </span>
                   </div>
-                  {/* 부가세 */}
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-ink-sub">부가세 (VAT 10%)</span>
-                    <span className="text-[13px] text-ink">
+                    <span className="text-[15px] text-ink-sub">부가세 (VAT 10%)</span>
+                    <span className="text-[15px] text-ink">
                       {Math.round(displaySubtotal * 0.1).toLocaleString()}원
                     </span>
                   </div>
-                  {/* 구분선 */}
-                  <div className="border-t border-line pt-2">
+                  <div className="border-t border-line pt-2.5">
                     <div className="flex items-baseline justify-between">
-                      <span className="text-[14px] font-bold text-ink">합계 (VAT 포함)</span>
-                      <span className="text-[24px] font-black tracking-tight text-brand">
+                      <span className="text-[16px] font-bold text-ink">합계 (VAT 포함)</span>
+                      <span className="text-[28px] font-black tracking-tight text-brand">
                         {Math.round(displaySubtotal * 1.1).toLocaleString()}원
                       </span>
                     </div>
                   </div>
                 </div>
               ) : loading ? (
-                <p className="text-[13px] text-ink-sub">계산 중…</p>
+                <p className="text-[15px] text-ink-sub">계산 중…</p>
               ) : (
-                <p className="text-[13px] text-ink-sub">단가가 설정되지 않았습니다.</p>
+                <p className="text-[15px] text-ink-sub">단가가 설정되지 않았습니다.</p>
               )}
             </div>
           </div>
@@ -393,7 +382,7 @@ export function ProductDetailClient({ product }: Props) {
             type="button"
             onClick={handleAddToCart}
             disabled={!displaySubtotal}
-            className="mt-5 w-full rounded-sm bg-brand py-3.5 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-5 w-full rounded bg-brand py-4 text-[17px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
           >
             장바구니 담기
           </button>

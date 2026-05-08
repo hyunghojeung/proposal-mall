@@ -308,7 +308,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
 
   return (
     <>
-    <h1 className="mb-8 border-b border-line pb-5 text-[26px] font-black tracking-tight text-ink">
+    <h1 className="mb-8 border-b border-line pb-5 text-[28px] font-black tracking-tight text-ink">
       결제
       {isAdmin && (
         <span className="ml-3 align-middle rounded-sm bg-brand px-2 py-0.5 text-[12px] font-bold text-white">
@@ -416,7 +416,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
               { value: "TRANSFER", label: "무통장 입금" },
             ] as { value: PaymentMethod; label: string }[]).map(({ value, label }) => (
               <label key={value}
-                className={`flex cursor-pointer items-center gap-3 rounded-sm border px-4 py-3 text-[15px] transition-colors ${
+                className={`flex cursor-pointer items-center gap-3 rounded border px-5 py-3.5 text-[16px] transition-colors ${
                   paymentMethod === value ? "border-brand bg-brand-light" : "border-line hover:border-ink"
                 }`}>
                 <input type="radio" name="payment" value={value}
@@ -429,10 +429,10 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
 
           {/* 무통장 입금 계좌 정보 — 항상 표시 */}
-          <div className="mt-3 rounded-sm bg-blue-50 border border-blue-100 px-4 py-3 text-[13px]">
+          <div className="mt-4 rounded bg-blue-50 border border-blue-100 px-5 py-4 text-[14px]">
             <p className="mb-1 text-ink-sub">계좌 정보</p>
-            <p className="font-bold text-[15px] text-ink">우리은행 208-08-426260</p>
-            <p className="mt-0.5 text-ink-sub">예금주: 정형호</p>
+            <p className="font-bold text-[17px] text-ink">우리은행 208-08-426260</p>
+            <p className="mt-1 text-ink-sub">예금주: 정형호</p>
           </div>
         </Card>
 
@@ -454,15 +454,15 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
       </div>
 
       {/* ── 오른쪽: 주문 요약 ── */}
-      <aside className="rounded border border-line bg-white p-6 lg:sticky lg:top-24 lg:h-fit">
-        <h2 className="text-[17px] font-bold text-ink">주문 내역</h2>
+      <aside className="rounded border border-line bg-white p-7 lg:sticky lg:top-24 lg:h-fit">
+        <h2 className="text-[20px] font-bold text-ink">주문 내역</h2>
 
-        <ul className="mt-4 space-y-3 border-t border-line pt-4 text-[14px]">
+        <ul className="mt-5 space-y-4 border-t border-line pt-5 text-[15px]">
           {items.map((it) => (
             <li key={it.id} className="flex justify-between gap-3">
               <div>
                 <p className="font-medium text-ink">{it.productName}</p>
-                <p className="mt-0.5 text-[12px] text-ink-sub">
+                <p className="mt-1 text-[13px] text-ink-sub">
                   {Object.entries(it.options).map(([k, v]) => `${k}: ${v}`).join(" · ")}
                   {it.pageCount ? ` · ${it.pageCount}쪽` : ""} · {it.quantity}개
                 </p>
@@ -472,7 +472,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
           ))}
         </ul>
 
-        <div className="mt-4 space-y-1.5 border-t border-line pt-4 text-[14px]">
+        <div className="mt-5 space-y-2 border-t border-line pt-5 text-[15px]">
           <div className="flex justify-between">
             <span className="text-ink-sub">상품 합계</span>
             <span className="font-medium text-ink">{subtotal.toLocaleString()}원</span>
@@ -491,22 +491,22 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
         </div>
 
-        <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
-          <span className="text-[15px] font-bold text-ink">결제 금액</span>
-          <span className="text-[24px] font-black tracking-tight text-brand">
+        <div className="mt-5 flex items-baseline justify-between border-t border-line pt-5">
+          <span className="text-[17px] font-bold text-ink">결제 금액</span>
+          <span className="text-[28px] font-black tracking-tight text-brand">
             {total.toLocaleString()}원
           </span>
         </div>
 
         {err && (
-          <p className="mt-3 rounded-sm border border-brand bg-brand-light px-3 py-2 text-[13px] text-brand">{err}</p>
+          <p className="mt-3 rounded border border-brand bg-brand-light px-4 py-3 text-[14px] text-brand">{err}</p>
         )}
 
         <button type="submit" disabled={submitting}
-          className="mt-4 w-full rounded-sm bg-brand py-3.5 text-[16px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60">
+          className="mt-5 w-full rounded bg-brand py-4 text-[17px] font-bold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60">
           {submitting ? "처리 중…" : "결제하기"}
         </button>
-        <p className="mt-2 text-center text-[12px] text-ink-sub">
+        <p className="mt-2 text-center text-[13px] text-ink-sub">
           다음 단계에서 주문 정보를 확인하고 결제까지 완료합니다.
         </p>
       </aside>
@@ -517,7 +517,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
 
 // ── 공통 스타일 ──
 const input =
-  "w-full rounded-sm border border-line px-3 py-2.5 text-[15px] outline-none focus:border-brand";
+  "w-full rounded border border-line px-4 py-3 text-[16px] outline-none focus:border-brand";
 
 // ── 섹션 카드 ──
 function Card({
@@ -532,9 +532,9 @@ function Card({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-line bg-white p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-[16px] font-bold text-ink">
+    <div className="rounded-lg border border-line bg-white p-6">
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-[18px] font-bold text-ink">
           {icon}
           {title}
         </h2>
@@ -559,7 +559,7 @@ function Field({
 }) {
   return (
     <label className={`block ${className ?? ""}`}>
-      <span className="mb-1.5 block text-[14px] font-medium text-ink">
+      <span className="mb-2 block text-[15px] font-medium text-ink">
         {label}
         {required && <span className="ml-0.5 text-brand">*</span>}
       </span>

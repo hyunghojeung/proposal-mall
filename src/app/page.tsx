@@ -42,8 +42,7 @@ export default function Home() {
       <NoticeBar />
       <Header />
 
-      <section className="relative flex min-h-[480px] items-center overflow-hidden bg-bg">
-        {/* 히어로 이미지 — 200px 위로 이동 */}
+      <section className="relative flex min-h-[500px] items-center overflow-hidden bg-bg">
         <div className="absolute bottom-0 right-0 w-[58%]" style={{ top: "-200px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -52,7 +51,6 @@ export default function Home() {
             className="h-full w-full object-cover object-left-top"
           />
         </div>
-        {/* 텍스트 가독성 + 이미지 경계 블렌딩 — 이미지 시작점(42%)을 완전히 덮고 서서히 페이드 */}
         <div
           className="absolute inset-0"
           style={{
@@ -61,27 +59,27 @@ export default function Home() {
           }}
         />
         <div className="relative z-10 mx-auto w-full max-w-page px-6 py-20">
-          <p className="mb-3 text-[13px] font-medium tracking-wide text-brand">
+          <p className="mb-3 text-[15px] font-medium tracking-wide text-brand">
             B2B 제안서 제작 전문
           </p>
-          <h1 className="mb-3.5 text-[42px] font-black leading-[1.2] tracking-tight text-ink">
+          <h1 className="mb-4 text-[44px] font-black leading-[1.2] tracking-tight text-ink">
             중요한 제안에 어울리는
             <br />
             <span className="text-brand">완성도 있는 제안서</span>를.
           </h1>
-          <p className="mb-7 text-[14px] leading-[1.9] text-ink-sub">
+          <p className="mb-8 text-[16px] leading-[1.9] text-ink-sub">
             인쇄, 제본, 박스 제작까지 한 번에. 빠른 제작과 합리적인 가격으로
             <br />
             중요한 비즈니스 순간을 더 돋보이게 만들어 드립니다.
           </p>
           <Link
             href="/products"
-            className="inline-flex items-center gap-1.5 rounded-sm bg-brand px-6 py-3 text-[15px] font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-[0_6px_20px_rgba(232,72,26,.3)]"
+            className="inline-flex items-center gap-2 rounded bg-brand px-7 py-3.5 text-[16px] font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-dark hover:shadow-[0_6px_20px_rgba(232,72,26,.3)]"
           >
             전체상품 보러가기
             <svg
-              width="14"
-              height="14"
+              width="15"
+              height="15"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -95,12 +93,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-white py-16">
+      <section className="bg-white py-18">
         <div className="mx-auto max-w-page px-6">
-          <h2 className="mb-2 text-[22px] font-black tracking-tight text-ink">
+          <h2 className="mb-2 text-[26px] font-black tracking-tight text-ink">
             카테고리
           </h2>
-          <p className="mb-10 text-[13px] text-ink-sub">
+          <p className="mb-10 text-[15px] text-ink-sub">
             필요하신 제안서 형태를 선택해 주세요
           </p>
 
@@ -109,19 +107,19 @@ export default function Home() {
               <li key={cat.title}>
                 <Link
                   href={cat.href}
-                  className="group block rounded border border-line bg-white p-6 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-[0_8px_24px_rgba(0,0,0,.06)]"
+                  className="group block rounded border border-line bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-[0_8px_24px_rgba(0,0,0,.06)]"
                 >
-                  <h3 className="mb-2 text-[16px] font-bold text-ink group-hover:text-brand">
+                  <h3 className="mb-2.5 text-[18px] font-bold text-ink group-hover:text-brand">
                     {cat.title}
                   </h3>
-                  <p className="text-[13px] leading-relaxed text-ink-sub">
+                  <p className="text-[15px] leading-relaxed text-ink-sub">
                     {cat.desc}
                   </p>
-                  <span className="mt-4 inline-flex items-center gap-1 text-[13px] font-bold text-brand">
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-[15px] font-bold text-brand">
                     살펴보기
                     <svg
-                      width="12"
-                      height="12"
+                      width="13"
+                      height="13"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
