@@ -65,12 +65,20 @@ export function CartView() {
           >
             <div className="flex-1">
               <h3 className="text-[17px] font-bold text-ink">{it.productName}</h3>
-              <p className="mt-1.5 text-[14px] text-ink-sub">
-                {Object.entries(it.options)
-                  .map(([k, v]) => `${k}: ${v}`)
-                  .join(" · ")}
-                {it.pageCount ? ` · ${it.pageCount}쪽` : ""}
-              </p>
+              <ul className="mt-2 space-y-1">
+                {Object.entries(it.options).map(([k, v]) => (
+                  <li key={k} className="flex gap-1.5 text-[14px] text-ink-sub">
+                    <span className="shrink-0 font-medium text-ink-del">{k}:</span>
+                    <span>{v}</span>
+                  </li>
+                ))}
+                {it.pageCount && (
+                  <li className="flex gap-1.5 text-[14px] text-ink-sub">
+                    <span className="shrink-0 font-medium text-ink-del">페이지 수:</span>
+                    <span>{it.pageCount}쪽</span>
+                  </li>
+                )}
+              </ul>
 
               <div className="mt-4 flex items-stretch overflow-hidden rounded border border-line w-fit">
                 <button
