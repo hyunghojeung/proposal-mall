@@ -133,7 +133,19 @@ export async function POST(req: NextRequest) {
 
   // PG 결제 초기화
   const adapter = getPaymentAdapter();
-  const origin = req.nextUrl.origin;
+
+  // Railway 리버스 프록시 환경에서 req.nextUrl.origin 이 localhost:8080 으로 잘못 인식되는 문제 방지.
+  // 우선순위: NEXT_PUBLIC_SITE_URL → X-Forwarded 헤더 재조합 → req.nextUrl.origin
+  function getOrigin(): string {
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (siteUrl) return siteUrl.replace(/\/$/, "");
+    const proto = req.headers.get("x-forwarded-proto");
+    const host  = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+    if (proto && host) return `${proto}://${host}`;
+    return req.nextUrl.origin;
+  }
+  const origin = getOrigin();
+
   let paymentInit;
   try {
     paymentInit = await adapter.init({

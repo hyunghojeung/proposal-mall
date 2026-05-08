@@ -10,7 +10,12 @@ export const dynamic = "force-dynamic";
 // returnurl 에 ?order=Pro-0001 를 넣었으므로 쿼리파라미터로 주문번호 식별
 async function handleReturn(req: NextRequest) {
   const adapter = getPaymentAdapter();
-  const origin = req.nextUrl.origin;
+
+  // Railway 리버스 프록시에서 origin 이 localhost:8080 으로 오는 문제 방지
+  const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  const fwdProto = req.headers.get("x-forwarded-proto");
+  const fwdHost  = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+  const origin   = siteUrl ?? (fwdProto && fwdHost ? `${fwdProto}://${fwdHost}` : req.nextUrl.origin);
 
   let params: URLSearchParams;
   if (req.method === "POST") {
