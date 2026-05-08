@@ -125,31 +125,6 @@ export function ContactView() {
 
       {/* Main content */}
       <div className="mx-auto max-w-page px-6 pb-20 pt-9">
-        {/* CS bar */}
-        <div className="mb-8 grid grid-cols-3 gap-3.5">
-          <div className="rounded border border-line bg-white p-5 transition-colors hover:border-brand">
-            <p className="mb-2 text-[12px] font-medium text-ink-sub">대표 전화</p>
-            <p className="mb-1 text-[20px] font-black tracking-tight text-ink">070-0000-0000</p>
-            <p className="text-[12.5px] leading-relaxed text-ink-sub">
-              평일 09:00 ~ 18:00<br />점심 12:00 ~ 13:00
-            </p>
-          </div>
-          <div className="rounded border border-line bg-white p-5 transition-colors hover:border-brand">
-            <p className="mb-2 text-[12px] font-medium text-ink-sub">카카오채널</p>
-            <p className="mb-1 text-[20px] font-black tracking-tight text-ink">@제안서몰</p>
-            <p className="text-[12.5px] leading-relaxed text-ink-sub">
-              채팅 상담 가능<br />평일 09:00 ~ 18:00
-            </p>
-          </div>
-          <div className="rounded border border-line bg-white p-5 transition-colors hover:border-brand">
-            <p className="mb-2 text-[12px] font-medium text-ink-sub">이메일</p>
-            <p className="mb-1 text-[15px] font-black tracking-tight text-ink">blackcopy2@naver.com</p>
-            <p className="text-[12.5px] leading-relaxed text-ink-sub">
-              24시간 접수<br />평일 내 순차 처리
-            </p>
-          </div>
-        </div>
-
         {/* Two-column grid */}
         <div className="grid grid-cols-[1fr_340px] items-start gap-6">
 
