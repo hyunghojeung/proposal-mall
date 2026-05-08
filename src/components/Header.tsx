@@ -15,7 +15,7 @@ export function Header() {
           href="/"
           className="shrink-0 text-[26px] font-black italic tracking-tight text-brand"
         >
-          제안서박스몰
+          제안서박스 <span className="text-ink">mall</span>
         </Link>
 
         <form
