@@ -83,7 +83,8 @@ function ImageGallery({ images }: { images: string[] }) {
               key={i}
               type="button"
               onClick={() => setActive(i)}
-              className={`h-18 w-18 shrink-0 overflow-hidden rounded border-2 transition-colors ${
+              style={{ width: 80, height: 80 }}
+              className={`shrink-0 overflow-hidden rounded border-2 transition-colors ${
                 i === active ? "border-brand" : "border-line"
               }`}
             >
