@@ -77,12 +77,12 @@ export default async function AdminOrdersPage({
         items: { select: { id: true, productName: true } },
       },
     })
-    .catch(() => []);
+    .catch((e) => { console.error("[admin/orders] findMany 실패:", e); return []; });
 
   // 요약 카운트
   const counts = await prisma.order
     .groupBy({ by: ["status"], _count: { id: true } })
-    .catch(() => []);
+    .catch((e) => { console.error("[admin/orders] groupBy 실패:", e); return []; });
   const countMap: Partial<Record<string, number>> = {};
   for (const c of counts) countMap[c.status] = c._count.id;
 
@@ -175,7 +175,10 @@ export default async function AdminOrdersPage({
             <tbody>
               {orders.map((o) => {
                 const badge = STATUS_BADGE[o.status];
-                const payMethod = (o as typeof o & { paymentMethod?: string }).paymentMethod ?? "TRANSFER";
+                // paymentMethod 컬럼이 아직 없는 구버전 행은 paymentTid 유무로 추정
+                const payMethod =
+                  (o as typeof o & { paymentMethod?: string }).paymentMethod ??
+                  (o.paymentTid ? "CARD" : "TRANSFER");
                 const productSummary = o.items[0]?.productName
                   ? o.items.length > 1
                     ? `${o.items[0].productName} 외 ${o.items.length - 1}건`
