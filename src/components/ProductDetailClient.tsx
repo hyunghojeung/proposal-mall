@@ -262,10 +262,19 @@ export function ProductDetailClient({ product }: Props) {
           {/* 통합 카드: 옵션선택 + 수량 + 가격 */}
           <div className="mt-5 overflow-hidden rounded border border-line">
 
-            {/* 옵션 그룹 — 카드 안에 통합 */}
+            {/* 옵션 그룹 — 그룹명 | 버튼들 수평 한 줄 배치 */}
             {product.optionGroups.map((g) => (
-              <div key={g.id} className="border-b border-line px-4 py-3">
-                <p className="mb-2 text-[12px] font-bold text-ink">{g.name}</p>
+              <div
+                key={g.id}
+                className="flex items-center gap-3 border-b border-line px-4 py-2.5"
+              >
+                {/* 그룹명 — 고정 너비 */}
+                <span className="w-[90px] shrink-0 text-[12px] font-bold text-ink">
+                  {g.name}
+                </span>
+                {/* 구분선 */}
+                <span className="h-4 w-px shrink-0 bg-line" />
+                {/* 옵션 버튼들 */}
                 <div className="flex flex-wrap gap-1.5">
                   {g.values.map((v) => {
                     const selected = options[g.name] === v.label;
@@ -274,15 +283,15 @@ export function ProductDetailClient({ product }: Props) {
                         key={v.id}
                         type="button"
                         onClick={() => setOptions((o) => ({ ...o, [g.name]: v.label }))}
-                        className={`rounded-sm border px-3 py-1.5 text-left text-[13px] transition-colors ${
+                        className={`flex items-center gap-1 rounded-sm border px-2.5 py-1 text-[12.5px] transition-colors ${
                           selected
                             ? "border-brand bg-brand-light font-bold text-brand"
-                            : "border-line text-ink hover:border-ink"
+                            : "border-line text-ink hover:border-brand/60 hover:text-brand"
                         }`}
                       >
-                        <span>{v.label}</span>
+                        {v.label}
                         {v.priceDelta > 0 && (
-                          <span className={`ml-1.5 text-[12px] ${selected ? "text-brand" : "text-ink-sub"}`}>
+                          <span className={`text-[11px] ${selected ? "text-brand" : "text-ink-sub"}`}>
                             +{v.priceDelta.toLocaleString()}원
                           </span>
                         )}
@@ -295,30 +304,30 @@ export function ProductDetailClient({ product }: Props) {
 
             {/* 페이지 수 (내지 인쇄) */}
             {isPaper && (
-              <div className="border-b border-line px-4 py-3">
-                <p className="mb-2 text-[12px] font-bold text-ink">페이지 수</p>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    min={1}
-                    max={2000}
-                    value={pageCount}
-                    onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
-                    className="w-28 rounded-sm border border-line px-3 py-1.5 text-[14px] outline-none focus:border-brand"
-                  />
-                  <span className="text-[12px] text-ink-sub">50 / 51~100 / 101쪽↑ 구간 단가 적용</span>
-                </div>
+              <div className="flex items-center gap-3 border-b border-line px-4 py-2.5">
+                <span className="w-[90px] shrink-0 text-[12px] font-bold text-ink">페이지 수</span>
+                <span className="h-4 w-px shrink-0 bg-line" />
+                <input
+                  type="number"
+                  min={1}
+                  max={2000}
+                  value={pageCount}
+                  onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
+                  className="w-24 rounded-sm border border-line px-2.5 py-1 text-[13px] outline-none focus:border-brand"
+                />
+                <span className="text-[12px] text-ink-sub">50 / 51~100 / 101쪽↑ 구간 적용</span>
               </div>
             )}
 
             {/* 수량 */}
-            <div className="flex items-center justify-between border-b border-line px-4 py-3">
-              <span className="text-[13px] text-ink-sub">수량</span>
+            <div className="flex items-center gap-3 border-b border-line px-4 py-2.5">
+              <span className="w-[90px] shrink-0 text-[12px] font-bold text-ink">수량</span>
+              <span className="h-4 w-px shrink-0 bg-line" />
               <div className="flex items-stretch overflow-hidden rounded-sm border border-line">
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-3 py-1.5 text-[14px] text-ink hover:bg-bg"
+                  className="px-3 py-1.5 text-[13px] text-ink hover:bg-bg"
                   aria-label="수량 감소"
                 >
                   −
@@ -329,12 +338,12 @@ export function ProductDetailClient({ product }: Props) {
                   max={10000}
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                  className="w-16 border-0 bg-transparent text-center text-[14px] outline-none"
+                  className="w-14 border-0 bg-transparent text-center text-[13px] outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="px-3 py-1.5 text-[14px] text-ink hover:bg-bg"
+                  className="px-3 py-1.5 text-[13px] text-ink hover:bg-bg"
                   aria-label="수량 증가"
                 >
                   +
