@@ -133,6 +133,7 @@ export const cidapayAdapter: PaymentAdapter = {
         "Authorization":    `Bearer ${approvalToken}`,
         "X-API-Key":        approvalToken,
         "X-Requested-With": "XMLHttpRequest",
+        "Origin":           origin,
       },
       body: JSON.stringify(paymentData),
     });
