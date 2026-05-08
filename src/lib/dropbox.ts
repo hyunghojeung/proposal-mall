@@ -71,7 +71,10 @@ export async function uploadProductImage(opts: {
   }
 
   const folder = (process.env.DROPBOX_PRODUCT_FOLDER ?? "/proposal-mall-products").replace(/\/$/, "");
-  const destPath = `${folder}/${Date.now()}_${opts.filename.replace(/\s+/g, "_")}`;
+
+  // 한글·특수문자 제거 → 타임스탬프 기반 안전한 파일명
+  const ext = opts.filename.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "jpg";
+  const destPath = `${folder}/${Date.now()}.${ext}`;
 
   const token = await getAccessToken();
 
