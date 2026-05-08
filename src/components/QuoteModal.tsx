@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type CartItem, cartSubtotal } from "@/lib/cart";
 import { shippingFee, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
 
@@ -107,14 +107,7 @@ export function QuoteModal({ items, delivery, onClose }: QuoteModalProps) {
               </div>
               {/* 직인 이미지 */}
               <div className="ml-4 shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/stamp.png"
-                  alt="직인"
-                  width={88}
-                  height={88}
-                  style={{ objectFit: "contain" }}
-                />
+                <StampImage />
               </div>
             </div>
           </div>
@@ -229,5 +222,30 @@ export function QuoteModal({ items, delivery, onClose }: QuoteModalProps) {
         </div>
       </div>
     </>
+  );
+}
+
+/* ── 도장 이미지: 파일 없으면 원형 텍스트 placeholder ── */
+function StampImage() {
+  const [err, setErr] = useState(false);
+
+  if (err) {
+    return (
+      <div className="flex h-[88px] w-[88px] items-center justify-center rounded-full border-[3px] border-brand text-center text-[11px] font-bold leading-tight text-brand">
+        인쇄의창<br />인&nbsp;(印)
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/stamp.png"
+      alt="직인"
+      width={88}
+      height={88}
+      style={{ objectFit: "contain" }}
+      onError={() => setErr(true)}
+    />
   );
 }
