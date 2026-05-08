@@ -10,7 +10,13 @@
 //   CIDERPAY_DEV_ID    개발사 아이디
 //   CIDERPAY_DEV_TOKEN 개발사 토큰
 //   CIDERPAY_MID       가맹점 회원 아이디 (기본값: 1140456136)
+//
+// Railway 컨테이너 DNS 우회:
+//   시스템 DNS 대신 Google(8.8.8.8) / Cloudflare(1.1.1.1)로 직접 resolve
+//   → node:https로 IP에 직접 연결 (Host 헤더 + TLS SNI 정상 처리)
 
+import https from "node:https";
+import { Resolver } from "node:dns/promises";
 import type {
   PaymentAdapter,
   PaymentInitInput,
@@ -20,26 +26,100 @@ import type {
 
 const BASE = "https://api.ciderpay.com";
 
-// EAI_AGAIN (DNS 일시 실패) 대비 재시도 fetch
-async function fetchWithRetry(
+// ── 공개 DNS 기반 fetch ────────────────────────────────────────────────────
+
+const _resolver = new Resolver();
+_resolver.setServers(["8.8.8.8", "1.1.1.1"]);
+
+// 5분 TTL DNS 캐시 (Railway는 컨테이너 IP가 자주 바뀌지 않음)
+const _dnsCache = new Map<string, { ip: string; exp: number }>();
+
+async function resolveIp(hostname: string): Promise<string> {
+  const hit = _dnsCache.get(hostname);
+  if (hit && hit.exp > Date.now()) return hit.ip;
+  const addrs = await _resolver.resolve4(hostname);
+  if (!addrs.length) throw new Error(`DNS: A 레코드 없음 (${hostname})`);
+  const ip = addrs[0];
+  _dnsCache.set(hostname, { ip, exp: Date.now() + 5 * 60_000 });
+  console.log(`[ciderpay] DNS ${hostname} → ${ip} (via 8.8.8.8)`);
+  return ip;
+}
+
+interface CiderResponse {
+  ok: boolean;
+  status: number;
+  json(): Promise<unknown>;
+  text(): Promise<string>;
+}
+
+/**
+ * Railway의 시스템 DNS를 완전히 우회하여 api.ciderpay.com 호출.
+ * - Google/Cloudflare DNS로 IP 조회
+ * - node:https 로 IP에 직접 TCP 연결
+ * - Host 헤더 + TLS servername(SNI) 올바르게 설정 → 인증서 오류 없음
+ */
+async function ciderFetch(
   url: string,
-  options: RequestInit,
-  retries = 3,
-  delayMs = 800,
-): Promise<Response> {
-  for (let i = 0; i < retries; i++) {
+  init: { method: string; headers: Record<string, string>; body?: string },
+  retries = 2,
+): Promise<CiderResponse> {
+  const parsed   = new URL(url);
+  const hostname = parsed.hostname;
+  const path     = parsed.pathname + (parsed.search ?? "");
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    // 먼저 IP 확보 (캐시 or Google DNS)
+    let ip: string;
     try {
-      return await fetch(url, options);
+      ip = await resolveIp(hostname);
+    } catch (dnsErr) {
+      console.error(`[ciderpay] DNS 조회 실패: ${String(dnsErr)}`);
+      // DNS 자체가 실패하면 hostname 그대로 시도 (시스템 DNS fallback)
+      ip = hostname;
+    }
+
+    try {
+      const resp = await new Promise<CiderResponse>((resolve, reject) => {
+        const req = https.request(
+          {
+            host:       ip,          // 연결할 IP (또는 hostname fallback)
+            port:       443,
+            path,
+            method:     init.method,
+            headers:    { ...init.headers, Host: hostname },
+            servername: hostname,    // TLS SNI — 인증서 검증에 필요
+          },
+          (res) => {
+            const chunks: Buffer[] = [];
+            res.on("data",  (c: Buffer) => chunks.push(c));
+            res.on("end",   () => {
+              const raw = Buffer.concat(chunks).toString("utf-8");
+              resolve({
+                ok:     (res.statusCode ?? 0) >= 200 && (res.statusCode ?? 0) < 300,
+                status: res.statusCode ?? 0,
+                json:   () => { try { return Promise.resolve(JSON.parse(raw)); } catch { return Promise.reject(new Error("JSON 파싱 오류")); } },
+                text:   () => Promise.resolve(raw),
+              });
+            });
+            res.on("error", reject);
+          },
+        );
+        req.on("error", reject);
+        if (init.body) req.write(init.body);
+        req.end();
+      });
+      return resp;
     } catch (e) {
-      const msg = String(e);
-      const isRetryable = msg.includes("EAI_AGAIN") || msg.includes("ECONNRESET") || msg.includes("ETIMEDOUT");
-      if (!isRetryable || i === retries - 1) throw e;
-      console.warn(`[ciderpay] fetch 재시도 ${i + 1}/${retries - 1}: ${msg}`);
-      await new Promise((r) => setTimeout(r, delayMs * (i + 1)));
+      console.warn(`[ciderpay] 요청 실패 (시도 ${attempt + 1}/${retries + 1}): ${String(e)}`);
+      if (attempt === retries) throw e;
+      _dnsCache.delete(hostname); // 재시도 전 캐시 초기화
+      await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
     }
   }
-  throw new Error("fetchWithRetry: unreachable");
+  throw new Error("ciderFetch: unreachable");
 }
+
+// ── 공통 유틸 ────────────────────────────────────────────────────────────
 
 function requireEnv(name: string): string {
   const v = process.env[name];
@@ -51,24 +131,25 @@ function getMid(): string {
   return process.env.CIDERPAY_MID ?? "1140456136";
 }
 
-function devHeaders() {
+function devHeaders(): Record<string, string> {
   return {
-    "accept":     "application/json",
-    "devID":      requireEnv("CIDERPAY_DEV_ID"),
-    "devToken":   requireEnv("CIDERPAY_DEV_TOKEN"),
+    accept:     "application/json",
+    devID:      requireEnv("CIDERPAY_DEV_ID"),
+    devToken:   requireEnv("CIDERPAY_DEV_TOKEN"),
   };
 }
 
+// ── makeWebKey ────────────────────────────────────────────────────────────
+
 // GET /oapi/pmember/makeWebKey
 // devID + devToken 헤더, memberID 쿼리파라미터로 approvalToken 동적 발급
-// 정적 CIDERPAY_API_KEY 없이 매 결제마다 토큰을 새로 발급받는 방식
 async function fetchMakeWebKey(): Promise<string> {
   const url = new URL(`${BASE}/oapi/pmember/makeWebKey`);
   url.searchParams.set("memberID", getMid());
 
-  const res = await fetch(url.toString(), {
-    method: "GET",
-    headers: devHeaders(), // accept + devID + devToken
+  const res = await ciderFetch(url.toString(), {
+    method:  "GET",
+    headers: devHeaders(),
   });
 
   if (!res.ok) {
@@ -81,9 +162,7 @@ async function fetchMakeWebKey(): Promise<string> {
   console.log("[ciderpay] makeWebKey 응답:", JSON.stringify(json));
 
   // 공식 문서 기준 응답: { success, message, var1 }
-  // var1 = 웹 로그인 가능한 토큰값 (= approvalToken)
   const approvalToken = json?.var1 ?? null;
-
   if (!approvalToken) {
     throw new Error(
       json?.message
@@ -91,9 +170,10 @@ async function fetchMakeWebKey(): Promise<string> {
         : `사이다페이: var1(토큰) 없음. 응답: ${JSON.stringify(json)}`
     );
   }
-
   return String(approvalToken);
 }
+
+// ── 어댑터 ───────────────────────────────────────────────────────────────
 
 export const cidapayAdapter: PaymentAdapter = {
   name: "ciderpay",
@@ -102,23 +182,18 @@ export const cidapayAdapter: PaymentAdapter = {
     const mid = getMid();
 
     // approvalToken 획득
-    // - CIDERPAY_API_KEY 가 설정된 경우 → 정적 토큰 사용 (fallback)
-    // - CIDERPAY_DEV_ID + CIDERPAY_DEV_TOKEN → makeWebKey API로 동적 발급 (권장)
     let approvalToken: string;
     const staticKey = process.env.CIDERPAY_API_KEY;
     if (staticKey) {
       approvalToken = staticKey;
     } else {
-      // makeWebKey: devID + devToken으로 approvalToken 동적 발급
       approvalToken = await fetchMakeWebKey();
     }
 
-    // returnurl에 주문번호 포함 → return 핸들러에서 주문 식별
     const origin      = new URL(input.returnUrl).origin;
     const feedbackUrl = `${origin}/api/payment/webhook`;
     const returnUrl   = `${origin}/api/payment/return?order=${encodeURIComponent(input.orderSerial)}`;
 
-    // 2단계: 결제 요청
     const paymentData = {
       memberID:    mid,
       price:       input.amount,
@@ -128,8 +203,8 @@ export const cidapayAdapter: PaymentAdapter = {
       email:       input.customerEmail,
       feedbackurl: feedbackUrl,
       returnurl:   returnUrl,
-      returnmode:  "JUST",           // 결제완료 후 returnurl 즉시 호출 (GET)
-      var1:        input.orderSerial, // feedback 콜백에서 주문 식별
+      returnmode:  "JUST",
+      var1:        input.orderSerial,
       var2:        "PROPOSAL_MALL",
       smsuse:      "Y",
       whereFrom:   "PROPOSAL_MALL_WEBSITE",
@@ -145,16 +220,16 @@ export const cidapayAdapter: PaymentAdapter = {
       ],
     };
 
-    const res = await fetchWithRetry(`${BASE}/oapi/payment/request/s2`, {
-      method: "POST",
+    const res = await ciderFetch(`${BASE}/oapi/payment/request/s2`, {
+      method:  "POST",
       headers: {
-        "accept":           "application/json",
+        accept:             "application/json",
         "Content-Type":     "application/json",
-        "approvalToken":    approvalToken,
-        "Authorization":    `Bearer ${approvalToken}`,
+        approvalToken,
+        Authorization:      `Bearer ${approvalToken}`,
         "X-API-Key":        approvalToken,
         "X-Requested-With": "XMLHttpRequest",
-        "Origin":           origin,
+        Origin:             origin,
       },
       body: JSON.stringify(paymentData),
     });
@@ -184,7 +259,6 @@ export const cidapayAdapter: PaymentAdapter = {
   },
 
   // returnmode=JUST → 결제완료 후 GET으로 returnurl 즉시 호출
-  // 우리가 returnurl에 ?order=주문번호 를 넣었으므로 쿼리파라미터로 식별
   parseReturn(query: URLSearchParams): PaymentReturnPayload {
     const orderSerial = query.get("order") ?? query.get("var1") ?? "";
     const state       = query.get("paymentState") ?? "";
@@ -192,7 +266,7 @@ export const cidapayAdapter: PaymentAdapter = {
 
     return {
       orderSerial,
-      status:       cancelled ? "cancelled" : "success", // JUST 모드는 성공 시에만 호출
+      status:       cancelled ? "cancelled" : "success",
       tid:          query.get("orderNo") ?? undefined,
       amount:       query.get("price") ? Number(query.get("price")) : undefined,
       errorMessage: query.get("errorMessage") ?? undefined,
@@ -200,12 +274,6 @@ export const cidapayAdapter: PaymentAdapter = {
   },
 
   // feedbackurl: 사이다페이 서버 → 우리 서버 POST 통지
-  // 공식 Feedback 필드:
-  //   memberID, feedbackToken, goodName, price, recvPhone
-  //   paymentState (COMPLETE | CANCEL)
-  //   payType (1:카드 2:핸드폰 3:카카오페이)
-  //   orderNo (주문번호), approvalNo (승인번호), ccname (카드사명)
-  //   var1 (우리가 넣은 orderSerial), var2, cardNum, cardQuota, csturl
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   verifyWebhook(rawBody: string, _signature: string | null) {
     try {
@@ -237,19 +305,17 @@ export const cidapayAdapter: PaymentAdapter = {
 };
 
 // ── 결제 취소 유틸 (관리자 패널에서 호출) ──────────────────────────────────
-// POST /oapi/payment/cancel
-// 필드: memberID, orderNo (사이다페이 주문번호 = paymentTid), token (feedbackToken)
 export async function cancelPayment(params: {
-  orderNo: string;       // 사이다페이 orderNo (paymentTid)
-  token: string;         // feedbackToken (feedback 콜백에서 수신한 값)
+  orderNo: string;
+  token: string;
   cancelMessage?: string;
 }): Promise<{ success: boolean; errorMessage?: string }> {
   const mid = getMid();
 
-  const res = await fetch(`${BASE}/oapi/payment/cancel`, {
-    method: "POST",
+  const res = await ciderFetch(`${BASE}/oapi/payment/cancel`, {
+    method:  "POST",
     headers: {
-      "accept":        "application/json",
+      accept:          "application/json",
       "Content-Type":  "application/json",
     },
     body: JSON.stringify({
