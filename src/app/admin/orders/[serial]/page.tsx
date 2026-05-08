@@ -93,6 +93,20 @@ export default async function AdminOrderDetail({
 
           <Section title="결제 / 파일">
             <dl className="grid gap-2 text-[13px]">
+              <Row
+                label="결제수단"
+                value={
+                  <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                    (order as typeof order & { paymentMethod?: string }).paymentMethod === "CARD"
+                      ? "border border-blue-200 bg-blue-50 text-blue-700"
+                      : "border border-amber-200 bg-amber-50 text-amber-700"
+                  }`}>
+                    {(order as typeof order & { paymentMethod?: string }).paymentMethod === "CARD"
+                      ? "카드 결제"
+                      : "무통장 입금"}
+                  </span>
+                }
+              />
               <Row label="상품 합계" value={`${(order.totalAmount - order.shippingFee).toLocaleString()}원`} />
               <Row
                 label="배송비"
