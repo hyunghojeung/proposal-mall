@@ -48,9 +48,9 @@ interface OrderRow {
 
 function PayBadge({ hasTid }: { hasTid: boolean }) {
   return hasTid ? (
-    <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[12px] font-bold text-blue-700">카드</span>
+    <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[15px] font-bold text-blue-700">카드</span>
   ) : (
-    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[12px] font-bold text-amber-700">무통장</span>
+    <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[15px] font-bold text-amber-700">무통장</span>
   );
 }
 
@@ -64,7 +64,6 @@ export default async function AdminOrdersPage({
   const statusParam = searchParams.status ?? "ALL";
   const q = searchParams.q?.trim() ?? "";
 
-  // ── Raw SQL: Prisma 스키마 컬럼 불일치 문제 완전 우회 ──
   const statusValid = Object.values(OrderStatus).includes(statusParam as OrderStatus);
 
   const orders = await prisma.$queryRaw<OrderRow[]>`
@@ -102,7 +101,6 @@ export default async function AdminOrdersPage({
     return [] as OrderRow[];
   });
 
-  // 상태별 카운트 (raw)
   const countRows = await prisma.$queryRaw<{ status: string; cnt: bigint }[]>`
     SELECT status::text, COUNT(*) AS cnt FROM orders GROUP BY status
   `.catch(() => [] as { status: string; cnt: bigint }[]);
@@ -118,7 +116,7 @@ export default async function AdminOrdersPage({
     <AdminShell active="orders" title="주문현황">
 
       {/* 상태 필터 탭 */}
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           {STATUS_FILTERS.map((f) => {
             const active = statusParam === f.value;
@@ -128,7 +126,7 @@ export default async function AdminOrdersPage({
               <Link
                 key={f.value}
                 href={href}
-                className={`rounded border px-4 py-2 text-[13px] transition-colors ${
+                className={`rounded border px-5 py-2.5 text-[16px] transition-colors ${
                   active
                     ? "border-brand bg-brand-light font-bold text-brand"
                     : "border-line text-ink hover:border-ink"
@@ -136,7 +134,7 @@ export default async function AdminOrdersPage({
               >
                 {f.label}
                 {cnt > 0 && (
-                  <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[11px] font-bold ${
+                  <span className={`ml-2 rounded-full px-2 py-0.5 text-[13px] font-bold ${
                     active ? "bg-brand text-white" : "bg-bg text-ink-sub"
                   }`}>
                     {cnt}
@@ -156,18 +154,18 @@ export default async function AdminOrdersPage({
             name="q"
             defaultValue={q}
             placeholder="주문번호 / 이름 / 연락처 / 이메일"
-            className="w-72 rounded border border-line px-3 py-2 text-[13px] outline-none focus:border-brand"
+            className="w-80 rounded border border-line px-4 py-2.5 text-[16px] outline-none focus:border-brand"
           />
           <button
             type="submit"
-            className="rounded bg-ink px-4 py-2 text-[13px] font-medium text-white hover:bg-black"
+            className="rounded bg-ink px-5 py-2.5 text-[16px] font-medium text-white hover:bg-black"
           >
             검색
           </button>
           {q && (
             <Link
               href={statusParam !== "ALL" && statusValid ? `/admin/orders?status=${statusParam}` : "/admin/orders"}
-              className="rounded border border-line px-4 py-2 text-[13px] text-ink-sub hover:border-ink"
+              className="rounded border border-line px-4 py-2.5 text-[16px] text-ink-sub hover:border-ink"
             >
               초기화
             </Link>
@@ -178,24 +176,24 @@ export default async function AdminOrdersPage({
       {/* 주문 테이블 */}
       {orders.length === 0 ? (
         <div className="rounded border border-line bg-bg px-4 py-16 text-center">
-          <p className="text-[15px] text-ink-sub">
+          <p className="text-[18px] text-ink-sub">
             {q ? `"${q}" 검색 결과가 없습니다.` : "주문이 없습니다."}
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[960px] border-collapse text-[14px]">
+          <table className="w-full min-w-[1100px] border-collapse text-[16px]">
             <thead>
-              <tr className="border-y border-line bg-bg text-left text-[13px] text-ink-sub">
-                <th className="px-4 py-3 font-semibold">주문번호</th>
-                <th className="px-4 py-3 font-semibold">주문자</th>
-                <th className="px-4 py-3 font-semibold">연락처 / 이메일</th>
-                <th className="px-4 py-3 font-semibold">결제</th>
-                <th className="px-4 py-3 font-semibold">상품</th>
-                <th className="px-4 py-3 font-semibold">수령</th>
-                <th className="px-4 py-3 font-semibold">상태</th>
-                <th className="px-4 py-3 text-right font-semibold">금액</th>
-                <th className="px-4 py-3 font-semibold">주문일시</th>
+              <tr className="border-y border-line bg-bg text-left text-[15px] text-ink-sub">
+                <th className="px-4 py-4 font-semibold">주문번호</th>
+                <th className="px-4 py-4 font-semibold">주문자</th>
+                <th className="px-4 py-4 font-semibold">연락처 / 이메일</th>
+                <th className="px-4 py-4 font-semibold">결제</th>
+                <th className="px-4 py-4 font-semibold">상품</th>
+                <th className="px-4 py-4 font-semibold">수령</th>
+                <th className="px-4 py-4 font-semibold">상태</th>
+                <th className="px-4 py-4 text-right font-semibold">금액</th>
+                <th className="px-4 py-4 font-semibold">주문일시</th>
               </tr>
             </thead>
             <tbody>
@@ -210,37 +208,37 @@ export default async function AdminOrdersPage({
 
                 return (
                   <tr key={o.serial} className="border-b border-line align-middle hover:bg-bg/50">
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-4">
                       <Link href={`/admin/orders/${o.serial}`} className="font-bold text-brand hover:underline">
                         {o.serial}
                       </Link>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-4">
                       <span className="font-medium text-ink">{o.customerName}</span>
-                      {o.company && <p className="mt-0.5 text-[12px] text-ink-sub">{o.company}</p>}
+                      {o.company && <p className="mt-0.5 text-[14px] text-ink-sub">{o.company}</p>}
                     </td>
-                    <td className="px-4 py-3.5 text-[13px] text-ink-sub">
+                    <td className="px-4 py-4 text-[15px] text-ink-sub">
                       <p>{o.customerPhone}</p>
                       <p className="mt-0.5">{o.customerEmail}</p>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-4">
                       <PayBadge hasTid={!!o.paymentTid} />
                     </td>
-                    <td className="px-4 py-3.5 max-w-[180px]">
-                      <span className="block truncate text-[13px] text-ink-sub">{productSummary}</span>
+                    <td className="px-4 py-4 max-w-[200px]">
+                      <span className="block truncate text-[15px] text-ink-sub">{productSummary}</span>
                     </td>
-                    <td className="px-4 py-3.5 text-[13px] text-ink-sub">
+                    <td className="px-4 py-4 text-[15px] text-ink-sub">
                       {DELIVERY_LABELS[o.deliveryMethod as keyof typeof DELIVERY_LABELS] ?? o.deliveryMethod}
                     </td>
-                    <td className="px-4 py-3.5">
-                      <span className={`inline-block rounded-full px-3 py-1 text-[12px] font-bold ${badge.cls}`}>
+                    <td className="px-4 py-4">
+                      <span className={`inline-block rounded-full px-3 py-1 text-[14px] font-bold ${badge.cls}`}>
                         {badge.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-right font-bold text-ink">
+                    <td className="px-4 py-4 text-right font-bold text-ink">
                       {Number(o.totalAmount).toLocaleString()}원
                     </td>
-                    <td className="px-4 py-3.5 text-[12px] text-ink-sub">
+                    <td className="px-4 py-4 text-[14px] text-ink-sub">
                       {new Date(o.createdAt).toLocaleString("ko-KR", {
                         month: "2-digit", day: "2-digit",
                         hour: "2-digit", minute: "2-digit",

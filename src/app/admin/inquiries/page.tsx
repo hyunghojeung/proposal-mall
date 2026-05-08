@@ -41,7 +41,7 @@ export default async function AdminInquiriesPage({
 
   return (
     <AdminShell active="inquiries" title="고객문의">
-      <div className="flex flex-wrap gap-2 pb-5">
+      <div className="flex flex-wrap gap-2 pb-6">
         {STATUS_FILTERS.map((f) => {
           const active = (statusParam ?? "ALL") === f.value;
           const href =
@@ -50,7 +50,7 @@ export default async function AdminInquiriesPage({
             <Link
               key={f.value}
               href={href}
-              className={`rounded border px-4 py-2 text-[13px] transition-colors ${
+              className={`rounded border px-5 py-2.5 text-[16px] transition-colors ${
                 active
                   ? "border-brand bg-brand-light font-bold text-brand"
                   : "border-line text-ink hover:border-ink"
@@ -63,41 +63,41 @@ export default async function AdminInquiriesPage({
       </div>
 
       {inquiries.length === 0 ? (
-        <p className="rounded border border-line bg-bg px-4 py-12 text-center text-[14px] text-ink-sub">
+        <p className="rounded border border-line bg-bg px-4 py-12 text-center text-[16px] text-ink-sub">
           조건에 맞는 문의가 없습니다.
         </p>
       ) : (
         <ul className="space-y-4">
           {inquiries.map((q) => (
             <li key={q.id} className="rounded border border-line bg-white p-6">
-              <div className="flex flex-wrap items-baseline gap-2.5">
-                <span className="rounded bg-brand-light px-2.5 py-1 text-[12px] font-bold text-brand">
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span className="rounded bg-brand-light px-3 py-1 text-[13px] font-bold text-brand">
                   {STATUS_LABEL[q.status]}
                 </span>
-                <h3 className="text-[15px] font-bold text-ink">{q.subject}</h3>
+                <h3 className="text-[17px] font-bold text-ink">{q.subject}</h3>
                 {q.isPrivate && (
-                  <span className="text-[12px] text-ink-sub">비공개</span>
+                  <span className="text-[13px] text-ink-sub">비공개</span>
                 )}
-                <span className="ml-auto text-[12px] text-ink-sub">
+                <span className="ml-auto text-[14px] text-ink-sub">
                   {new Date(q.createdAt).toLocaleString("ko-KR")}
                 </span>
               </div>
-              <p className="mt-1.5 text-[13px] text-ink-sub">
+              <p className="mt-2 text-[15px] text-ink-sub">
                 {q.name} · {q.email}
                 {q.phone ? ` · ${q.phone}` : ""}
               </p>
-              <p className="mt-3 whitespace-pre-wrap rounded border border-line bg-bg p-4 text-[14px] text-ink">
+              <p className="mt-4 whitespace-pre-wrap rounded border border-line bg-bg p-4 text-[16px] text-ink">
                 {q.message}
               </p>
               <div className="mt-5">
-                <p className="mb-2 text-[13px] font-bold text-ink">답변</p>
+                <p className="mb-2 text-[15px] font-bold text-ink">답변</p>
                 <InquiryAnswerForm
                   id={q.id}
                   initialAnswer={q.answer}
                   initialStatus={q.status}
                 />
                 {q.answeredAt && (
-                  <p className="mt-2 text-[12px] text-ink-sub">
+                  <p className="mt-2 text-[14px] text-ink-sub">
                     {new Date(q.answeredAt).toLocaleString("ko-KR")} 답변 완료
                   </p>
                 )}
