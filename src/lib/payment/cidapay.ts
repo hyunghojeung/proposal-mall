@@ -20,6 +20,27 @@ import type {
 
 const BASE = "https://api.ciderpay.com";
 
+// EAI_AGAIN (DNS 일시 실패) 대비 재시도 fetch
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  retries = 3,
+  delayMs = 800,
+): Promise<Response> {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (e) {
+      const msg = String(e);
+      const isRetryable = msg.includes("EAI_AGAIN") || msg.includes("ECONNRESET") || msg.includes("ETIMEDOUT");
+      if (!isRetryable || i === retries - 1) throw e;
+      console.warn(`[ciderpay] fetch 재시도 ${i + 1}/${retries - 1}: ${msg}`);
+      await new Promise((r) => setTimeout(r, delayMs * (i + 1)));
+    }
+  }
+  throw new Error("fetchWithRetry: unreachable");
+}
+
 function requireEnv(name: string): string {
   const v = process.env[name];
   if (!v) throw new Error(`사이다페이: 환경변수 ${name} 가 설정되지 않았습니다.`);
@@ -124,7 +145,7 @@ export const cidapayAdapter: PaymentAdapter = {
       ],
     };
 
-    const res = await fetch(`${BASE}/oapi/payment/request/s2`, {
+    const res = await fetchWithRetry(`${BASE}/oapi/payment/request/s2`, {
       method: "POST",
       headers: {
         "accept":           "application/json",

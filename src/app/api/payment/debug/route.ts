@@ -2,6 +2,48 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+async function tryFetch(apiKey: string, mid: string): Promise<{ attempts: number; result: unknown }> {
+  const MAX = 3;
+  let lastErr: unknown;
+  for (let i = 0; i < MAX; i++) {
+    try {
+      const r = await fetch("https://api.ciderpay.com/oapi/payment/request/s2", {
+        method: "POST",
+        headers: {
+          accept:             "application/json",
+          "Content-Type":     "application/json",
+          approvalToken:      apiKey,
+          Authorization:      `Bearer ${apiKey}`,
+          "X-API-Key":        apiKey,
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({
+          memberID: mid, price: 100, goodName: "test",
+          mobile: "01012345678", customName: "test", email: "t@t.com",
+          feedbackurl: "https://example.com/cb",
+          returnurl:   "https://example.com/ret",
+          returnmode: "JUST", var1: "DEBUG-001", var2: "TEST",
+          smsuse: "N", whereFrom: "TEST", sellerMemo: "test",
+          makeQr: "false", charSet: "UTF-8",
+          goods: [{ goodName: "test", goodPrice: 100, useTax: true }],
+        }),
+      });
+      const body = await r.json().catch(() => "(non-JSON)");
+      return { attempts: i + 1, result: { httpStatus: r.status, ok: r.ok, body } };
+    } catch (e) {
+      lastErr = e;
+      const msg = String(e);
+      const retryable = msg.includes("EAI_AGAIN") || msg.includes("ECONNRESET");
+      if (!retryable || i === MAX - 1) break;
+      await new Promise((res) => setTimeout(res, 1000 * (i + 1)));
+    }
+  }
+  const cause = (lastErr instanceof Error && (lastErr as NodeJS.ErrnoException).cause)
+    ? String((lastErr as NodeJS.ErrnoException).cause)
+    : undefined;
+  return { attempts: MAX, result: { error: String(lastErr), cause } };
+}
+
 export async function GET() {
   const apiKey   = process.env.CIDERPAY_API_KEY;
   const devId    = process.env.CIDERPAY_DEV_ID;
@@ -24,37 +66,6 @@ export async function GET() {
     return NextResponse.json({ ...env, ciderpay: "SKIPPED (stub)" });
   }
 
-  // Ciderpay 연결 테스트
-  let ciderpay: unknown;
-  try {
-    const r = await fetch("https://api.ciderpay.com/oapi/payment/request/s2", {
-      method: "POST",
-      headers: {
-        accept:            "application/json",
-        "Content-Type":    "application/json",
-        approvalToken:     apiKey!,
-        Authorization:     `Bearer ${apiKey!}`,
-        "X-API-Key":       apiKey!,
-        "X-Requested-With":"XMLHttpRequest",
-      },
-      body: JSON.stringify({
-        memberID: mid, price: 100, goodName: "test",
-        mobile: "01012345678", customName: "test", email: "t@t.com",
-        feedbackurl: "https://example.com/cb", returnurl: "https://example.com/ret",
-        returnmode: "JUST", var1: "DEBUG-001", var2: "TEST",
-        smsuse: "N", whereFrom: "TEST", sellerMemo: "test",
-        makeQr: "false", charSet: "UTF-8",
-        goods: [{ goodName: "test", goodPrice: 100, useTax: true }],
-      }),
-    });
-    const body = await r.json().catch(() => "(non-JSON)");
-    ciderpay = { httpStatus: r.status, ok: r.ok, body };
-  } catch (e) {
-    const cause = (e instanceof Error && (e as NodeJS.ErrnoException).cause)
-      ? String((e as NodeJS.ErrnoException).cause)
-      : undefined;
-    ciderpay = { error: String(e), cause };
-  }
-
-  return NextResponse.json({ ...env, ciderpay });
+  const { attempts, result } = await tryFetch(apiKey!, mid);
+  return NextResponse.json({ ...env, ciderpay: result, attempts });
 }
