@@ -59,19 +59,15 @@ async function fetchMakeWebKey(): Promise<string> {
   const json = await res.json() as Record<string, any>;
   console.log("[ciderpay] makeWebKey 응답:", JSON.stringify(json));
 
-  // 응답 구조: data.approvalToken 또는 최상위 approvalToken/webKey/key
-  const approvalToken =
-    json?.data?.approvalToken ??
-    json?.approvalToken ??
-    json?.webKey ??
-    json?.key ??
-    null;
+  // 공식 문서 기준 응답: { success, message, var1 }
+  // var1 = 웹 로그인 가능한 토큰값 (= approvalToken)
+  const approvalToken = json?.var1 ?? null;
 
   if (!approvalToken) {
     throw new Error(
-      json?.errorMessage
-        ? `사이다페이 makeWebKey 오류: ${json.errorMessage}`
-        : `사이다페이: approvalToken 없음. 응답: ${JSON.stringify(json)}`
+      json?.message
+        ? `사이다페이 makeWebKey 오류: ${json.message}`
+        : `사이다페이: var1(토큰) 없음. 응답: ${JSON.stringify(json)}`
     );
   }
 
