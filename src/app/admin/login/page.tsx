@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -20,7 +18,10 @@ export default function AdminLoginPage() {
     });
     setLoading(false);
     if (res.ok) {
-      router.push("/admin");
+      // router.push 대신 하드 네비게이션 — Next.js 라우터 캐시(prefetch) 우회
+      // 쿠키가 확실히 세팅된 상태로 서버에 새 요청을 보내기 위함
+      window.location.href = "/admin";
+      return;
     } else {
       const data = (await res.json().catch(() => null)) as { error?: string } | null;
       setErr(data?.error ?? "로그인 실패");
