@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
 import { ClearCartOnSuccess } from "@/components/ClearCartOnSuccess";
 import { OrderCheckingBanner } from "@/components/OrderCheckingBanner";
+import { OrderVerifyGate } from "@/components/OrderVerifyGate";
 import { prisma } from "@/lib/prisma";
 import { DELIVERY_LABELS } from "@/lib/pricing";
 
@@ -42,6 +43,8 @@ export default async function OrderDetailPage({
   const justPaid = searchParams.paid === "1" && order.status === "PAID";
   // checking=1: 팝업이 닫혔지만 결제 여부 불확실한 상태 (webhook 대기 중일 수 있음)
   const checking = searchParams.checking === "1" && order.status === "PENDING";
+  // 결제 직후이거나 checking 중이면 본인확인 건너뜀 (방금 결제한 본인)
+  const skipVerify = justPaid || checking;
   const items = order.items;
 
   return (
@@ -50,6 +53,8 @@ export default async function OrderDetailPage({
       <Header />
       <main className="mx-auto min-h-[60vh] max-w-page px-6 py-10">
         {justPaid && <ClearCartOnSuccess />}
+
+        <OrderVerifyGate serial={order.serial} skipVerify={skipVerify}>
 
         <nav className="flex flex-wrap items-center gap-1 pb-5 text-[13px] text-ink-sub">
           <Link href="/" className="hover:text-ink">홈</Link>
@@ -192,6 +197,8 @@ export default async function OrderDetailPage({
             상품 더 보기
           </Link>
         </div>
+
+        </OrderVerifyGate>
       </main>
       <Footer />
     </>
