@@ -4,6 +4,7 @@ import { OrderStatus } from "@prisma/client";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { AdminShell } from "@/components/AdminShell";
 import { OrdersListActions } from "@/components/OrdersListActions";
+import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 import { prisma } from "@/lib/prisma";
 import { DELIVERY_LABELS } from "@/lib/pricing";
 
@@ -21,29 +22,8 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "CANCELLED",     label: "취소" },
 ];
 
-/* ─────────────── 공통 배지 색상 (결제상태·주문상태 통일) ─────────────── */
-// 사각형(rounded-sm) + 동일 컬러 팔레트
+/* 결제수단 배지 색상 */
 const BADGE_BASE = "inline-block rounded-sm px-3 py-1 text-[13px] font-bold text-white whitespace-nowrap";
-
-const ORDER_STATUS_BADGE: Record<string, { label: string; color: string }> = {
-  PENDING:       { label: "결제대기", color: "bg-[#f59e0b]" },
-  PAID:          { label: "결제완료", color: "bg-[#22c55e]" },
-  IN_PRODUCTION: { label: "제작중",   color: "bg-[#E8481A]" },
-  SHIPPING:      { label: "배송중",   color: "bg-[#3b82f6]" },
-  DELIVERED:     { label: "발송완료", color: "bg-[#10b981]" },
-  CANCELLED:     { label: "취소",     color: "bg-[#6b7280]" },
-};
-
-/* 결제 완료 여부 (결제상태 컬럼) — 동일 색상 팔레트 사용 */
-function payStatusBadge(status: string): { label: string; color: string } {
-  if (["PAID","IN_PRODUCTION","SHIPPING","DELIVERED"].includes(status)) {
-    return { label: "결제완료", color: "bg-[#22c55e]" };
-  }
-  if (status === "CANCELLED") {
-    return { label: "취소",     color: "bg-[#6b7280]" };
-  }
-  return { label: "결제대기", color: "bg-[#f59e0b]" };
-}
 
 /* ─────────────── Raw SQL 결과 타입 ─────────────── */
 interface OrderRow {
@@ -246,10 +226,6 @@ export default async function AdminOrdersPage({
             </thead>
             <tbody>
               {orders.map((o) => {
-                const orderBadge = ORDER_STATUS_BADGE[o.status] ??
-                  { label: o.status, color: "bg-[#6b7280]" };
-                const payBadge = payStatusBadge(o.status);
-
                 const names        = o.productNames ?? "";
                 const firstProduct = names.split(", ")[0] ?? "";
                 const extraCount   = Number(o.itemCount) - 1;
@@ -313,11 +289,9 @@ export default async function AdminOrdersPage({
                         <PayMethodCell hasTid={!!o.paymentTid} tid={o.paymentTid} />
                       </td>
 
-                      {/* 주문상태 */}
+                      {/* 주문상태 — 클릭으로 4단계 순환 */}
                       <td className="whitespace-nowrap px-5 py-3.5">
-                        <span className={`${BADGE_BASE} ${orderBadge.color}`}>
-                          {orderBadge.label}
-                        </span>
+                        <OrderStatusBadge serial={o.serial} initialStatus={o.status} />
                       </td>
 
                       {/* 결제금액 */}
