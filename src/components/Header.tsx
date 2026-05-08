@@ -13,7 +13,7 @@ export function Header() {
       <div className="mx-auto flex h-[70px] max-w-page items-center gap-6 px-6">
         <Link
           href="/"
-          className="shrink-0 text-[26px] font-black italic tracking-tight text-brand"
+          className="shrink-0 text-[34px] font-black italic tracking-tight text-brand"
         >
           제안서박스 <span className="text-ink">mall</span>
         </Link>
