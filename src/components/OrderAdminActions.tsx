@@ -4,12 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 const STATUSES = [
-  { value: "PENDING", label: "결제대기" },
-  { value: "PAID", label: "결제완료" },
+  { value: "PENDING",       label: "결제대기" },
+  { value: "PAID",          label: "결제완료" },
   { value: "IN_PRODUCTION", label: "제작중" },
-  { value: "SHIPPING", label: "배송중" },
-  { value: "DELIVERED", label: "배송완료" },
-  { value: "CANCELLED", label: "취소" },
+  { value: "DELIVERED",     label: "발송완료" },
 ];
 
 export function OrderAdminActions({

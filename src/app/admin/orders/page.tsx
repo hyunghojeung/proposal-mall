@@ -24,7 +24,7 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   PAID:          { label: "결제완료", cls: "bg-blue-50 text-blue-700 border border-blue-200" },
   IN_PRODUCTION: { label: "제작중",   cls: "bg-orange-50 text-orange-700 border border-orange-200" },
   SHIPPING:      { label: "배송중",   cls: "bg-purple-50 text-purple-700 border border-purple-200" },
-  DELIVERED:     { label: "배송완료", cls: "bg-green-50 text-green-700 border border-green-200" },
+  DELIVERED:     { label: "발송완료", cls: "bg-green-50 text-green-700 border border-green-200" },
   CANCELLED:     { label: "취소",     cls: "bg-gray-100 text-gray-500 border border-gray-200" },
 };
 
@@ -207,7 +207,7 @@ export default async function AdminOrdersPage({
                   : `${Number(o.itemCount)}건`;
 
                 return (
-                  <tr key={o.serial} className="border-b border-line align-middle hover:bg-bg/50">
+                  <tr key={o.serial} className="border-b border-line align-middle">
                     <td className="whitespace-nowrap px-4 py-4">
                       <Link href={`/admin/orders/${o.serial}`} className="font-bold text-brand hover:underline">
                         {o.serial}

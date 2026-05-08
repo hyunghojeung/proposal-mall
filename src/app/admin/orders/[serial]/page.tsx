@@ -9,12 +9,12 @@ import { DELIVERY_LABELS } from "@/lib/pricing";
 export const dynamic = "force-dynamic";
 
 const STATUS_LABEL: Record<string, string> = {
-  PENDING: "결제대기",
-  PAID: "결제완료",
+  PENDING:       "결제대기",
+  PAID:          "결제완료",
   IN_PRODUCTION: "제작중",
-  SHIPPING: "배송중",
-  DELIVERED: "배송완료",
-  CANCELLED: "취소",
+  SHIPPING:      "배송중",
+  DELIVERED:     "발송완료",
+  CANCELLED:     "취소",
 };
 
 export default async function AdminOrderDetail({
