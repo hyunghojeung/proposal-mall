@@ -50,7 +50,10 @@ export async function GET() {
     const body = await r.json().catch(() => "(non-JSON)");
     ciderpay = { httpStatus: r.status, ok: r.ok, body };
   } catch (e) {
-    ciderpay = { error: String(e) };
+    const cause = (e instanceof Error && (e as NodeJS.ErrnoException).cause)
+      ? String((e as NodeJS.ErrnoException).cause)
+      : undefined;
+    ciderpay = { error: String(e), cause };
   }
 
   return NextResponse.json({ ...env, ciderpay });
