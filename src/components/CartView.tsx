@@ -11,7 +11,7 @@ import {
   subscribeCart,
   updateCartQuantity,
 } from "@/lib/cart";
-import { shippingFee, FREE_SHIPPING_THRESHOLD, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
+import { shippingFee, type DeliveryMethod, DELIVERY_LABELS } from "@/lib/pricing";
 
 export function CartView() {
   const router = useRouter();
@@ -128,12 +128,7 @@ export function CartView() {
               {fee === 0 ? "무료" : `${fee.toLocaleString()}원`}
             </span>
           </div>
-          {delivery === "COURIER_PREPAID" && subtotal < FREE_SHIPPING_THRESHOLD && (
-            <p className="text-[11px] text-ink-sub">
-              {(FREE_SHIPPING_THRESHOLD - subtotal).toLocaleString()}원 추가 시 무료배송
-            </p>
-          )}
-          {(delivery === "COURIER_COLLECT" || delivery === "QUICK_COLLECT" || delivery === "QUICK_PREPAID") && (
+          {(delivery === "COURIER_COLLECT" || delivery === "QUICK_COLLECT") && (
             <p className="text-[11px] text-ink-sub">배송비는 수령 시 별도 적용됩니다.</p>
           )}
         </div>
@@ -143,9 +138,8 @@ export function CartView() {
           <div className="space-y-2">
             {(
               [
-                { value: "COURIER_PREPAID", desc: "3,000원 (30,000원↑ 무료)" },
+                { value: "COURIER_PREPAID", desc: "5,000원" },
                 { value: "COURIER_COLLECT", desc: "착불 — 수령 시 지불" },
-                { value: "QUICK_PREPAID",   desc: "실비 — 별도 안내" },
                 { value: "QUICK_COLLECT",   desc: "착불 — 수령 시 지불" },
                 { value: "PICKUP",          desc: "무료" },
               ] as { value: DeliveryMethod; desc: string }[]

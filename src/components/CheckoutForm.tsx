@@ -386,8 +386,8 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
         <Card icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>} title="결제 방법">
           <div className="space-y-2">
             {([
-              { value: "CARD",     label: "카드 결제" },
               { value: "TRANSFER", label: "무통장 입금" },
+              { value: "CARD",     label: "카드 결제" },
             ] as { value: PaymentMethod; label: string }[]).map(({ value, label }) => (
               <label key={value}
                 className={`flex cursor-pointer items-center gap-3 rounded-sm border px-4 py-3 text-[15px] transition-colors ${
@@ -401,6 +401,15 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
               </label>
             ))}
           </div>
+
+          {/* 무통장 입금 계좌 정보 */}
+          {paymentMethod === "TRANSFER" && (
+            <div className="mt-3 rounded-sm bg-blue-50 border border-blue-100 px-4 py-3 text-[13px]">
+              <p className="mb-1 text-ink-sub">계좌 정보</p>
+              <p className="font-bold text-[15px] text-ink">우리은행 208-08-426260</p>
+              <p className="mt-0.5 text-ink-sub">예금주: 정형호</p>
+            </div>
+          )}
         </Card>
 
         {/* ⑤ 주문 요청 사항 */}

@@ -10,29 +10,27 @@ export function quantityTier(quantity: number): QtyTier {
   return "10+";
 }
 
-export const SHIPPING_FEE = 3000;
-export const FREE_SHIPPING_THRESHOLD = 30000;
+export const SHIPPING_FEE = 5000;
 
 export type DeliveryMethod =
   | "COURIER_PREPAID"   // 택배선불
   | "COURIER_COLLECT"   // 택배착불
-  | "QUICK_PREPAID"     // 퀵선불
+  | "QUICK_PREPAID"     // 퀵선불 (UI 비노출, DB 호환용)
   | "QUICK_COLLECT"     // 퀵착불
   | "PICKUP";           // 직접 방문 수령
 
 export const DELIVERY_LABELS: Record<DeliveryMethod, string> = {
   COURIER_PREPAID: "택배선불",
   COURIER_COLLECT: "택배착불",
-  QUICK_PREPAID: "퀵선불",
-  QUICK_COLLECT: "퀵착불",
-  PICKUP: "직접 방문 수령",
+  QUICK_PREPAID:   "퀵선불",
+  QUICK_COLLECT:   "퀵착불",
+  PICKUP:          "직접 방문 수령",
 };
 
-export function shippingFee(subtotal: number, method: DeliveryMethod): number {
+export function shippingFee(_subtotal: number, method: DeliveryMethod): number {
   // 착불·퀵·방문수령 → 배송비 별도(0으로 표시)
   if (method === "PICKUP" || method === "COURIER_COLLECT" || method === "QUICK_COLLECT" || method === "QUICK_PREPAID") return 0;
-  // 택배선불: 3,000원 (30,000원 이상 무료)
-  if (subtotal >= FREE_SHIPPING_THRESHOLD) return 0;
+  // 택배선불: 항상 5,000원
   return SHIPPING_FEE;
 }
 
