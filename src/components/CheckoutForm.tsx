@@ -352,8 +352,8 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
             <p className="text-[13px] text-blue-600">입금할 금액</p>
             <p className="mt-1 text-[28px] font-black text-blue-700">{orderTotal.toLocaleString()}원</p>
             <div className="mt-4 space-y-1">
-              <p className="text-[16px] font-bold text-blue-700">우리은행 208-08-426260</p>
-              <p className="text-[14px] text-blue-600">예금주: 정형호</p>
+              <p className="text-[26px] font-black tracking-tight text-blue-700">우리은행 208-08-426260</p>
+              <p className="text-[16px] font-bold text-blue-600">예금주: 정형호</p>
               <p className="mt-3 text-[13px] text-blue-500">입금 확인 후 제작을 시작합니다.</p>
             </div>
           </div>
@@ -388,6 +388,15 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
   }
 
   return (
+    <>
+    <h1 className="mb-8 border-b border-line pb-5 text-[26px] font-black tracking-tight text-ink">
+      결제
+      {isAdmin && (
+        <span className="ml-3 align-middle rounded-sm bg-brand px-2 py-0.5 text-[12px] font-bold text-white">
+          관리자 테스트 모드
+        </span>
+      )}
+    </h1>
     <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
       {/* ── 왼쪽: 입력 섹션 ── */}
       <div className="space-y-5">
@@ -583,6 +592,7 @@ export function CheckoutForm({ isAdmin = false }: { isAdmin?: boolean }) {
         </p>
       </aside>
     </form>
+    </>
   );
 }
 
