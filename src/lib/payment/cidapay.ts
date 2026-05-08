@@ -124,8 +124,6 @@ export const cidapayAdapter: PaymentAdapter = {
       ],
     };
 
-    const origin2 = new URL(input.returnUrl).origin;
-
     const res = await fetch(`${BASE}/oapi/payment/request/s2`, {
       method: "POST",
       headers: {
@@ -135,8 +133,7 @@ export const cidapayAdapter: PaymentAdapter = {
         "Authorization":    `Bearer ${approvalToken}`,
         "X-API-Key":        approvalToken,
         "X-Requested-With": "XMLHttpRequest",
-        "User-Agent":       "ProposalMall-Payment-System/1.0",
-        "Origin":           origin2,
+        "Origin":           origin,
       },
       body: JSON.stringify(paymentData),
     });
