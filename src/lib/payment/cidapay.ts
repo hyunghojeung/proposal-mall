@@ -113,15 +113,30 @@ export const cidapayAdapter: PaymentAdapter = {
       smsuse:      "Y",
       whereFrom:   "PROPOSAL_MALL_WEBSITE",
       sellerMemo:  "제안서몰 주문 결제",
-      makeQr:      false,
+      makeQr:      "false",
+      charSet:     "UTF-8",
+      goods: [
+        {
+          goodName:  input.productName,
+          goodPrice: input.amount,
+          useTax:    true,
+        },
+      ],
     };
 
-    const res = await fetch(`${BASE}/oapi/payment/request`, {
+    const origin2 = new URL(input.returnUrl).origin;
+
+    const res = await fetch(`${BASE}/oapi/payment/request/s2`, {
       method: "POST",
       headers: {
-        "accept":        "application/json",
-        "Content-Type":  "application/json",
-        "approvalToken": approvalToken,
+        "accept":           "application/json",
+        "Content-Type":     "application/json",
+        "approvalToken":    approvalToken,
+        "Authorization":    `Bearer ${approvalToken}`,
+        "X-API-Key":        approvalToken,
+        "X-Requested-With": "XMLHttpRequest",
+        "User-Agent":       "ProposalMall-Payment-System/1.0",
+        "Origin":           origin2,
       },
       body: JSON.stringify(paymentData),
     });
