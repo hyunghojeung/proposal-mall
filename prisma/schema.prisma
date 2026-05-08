@@ -153,7 +153,6 @@ model Order {
   shippingFee     Int            @default(0)
   totalAmount     Int
   status          OrderStatus    @default(PENDING)
-  paymentMethod         String         @default("TRANSFER") // "CARD" | "TRANSFER"
   paymentTid            String?
   paymentFeedbackToken  String?   // 사이다페이 취소 시 필요한 feedbackToken
   fileLink        String?

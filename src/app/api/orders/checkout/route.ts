@@ -111,7 +111,6 @@ export async function POST(req: NextRequest) {
         customerPhone: data.customerPhone,
         customerEmail: data.customerEmail,
         company: data.company,
-        paymentMethod: data.paymentMethod,
         deliveryMethod: data.deliveryMethod,
         shippingAddress: data.shippingAddress,
         shippingFee: fee,

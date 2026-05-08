@@ -175,10 +175,8 @@ export default async function AdminOrdersPage({
             <tbody>
               {orders.map((o) => {
                 const badge = STATUS_BADGE[o.status];
-                // paymentMethod 컬럼이 아직 없는 구버전 행은 paymentTid 유무로 추정
-                const payMethod =
-                  (o as typeof o & { paymentMethod?: string }).paymentMethod ??
-                  (o.paymentTid ? "CARD" : "TRANSFER");
+                // paymentTid 있으면 카드(PG), 없으면 무통장
+                const payMethod = o.paymentTid ? "CARD" : "TRANSFER";
                 const productSummary = o.items[0]?.productName
                   ? o.items.length > 1
                     ? `${o.items[0].productName} 외 ${o.items.length - 1}건`

@@ -95,20 +95,15 @@ export default async function AdminOrderDetail({
             <dl className="grid gap-2 text-[13px]">
               <Row
                 label="결제수단"
-                value={(() => {
-                  const pm =
-                    (order as typeof order & { paymentMethod?: string }).paymentMethod ??
-                    (order.paymentTid ? "CARD" : "TRANSFER");
-                  return (
-                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                      pm === "CARD"
-                        ? "border border-blue-200 bg-blue-50 text-blue-700"
-                        : "border border-amber-200 bg-amber-50 text-amber-700"
-                    }`}>
-                      {pm === "CARD" ? "카드 결제" : "무통장 입금"}
-                    </span>
-                  );
-                })()}
+                value={
+                  <span className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                    order.paymentTid
+                      ? "border border-blue-200 bg-blue-50 text-blue-700"
+                      : "border border-amber-200 bg-amber-50 text-amber-700"
+                  }`}>
+                    {order.paymentTid ? "카드 결제" : "무통장 입금"}
+                  </span>
+                }
               />
               <Row label="상품 합계" value={`${(order.totalAmount - order.shippingFee).toLocaleString()}원`} />
               <Row
