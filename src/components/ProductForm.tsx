@@ -107,7 +107,9 @@ function ImageGallery({
   images: string[];
   onChange: (imgs: string[]) => void;
 }) {
-  const [draggingOver, setDraggingOver] = useState(false);
+  const [fileDragOver, setFileDragOver] = useState(false);
+  const [dragSrcIdx,   setDragSrcIdx]   = useState<number | null>(null);
+  const [dragOverIdx,  setDragOverIdx]  = useState<number | null>(null);
   const upload = useImageUpload((url) => onChange([...images, url]));
 
   function setRepresentative(i: number) {
@@ -122,27 +124,63 @@ function ImageGallery({
     onChange(images.filter((_, j) => j !== i));
   }
 
-  function handleDragOver(e: React.DragEvent) {
-    e.preventDefault();
-    if (images.length < 5) setDraggingOver(true);
+  /* ── 이미지 간 드래그 재정렬 ── */
+  function handleImgDragStart(e: React.DragEvent, i: number) {
+    setDragSrcIdx(i);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(i)); // Firefox 필수
   }
 
-  function handleDragLeave() {
-    setDraggingOver(false);
+  function handleImgDragOver(e: React.DragEvent, i: number) {
+    e.preventDefault();
+    e.stopPropagation(); // 파일 드롭존 이벤트 차단
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverIdx !== i) setDragOverIdx(i);
   }
 
-  async function handleDrop(e: React.DragEvent) {
+  function handleImgDrop(e: React.DragEvent, i: number) {
     e.preventDefault();
-    setDraggingOver(false);
+    e.stopPropagation();
+    if (dragSrcIdx === null || dragSrcIdx === i) {
+      setDragSrcIdx(null);
+      setDragOverIdx(null);
+      return;
+    }
+    const next = [...images];
+    const [moved] = next.splice(dragSrcIdx, 1);
+    next.splice(i, 0, moved);
+    onChange(next);
+    setDragSrcIdx(null);
+    setDragOverIdx(null);
+  }
+
+  function handleImgDragEnd() {
+    setDragSrcIdx(null);
+    setDragOverIdx(null);
+  }
+
+  /* ── 파일 드롭 (신규 이미지 추가) ── */
+  function handleZoneDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    if (dragSrcIdx !== null) return; // 내부 재정렬 중엔 무시
+    if (images.length < 5 && e.dataTransfer.types.includes("Files")) setFileDragOver(true);
+  }
+
+  function handleZoneDragLeave() {
+    setFileDragOver(false);
+  }
+
+  async function handleZoneDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setFileDragOver(false);
+    if (dragSrcIdx !== null) return; // 내부 재정렬 처리 완료 후 무시
     const files = Array.from(e.dataTransfer.files).filter((f) =>
       ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type),
     );
     const available = 5 - images.length;
     const newUrls: string[] = [];
     for (const file of files.slice(0, available)) {
-      try {
-        newUrls.push(await uploadFile(file));
-      } catch { /* 개별 실패 무시 */ }
+      try { newUrls.push(await uploadFile(file)); } catch { /* 개별 실패 무시 */ }
     }
     if (newUrls.length > 0) onChange([...images, ...newUrls]);
   }
@@ -151,33 +189,47 @@ function ImageGallery({
     <div>
       {/* 드래그앤드롭 존 */}
       <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onDragOver={handleZoneDragOver}
+        onDragLeave={handleZoneDragLeave}
+        onDrop={handleZoneDrop}
         className={`mb-3 flex min-h-[60px] flex-wrap gap-3 rounded border-2 border-dashed p-3 transition-colors ${
-          draggingOver ? "border-brand bg-brand-light" : "border-line"
+          fileDragOver ? "border-brand bg-brand-light" : "border-line"
         }`}
       >
-        {images.length === 0 && !draggingOver && (
+        {images.length === 0 && !fileDragOver && (
           <p className="flex w-full items-center justify-center text-[12px] text-ink-sub">
             이미지를 여기에 드래그하거나 아래 버튼으로 추가하세요
           </p>
         )}
-        {draggingOver && (
+        {fileDragOver && (
           <p className="flex w-full items-center justify-center text-[12px] font-bold text-brand">
             여기에 놓으세요
           </p>
         )}
 
         {images.map((url, i) => (
-          <div key={url} className="group relative">
+          <div
+            key={url}
+            className="group relative"
+            draggable
+            onDragStart={(e) => handleImgDragStart(e, i)}
+            onDragOver={(e)  => handleImgDragOver(e, i)}
+            onDrop={(e)      => handleImgDrop(e, i)}
+            onDragEnd={handleImgDragEnd}
+            style={{ cursor: "grab", opacity: dragSrcIdx === i ? 0.4 : 1 }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={url}
               alt={`상품 이미지 ${i + 1}`}
               className={`h-24 w-24 rounded-sm object-cover transition-all ${
-                i === 0 ? "border-2 border-brand" : "border border-line"
+                dragOverIdx === i && dragSrcIdx !== i
+                  ? "ring-2 ring-brand ring-offset-1"
+                  : i === 0
+                  ? "border-2 border-brand"
+                  : "border border-line"
               }`}
+              draggable={false} // img 자체의 기본 드래그 비활성화
             />
             {/* 대표 뱃지 */}
             {i === 0 && (
@@ -185,6 +237,10 @@ function ImageGallery({
                 대표
               </span>
             )}
+            {/* 드래그 핸들 아이콘 */}
+            <span className="absolute bottom-1 right-1 text-white/70 text-[14px] select-none pointer-events-none">
+              ⠿
+            </span>
             {/* 호버 오버레이 */}
             <div className="absolute inset-0 hidden rounded-sm bg-black/50 group-hover:flex flex-col items-center justify-center gap-1">
               {i !== 0 && (
@@ -243,7 +299,7 @@ function ImageGallery({
         onChange={upload.handleChange}
       />
       <p className="mt-2 text-[11px] text-ink-sub">
-        최대 5장 · JPG/PNG/WEBP · 10MB 이하 · 이미지 위에 커서를 올리면 대표 설정 / 삭제 버튼이 나타납니다
+        최대 5장 · JPG/PNG/WEBP · 10MB 이하 · 이미지를 드래그하여 순서 변경 · 커서를 올리면 대표 설정/삭제
       </p>
     </div>
   );
