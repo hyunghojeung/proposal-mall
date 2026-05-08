@@ -16,7 +16,7 @@ const CATEGORIES = [
   },
   {
     title: "3공바인더",
-    desc: "인쇄형 / 원단형 — 100쪽 이상의 두꺼운 제안서에 적합",
+    desc: "인쇄형/원단형 내용이 많은 제안서에 적합",
     href: "/products?cat=binding-3-ring",
   },
   {
