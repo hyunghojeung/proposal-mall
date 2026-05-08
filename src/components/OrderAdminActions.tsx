@@ -51,14 +51,14 @@ export function OrderAdminActions({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
-        <label className="mb-1.5 block text-[13px] font-bold text-ink">상태</label>
+        <label className="mb-2 block text-[14px] font-bold text-ink">상태</label>
         <div className="flex gap-2">
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="flex-1 rounded-sm border border-line px-3 py-2 text-[14px] outline-none focus:border-brand"
+            className="flex-1 rounded border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
           >
             {STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
@@ -68,38 +68,38 @@ export function OrderAdminActions({
             type="button"
             disabled={pending || status === initialStatus}
             onClick={() => save({ status })}
-            className="rounded-sm bg-brand px-4 py-2 text-[13px] font-bold text-white hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded bg-brand px-4 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
           >
-            상태 변경
+            변경
           </button>
         </div>
       </div>
 
       <div>
-        <label className="mb-1.5 block text-[13px] font-bold text-ink">관리 메모</label>
+        <label className="mb-2 block text-[14px] font-bold text-ink">관리 메모</label>
         <textarea
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
-          rows={4}
+          rows={5}
           maxLength={2000}
           placeholder="내부 메모 (고객에게 노출되지 않음)"
-          className="w-full rounded-sm border border-line px-3 py-2 text-[13px] outline-none focus:border-brand"
+          className="w-full rounded border border-line px-3 py-2.5 text-[14px] outline-none focus:border-brand"
         />
         <div className="mt-2 flex justify-end">
           <button
             type="button"
             disabled={pending || memo === (initialMemo ?? "")}
             onClick={() => save({ memo })}
-            className="rounded-sm border border-line px-4 py-1.5 text-[12px] font-medium text-ink hover:border-ink disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded border border-line px-4 py-2 text-[13px] font-medium text-ink hover:border-ink disabled:cursor-not-allowed disabled:opacity-50"
           >
             메모 저장
           </button>
         </div>
       </div>
 
-      {err && <p className="text-[12px] font-medium text-brand">{err}</p>}
+      {err && <p className="text-[13px] font-medium text-brand">{err}</p>}
       {savedAt && !err && (
-        <p className="text-[12px] text-ink-sub">{savedAt} 에 저장됨</p>
+        <p className="text-[13px] text-ink-sub">{savedAt} 에 저장됨</p>
       )}
     </div>
   );

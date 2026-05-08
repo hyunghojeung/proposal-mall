@@ -30,34 +30,34 @@ export default async function AdminProductsPage() {
 
   return (
     <AdminShell active="products" title="상품 관리">
-      <div className="mb-4 flex justify-between">
-        <p className="text-[12px] text-ink-sub">
+      <div className="mb-5 flex justify-between">
+        <p className="text-[13px] text-ink-sub">
           총 <b>{products.length}</b>개 · 비활성 상품도 포함
         </p>
         <Link
           href="/admin/products/new"
-          className="rounded-sm bg-brand px-4 py-2 text-[13px] font-bold text-white hover:bg-brand-dark"
+          className="rounded bg-brand px-5 py-2 text-[14px] font-bold text-white hover:bg-brand-dark"
         >
           + 새 상품
         </Link>
       </div>
 
       {products.length === 0 ? (
-        <p className="rounded border border-line bg-bg px-4 py-12 text-center text-[13px] text-ink-sub">
+        <p className="rounded border border-line bg-bg px-4 py-12 text-center text-[14px] text-ink-sub">
           등록된 상품이 없습니다.
         </p>
       ) : (
-        <table className="w-full border-collapse text-[13px]">
-          <thead className="border-y border-line bg-bg text-left text-[12px] text-ink-sub">
+        <table className="w-full border-collapse text-[14px]">
+          <thead className="border-y border-line bg-bg text-left text-[13px] text-ink-sub">
             <tr>
-              <th className="px-3 py-2 font-medium">slug</th>
-              <th className="px-3 py-2 font-medium">상품명</th>
-              <th className="px-3 py-2 font-medium">카테고리</th>
-              <th className="px-3 py-2 text-center font-medium">옵션 그룹</th>
-              <th className="px-3 py-2 text-center font-medium">주문 이력</th>
-              <th className="px-3 py-2 text-center font-medium">정렬</th>
-              <th className="px-3 py-2 text-center font-medium">노출</th>
-              <th className="px-3 py-2 text-right font-medium">액션</th>
+              <th className="px-4 py-3 font-semibold">slug</th>
+              <th className="px-4 py-3 font-semibold">상품명</th>
+              <th className="px-4 py-3 font-semibold">카테고리</th>
+              <th className="px-4 py-3 text-center font-semibold">옵션 그룹</th>
+              <th className="px-4 py-3 text-center font-semibold">주문 이력</th>
+              <th className="px-4 py-3 text-center font-semibold">정렬</th>
+              <th className="px-4 py-3 text-center font-semibold">노출</th>
+              <th className="px-4 py-3 text-right font-semibold">액션</th>
             </tr>
           </thead>
           <tbody>
@@ -66,17 +66,17 @@ export default async function AdminProductsPage() {
                 key={p.id}
                 className={`border-b border-line align-middle ${p.isActive ? "" : "opacity-60"}`}
               >
-                <td className="px-3 py-2.5 font-mono text-[12px] text-ink-sub">{p.slug}</td>
-                <td className="px-3 py-2.5 font-medium text-ink">
+                <td className="px-4 py-3 font-mono text-[13px] text-ink-sub">{p.slug}</td>
+                <td className="px-4 py-3 font-medium text-ink">
                   <Link href={`/admin/products/${p.id}`} className="hover:text-brand">
                     {p.name}
                   </Link>
                 </td>
-                <td className="px-3 py-2.5 text-ink-sub">{CATEGORY_LABELS[p.category]}</td>
-                <td className="px-3 py-2.5 text-center text-ink-sub">{p._count.optionGroups}</td>
-                <td className="px-3 py-2.5 text-center text-ink-sub">{p._count.orderItems}</td>
-                <td className="px-3 py-2.5 text-center text-ink-sub">{p.sortOrder}</td>
-                <td className="px-3 py-2.5 text-center">
+                <td className="px-4 py-3 text-ink-sub">{CATEGORY_LABELS[p.category]}</td>
+                <td className="px-4 py-3 text-center text-ink-sub">{p._count.optionGroups}</td>
+                <td className="px-4 py-3 text-center text-ink-sub">{p._count.orderItems}</td>
+                <td className="px-4 py-3 text-center text-ink-sub">{p.sortOrder}</td>
+                <td className="px-4 py-3 text-center">
                   <ProductRowActions
                     id={p.id}
                     isActive={p.isActive}
@@ -84,7 +84,7 @@ export default async function AdminProductsPage() {
                     type="toggle"
                   />
                 </td>
-                <td className="px-3 py-2.5 text-right">
+                <td className="px-4 py-3 text-right">
                   <ProductRowActions
                     id={p.id}
                     isActive={p.isActive}

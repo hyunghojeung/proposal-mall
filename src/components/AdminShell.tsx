@@ -23,12 +23,12 @@ export function AdminShell({
   return (
     <div className="min-h-screen bg-bg">
       <header className="border-b border-line bg-white">
-        <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between px-6">
-          <Link href="/admin" className="text-[18px] font-black italic text-brand">
+        <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-8">
+          <Link href="/admin" className="text-[20px] font-black italic text-brand">
             제안서몰 · 관리자
           </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/" className="text-[12px] text-ink-sub hover:text-ink">
+          <div className="flex items-center gap-5">
+            <Link href="/" className="text-[13px] text-ink-sub hover:text-ink">
               사이트로
             </Link>
             <LogoutButton />
@@ -36,9 +36,9 @@ export function AdminShell({
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1400px] gap-6 px-6 py-6">
-        <aside className="w-44 shrink-0">
-          <nav className="space-y-0.5">
+      <div className="mx-auto flex max-w-[1400px] gap-7 px-8 py-7">
+        <aside className="w-52 shrink-0">
+          <nav className="space-y-1">
             {NAV.map((item) => {
               const isActive =
                 item.href === "/admin"
@@ -48,7 +48,7 @@ export function AdminShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`block rounded-sm px-3 py-2 text-[13px] transition-colors ${
+                  className={`block rounded px-4 py-2.5 text-[14px] font-medium transition-colors ${
                     isActive
                       ? "bg-brand-light font-bold text-brand"
                       : "text-ink hover:bg-white"
@@ -61,11 +61,11 @@ export function AdminShell({
           </nav>
         </aside>
 
-        <main className="min-w-0 flex-1 rounded border border-line bg-white p-6">
-          <h1 className="border-b border-line pb-4 text-[20px] font-black tracking-tight text-ink">
+        <main className="min-w-0 flex-1 rounded border border-line bg-white p-8">
+          <h1 className="border-b border-line pb-5 text-[22px] font-black tracking-tight text-ink">
             {title}
           </h1>
-          <div className="mt-6">{children}</div>
+          <div className="mt-7">{children}</div>
         </main>
       </div>
     </div>

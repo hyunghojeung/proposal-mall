@@ -17,7 +17,7 @@ export function LogoutButton() {
           router.refresh();
         })
       }
-      className="rounded-sm border border-line px-3 py-1 text-[12px] font-medium text-ink hover:border-ink"
+      className="rounded border border-line px-4 py-1.5 text-[13px] font-medium text-ink hover:border-ink"
     >
       {pending ? "로그아웃 중…" : "로그아웃"}
     </button>
