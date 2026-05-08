@@ -52,11 +52,11 @@ function PayMethodCell({ hasTid, tid }: { hasTid: boolean; tid: string | null })
           <span className="text-[#4ade80] text-[13px]">✓</span>
           <span className="text-white text-[14px] font-medium">카드결제</span>
         </div>
-        <p className="mt-0.5 text-[12px] text-[#9ba8c4]">{tid}</p>
+        <p className="mt-0.5 text-[12px] text-[#a0a0a8]">{tid}</p>
       </div>
     );
   }
-  return <span className="text-[14px] text-[#c5d1e8]">무통장입금</span>;
+  return <span className="text-[14px] text-[#d4d4d8]">무통장입금</span>;
 }
 
 /* ─────────────── 페이지 컴포넌트 ─────────────── */
@@ -192,16 +192,16 @@ export default async function AdminOrdersPage({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl bg-[#1a2236]">
+        <div className="overflow-x-auto rounded-xl bg-[#18181b]">
           {/* 테이블 헤더 바 */}
-          <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#2a3350]">
+          <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#2e2e33]">
             <p className="text-[15px] font-bold text-white">
               주문 목록{" "}
-              <span className="ml-1.5 rounded-full bg-[#2a3350] px-2.5 py-0.5 text-[13px] text-[#9ba8c4]">
+              <span className="ml-1.5 rounded-full bg-[#2e2e33] px-2.5 py-0.5 text-[13px] text-[#a0a0a8]">
                 {orders.length}건
               </span>
             </p>
-            <p className="text-[14px] text-[#9ba8c4]">
+            <p className="text-[14px] text-[#a0a0a8]">
               총 주문 금액:{" "}
               <span className="ml-1 font-bold text-white">
                 ₩{grandTotal.toLocaleString()}
@@ -211,7 +211,7 @@ export default async function AdminOrdersPage({
 
           <table className="w-full border-collapse text-[14px]">
             <thead>
-              <tr className="bg-[#141b2d] text-[13px] text-[#8899b0]">
+              <tr className="bg-[#111114] text-[13px] text-[#8a8a92]">
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">번호</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">고객정보</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
@@ -241,7 +241,7 @@ export default async function AdminOrdersPage({
                     {/* ── 메인 행 ── */}
                     <tr
                       key={o.serial}
-                      className="border-t border-[#2a3350] align-middle transition-colors hover:bg-[#202b42]"
+                      className="border-t border-[#2e2e33] align-middle transition-colors hover:bg-[#222226]"
                     >
                       {/* 번호 */}
                       <td className="whitespace-nowrap px-5 py-3.5">
@@ -257,18 +257,18 @@ export default async function AdminOrdersPage({
                       <td className="px-5 py-3.5">
                         <p className="font-bold text-white">{o.customerName}</p>
                         {o.company && (
-                          <p className="text-[12px] text-[#9ba8c4]">{o.company}</p>
+                          <p className="text-[12px] text-[#a0a0a8]">{o.company}</p>
                         )}
-                        <p className="text-[12px] text-[#9ba8c4]">{o.customerEmail}</p>
-                        <p className="text-[12px] text-[#9ba8c4]">{o.customerPhone}</p>
+                        <p className="text-[12px] text-[#a0a0a8]">{o.customerEmail}</p>
+                        <p className="text-[12px] text-[#a0a0a8]">{o.customerPhone}</p>
                       </td>
 
                       {/* 상품 */}
                       <td className="px-5 py-3.5">
-                        <p className="max-w-[220px] truncate text-[14px] text-[#c5d1e8]">
+                        <p className="max-w-[220px] truncate text-[14px] text-[#d4d4d8]">
                           {productSummary}
                         </p>
-                        <p className="mt-0.5 text-[12px] text-[#7888a4]">{deliveryLabel}</p>
+                        <p className="mt-0.5 text-[12px] text-[#6b6b73]">{deliveryLabel}</p>
                       </td>
 
                       {/* 결제수단 */}
@@ -289,7 +289,7 @@ export default async function AdminOrdersPage({
                       </td>
 
                       {/* 주문일 */}
-                      <td className="whitespace-nowrap px-5 py-3.5 text-[13px] text-[#9ba8c4]">
+                      <td className="whitespace-nowrap px-5 py-3.5 text-[13px] text-[#a0a0a8]">
                         {new Date(o.createdAt).toLocaleString("ko-KR", {
                           year:   "numeric",
                           month:  "2-digit",
@@ -308,29 +308,29 @@ export default async function AdminOrdersPage({
                     {/* ── 배송지 서브 행 ── */}
                     <tr
                       key={`${o.serial}-sub`}
-                      className="border-t border-[#1e2840] bg-[#141b2d]"
+                      className="border-t border-[#1a1a1e] bg-[#111114]"
                     >
                       <td />
                       <td colSpan={7} className="px-5 py-3 text-[12px]">
                         <div className="flex flex-wrap gap-x-6 gap-y-1">
                           {/* 수령인 */}
                           <span>
-                            <span className="font-semibold text-[#8899b0]">수령인:</span>{" "}
-                            <span className="text-[#c5d1e8]">
+                            <span className="font-semibold text-[#8a8a92]">수령인:</span>{" "}
+                            <span className="text-[#d4d4d8]">
                               {o.company ? `${o.company} (${o.customerName})` : o.customerName}
                             </span>
                           </span>
                           {/* 주소 */}
                           <span>
-                            <span className="font-semibold text-[#8899b0]">주소:</span>{" "}
-                            <span className="text-[#c5d1e8]">
+                            <span className="font-semibold text-[#8a8a92]">주소:</span>{" "}
+                            <span className="text-[#d4d4d8]">
                               {isPickup ? "직접 방문 수령" : (o.shippingAddress ?? "-")}
                             </span>
                           </span>
                           {/* 배송메모 */}
                           <span>
-                            <span className="font-semibold text-[#8899b0]">배송메모:</span>{" "}
-                            <span className={o.memo ? "text-[#c5d1e8]" : "text-[#4b5568]"}>
+                            <span className="font-semibold text-[#8a8a92]">배송메모:</span>{" "}
+                            <span className={o.memo ? "text-[#d4d4d8]" : "text-[#4b4b52]"}>
                               {o.memo ?? "없음"}
                             </span>
                           </span>
