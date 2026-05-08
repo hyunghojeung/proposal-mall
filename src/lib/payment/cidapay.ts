@@ -1,9 +1,8 @@
 // 사이다페이 연동 어댑터 (공식 API 문서 기준)
 //
 // 결제 흐름:
-//   0. POST /oapi/pv/payment/setPayTokenYn/{memberID}  → 토큰 결제 활성화
-//   1. GET  /oapi/pmember/childToken                   → approvalToken + feedbackToken 조회
-//   2. POST /oapi/payment/request                      → payUrl 획득 → 사용자 리다이렉트
+//   1. GET  /oapi/pmember/makeWebKey                   → approvalToken 동적 발급
+//   2. POST /oapi/payment/request                      → payUrl 획득 → 사용자 팝업
 //   3. 결제완료 → feedbackurl(POST) 수신 → 주문 PAID 처리
 //   4. 취소 시 → POST /oapi/payment/cancel (feedbackToken + orderNo)
 //
@@ -39,68 +38,44 @@ function devHeaders() {
   };
 }
 
-// POST /oapi/pv/payment/setPayTokenYn/{memberID}
-// 토큰 결제 활성화 — childToken 호출 전 반드시 선행
-// 헤더: devID, devToken
-// 바디: multipart form-data  payTokenYn=Y
-async function setPayTokenYn(yn: "Y" | "N" = "Y"): Promise<void> {
-  const mid = getMid();
-
-  const form = new FormData();
-  form.append("payTokenYn", yn);
-
-  const res = await fetch(`${BASE}/oapi/pv/payment/setPayTokenYn/${mid}`, {
-    method: "POST",
-    headers: devHeaders(),   // accept + devID + devToken (Content-Type은 FormData가 자동 설정)
-    body: form,
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`사이다페이 setPayTokenYn 실패 (${res.status}): ${text}`);
-  }
-
-  const json = await res.json() as { success?: boolean; errorMessage?: string };
-  if (json.success === false) {
-    throw new Error(`사이다페이 setPayTokenYn 오류: ${json.errorMessage ?? "알 수 없는 오류"}`);
-  }
-}
-
-// GET /oapi/pmember/childToken
-// → data.approvalToken (결제 헤더용)
-// → data.feedbackToken (취소 토큰 — 미리 저장해두면 유용)
-async function fetchChildToken(): Promise<{ approvalToken: string; feedbackToken: string }> {
-  const url = new URL(`${BASE}/oapi/pmember/childToken`);
+// GET /oapi/pmember/makeWebKey
+// devID + devToken 헤더, memberID 쿼리파라미터로 approvalToken 동적 발급
+// 정적 CIDERPAY_API_KEY 없이 매 결제마다 토큰을 새로 발급받는 방식
+async function fetchMakeWebKey(): Promise<string> {
+  const url = new URL(`${BASE}/oapi/pmember/makeWebKey`);
   url.searchParams.set("memberID", getMid());
 
   const res = await fetch(url.toString(), {
     method: "GET",
-    headers: devHeaders(),
+    headers: devHeaders(), // accept + devID + devToken
   });
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`사이다페이 childToken 실패 (${res.status}): ${text}`);
+    throw new Error(`사이다페이 makeWebKey 실패 (${res.status}): ${text}`);
   }
 
-  const json = await res.json() as {
-    success?: boolean;
-    errorMessage?: string;
-    data?: { approvalToken?: string; feedbackToken?: string };
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const json = await res.json() as Record<string, any>;
+  console.log("[ciderpay] makeWebKey 응답:", JSON.stringify(json));
 
-  const approvalToken = json.data?.approvalToken;
-  const feedbackToken = json.data?.feedbackToken ?? "";
+  // 응답 구조: data.approvalToken 또는 최상위 approvalToken/webKey/key
+  const approvalToken =
+    json?.data?.approvalToken ??
+    json?.approvalToken ??
+    json?.webKey ??
+    json?.key ??
+    null;
 
   if (!approvalToken) {
     throw new Error(
-      json.errorMessage
-        ? `사이다페이 childToken 오류: ${json.errorMessage}`
-        : "사이다페이: approvalToken 없음"
+      json?.errorMessage
+        ? `사이다페이 makeWebKey 오류: ${json.errorMessage}`
+        : `사이다페이: approvalToken 없음. 응답: ${JSON.stringify(json)}`
     );
   }
 
-  return { approvalToken, feedbackToken };
+  return String(approvalToken);
 }
 
 export const cidapayAdapter: PaymentAdapter = {
@@ -109,19 +84,16 @@ export const cidapayAdapter: PaymentAdapter = {
   async init(input: PaymentInitInput): Promise<PaymentInitResult> {
     const mid = getMid();
 
-    // approvalToken 획득 방법 선택
-    // - CIDERPAY_API_KEY 가 설정된 경우 → 정적 토큰으로 바로 사용 (백업 사이트 방식)
-    // - CIDERPAY_DEV_ID + CIDERPAY_DEV_TOKEN 이 설정된 경우 → childToken API 동적 조회
+    // approvalToken 획득
+    // - CIDERPAY_API_KEY 가 설정된 경우 → 정적 토큰 사용 (fallback)
+    // - CIDERPAY_DEV_ID + CIDERPAY_DEV_TOKEN → makeWebKey API로 동적 발급 (권장)
     let approvalToken: string;
     const staticKey = process.env.CIDERPAY_API_KEY;
     if (staticKey) {
       approvalToken = staticKey;
     } else {
-      // 0단계: 토큰 결제 활성화 (childToken 사용 전 필수)
-      await setPayTokenYn("Y");
-      // 1단계: approvalToken 동적 조회
-      const tokenResult = await fetchChildToken();
-      approvalToken = tokenResult.approvalToken;
+      // makeWebKey: devID + devToken으로 approvalToken 동적 발급
+      approvalToken = await fetchMakeWebKey();
     }
 
     // returnurl에 주문번호 포함 → return 핸들러에서 주문 식별
