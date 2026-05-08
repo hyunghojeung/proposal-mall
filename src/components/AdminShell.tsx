@@ -9,6 +9,7 @@ const NAV = [
   { href: "/admin/inquiries", label: "고객문의" },
   { href: "/admin/faqs", label: "FAQ" },
   { href: "/admin/notices", label: "공지사항" },
+  { href: "/admin/stamp", label: "도장 이미지" },
 ];
 
 export function AdminShell({
