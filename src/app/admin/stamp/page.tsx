@@ -1,12 +1,21 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { AdminShell } from "@/components/AdminShell";
 
 export default function StampUploadPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [current, setCurrent] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("");
   const [loading, setLoading] = useState(false);
+
+  /* 현재 등록된 도장 불러오기 */
+  useEffect(() => {
+    fetch("/api/stamp")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.ok) setCurrent(data.dataUrl); })
+      .catch(() => {});
+  }, []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -19,7 +28,7 @@ export default function StampUploadPage() {
     const file = inputRef.current?.files?.[0];
     if (!file) { setStatus("파일을 선택해주세요."); return; }
     setLoading(true);
-    setStatus("업로드 중...");
+    setStatus("");
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -27,6 +36,7 @@ export default function StampUploadPage() {
       const data = await res.json();
       if (data.ok) {
         setStatus("ok");
+        setCurrent(preview); // 현재 도장 갱신
       } else {
         setStatus("error:" + (data.error ?? "알 수 없는 오류"));
       }
@@ -41,22 +51,19 @@ export default function StampUploadPage() {
     <AdminShell active="stamp" title="도장 이미지 관리">
       <div className="max-w-md">
         <p className="mb-6 text-[15px] text-ink-sub">
-          견적서 우측 상단에 표시되는 직인(도장) 이미지를 등록합니다.
-          PNG 파일을 권장하며, 배경이 투명한 파일이 가장 잘 어울립니다.
+          견적서 우측에 표시되는 직인(도장) 이미지를 등록합니다.
+          배경이 투명한 PNG 파일을 권장합니다.
         </p>
 
-        {/* 현재 도장 미리보기 */}
+        {/* 현재 등록된 도장 */}
         <div className="mb-8 rounded border border-line bg-bg p-5">
           <p className="mb-3 text-[13px] font-bold text-ink-sub">현재 등록된 도장</p>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/stamp.png?t=${Date.now()}`}
-            alt="현재 도장"
-            className="h-24 w-24 object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
-          />
+          {current ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={current} alt="현재 도장" className="h-24 w-24 object-contain" />
+          ) : (
+            <p className="text-[13px] text-ink-del">등록된 도장이 없습니다.</p>
+          )}
         </div>
 
         {/* 파일 선택 */}
@@ -82,7 +89,6 @@ export default function StampUploadPage() {
           </div>
         )}
 
-        {/* 저장 버튼 */}
         <button
           onClick={handleUpload}
           disabled={loading || !preview}
@@ -91,10 +97,9 @@ export default function StampUploadPage() {
           {loading ? "저장 중..." : "저장"}
         </button>
 
-        {/* 결과 메시지 */}
         {status === "ok" && (
           <div className="mt-4 rounded border border-green-200 bg-green-50 px-4 py-3 text-[14px] font-medium text-green-700">
-            ✅ 도장 이미지가 저장되었습니다. 견적서에 즉시 반영됩니다.
+            ✅ 도장 이미지가 DB에 저장되었습니다. 재배포 후에도 유지됩니다.
           </div>
         )}
         {status.startsWith("error:") && (

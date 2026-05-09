@@ -228,3 +228,11 @@ model Notice {
   @@index([isPinned, createdAt])
   @@map("notices")
 }
+
+model Setting {
+  key       String   @id
+  value     String   // 대용량 텍스트 (base64 이미지 포함)
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}

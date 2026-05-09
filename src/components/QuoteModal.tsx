@@ -225,11 +225,24 @@ export function QuoteModal({ items, delivery, onClose }: QuoteModalProps) {
   );
 }
 
-/* ── 도장 이미지: 파일 없으면 원형 텍스트 placeholder ── */
+/* ── 도장 이미지: DB에서 base64 data URL을 불러와 표시 ── */
 function StampImage() {
-  const [err, setErr] = useState(false);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  if (err) {
+  useEffect(() => {
+    fetch("/api/stamp")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.ok && data.dataUrl) setDataUrl(data.dataUrl);
+      })
+      .catch(() => {})
+      .finally(() => setLoaded(true));
+  }, []);
+
+  if (!loaded) return null; // 로딩 중 공백
+
+  if (!dataUrl) {
     return (
       <div className="flex h-[88px] w-[88px] items-center justify-center rounded-full border-[3px] border-brand text-center text-[11px] font-bold leading-tight text-brand">
         인쇄의창<br />인&nbsp;(印)
@@ -240,12 +253,11 @@ function StampImage() {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/stamp.png"
+      src={dataUrl}
       alt="직인"
       width={88}
       height={88}
       style={{ objectFit: "contain" }}
-      onError={() => setErr(true)}
     />
   );
 }
