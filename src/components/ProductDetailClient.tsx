@@ -169,42 +169,54 @@ export function ProductDetailClient({ product }: Props) {
   const displayUnitPrice = quote?.unitPrice ?? (localUnitPrice > 0 ? localUnitPrice : null);
   const displaySubtotal = quote?.subtotal ?? (localUnitPrice > 0 ? localUnitPrice * quantity : null);
 
-  const reqIdRef = useRef(0);
+  const reqIdRef  = useRef(0);
+  const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const reqId = ++reqIdRef.current;
-    setLoading(true);
+    // ① 즉시: 낡은 quote 제거 → localUnitPrice 가 바로 표시됨 (지연 없음)
+    setQuote(null);
     setQuoteErr(null);
-    const payload = {
-      slug: product.slug,
-      options,
-      quantity,
-      ...(isPaper ? { pageCount } : {}),
+
+    // ② 이전 타이머 취소 (연속 클릭·타이핑 중복 호출 방지)
+    if (timerRef.current) clearTimeout(timerRef.current);
+
+    // ③ 300 ms 디바운스 후 API 호출 (DB 단가표 기반 정밀 계산)
+    timerRef.current = setTimeout(() => {
+      const reqId = ++reqIdRef.current;
+      setLoading(true);
+      const payload = {
+        slug: product.slug,
+        options,
+        quantity,
+        ...(isPaper ? { pageCount } : {}),
+      };
+      fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(async (r) => {
+          const data = (await r.json()) as QuoteResp;
+          if (reqId !== reqIdRef.current) return;
+          if (!r.ok) {
+            setQuoteErr(data.error ?? "가격 계산 실패");
+          } else {
+            setQuote(data);
+            setQuoteErr(null);
+          }
+        })
+        .catch(() => {
+          if (reqId !== reqIdRef.current) return;
+          setQuoteErr("네트워크 오류");
+        })
+        .finally(() => {
+          if (reqId === reqIdRef.current) setLoading(false);
+        });
+    }, 300);
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
-    fetch("/api/quote", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then(async (r) => {
-        const data = (await r.json()) as QuoteResp;
-        if (reqId !== reqIdRef.current) return;
-        if (!r.ok) {
-          setQuote(null);
-          setQuoteErr(data.error ?? "가격 계산 실패");
-        } else {
-          setQuote(data);
-          setQuoteErr(null);
-        }
-      })
-      .catch(() => {
-        if (reqId !== reqIdRef.current) return;
-        setQuote(null);
-        setQuoteErr("네트워크 오류");
-      })
-      .finally(() => {
-        if (reqId === reqIdRef.current) setLoading(false);
-      });
   }, [product.slug, options, quantity, pageCount, isPaper]);
 
   function handleAddToCart() {
@@ -346,9 +358,7 @@ export function ProductDetailClient({ product }: Props) {
 
             {/* 공급가 + 부가세 + 합계 */}
             <div className="bg-bg px-5 py-5">
-              {quoteErr && !displaySubtotal ? (
-                <p className="text-[15px] font-medium text-brand">{quoteErr}</p>
-              ) : displaySubtotal ? (
+              {displaySubtotal ? (
                 <div className="space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[15px] text-ink-sub">공급가</span>
@@ -370,7 +380,13 @@ export function ProductDetailClient({ product }: Props) {
                       </span>
                     </div>
                   </div>
+                  {/* API 정밀계산 진행 중 표시 (가격은 이미 보임) */}
+                  {loading && (
+                    <p className="text-[12px] text-ink-del">정밀 계산 중…</p>
+                  )}
                 </div>
+              ) : quoteErr ? (
+                <p className="text-[15px] font-medium text-brand">{quoteErr}</p>
               ) : loading ? (
                 <p className="text-[15px] text-ink-sub">계산 중…</p>
               ) : (
