@@ -128,12 +128,12 @@ function ImageGallery({
   function handleImgDragStart(e: React.DragEvent, i: number) {
     setDragSrcIdx(i);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", String(i)); // Firefox 필수
+    e.dataTransfer.setData("text/plain", String(i));
   }
 
   function handleImgDragOver(e: React.DragEvent, i: number) {
     e.preventDefault();
-    e.stopPropagation(); // 파일 드롭존 이벤트 차단
+    e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
     if (dragOverIdx !== i) setDragOverIdx(i);
   }
@@ -162,7 +162,7 @@ function ImageGallery({
   /* ── 파일 드롭 (신규 이미지 추가) ── */
   function handleZoneDragOver(e: React.DragEvent) {
     e.preventDefault();
-    if (dragSrcIdx !== null) return; // 내부 재정렬 중엔 무시
+    if (dragSrcIdx !== null) return;
     if (images.length < 5 && e.dataTransfer.types.includes("Files")) setFileDragOver(true);
   }
 
@@ -173,7 +173,7 @@ function ImageGallery({
   async function handleZoneDrop(e: React.DragEvent) {
     e.preventDefault();
     setFileDragOver(false);
-    if (dragSrcIdx !== null) return; // 내부 재정렬 처리 완료 후 무시
+    if (dragSrcIdx !== null) return;
     const files = Array.from(e.dataTransfer.files).filter((f) =>
       ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type),
     );
@@ -197,12 +197,12 @@ function ImageGallery({
         }`}
       >
         {images.length === 0 && !fileDragOver && (
-          <p className="flex w-full items-center justify-center text-[16px] text-ink-sub">
+          <p className="flex w-full items-center justify-center text-[14px] text-ink-sub">
             이미지를 여기에 드래그하거나 아래 버튼으로 추가하세요
           </p>
         )}
         {fileDragOver && (
-          <p className="flex w-full items-center justify-center text-[16px] font-bold text-brand">
+          <p className="flex w-full items-center justify-center text-[14px] font-bold text-brand">
             여기에 놓으세요
           </p>
         )}
@@ -229,11 +229,11 @@ function ImageGallery({
                   ? "border-2 border-brand"
                   : "border border-line"
               }`}
-              draggable={false} // img 자체의 기본 드래그 비활성화
+              draggable={false}
             />
             {/* 대표 뱃지 */}
             {i === 0 && (
-              <span className="absolute left-0 top-0 rounded-br-sm rounded-tl-sm bg-brand px-1.5 py-0.5 text-[16px] font-bold text-white">
+              <span className="absolute left-0 top-0 rounded-br-sm rounded-tl-sm bg-brand px-1.5 py-0.5 text-[12px] font-bold text-white">
                 대표
               </span>
             )}
@@ -247,7 +247,7 @@ function ImageGallery({
                 <button
                   type="button"
                   onClick={() => setRepresentative(i)}
-                  className="rounded bg-brand px-2 py-0.5 text-[16px] font-bold text-white hover:bg-brand-dark"
+                  className="rounded bg-brand px-2 py-0.5 text-[12px] font-bold text-white hover:bg-brand-dark"
                 >
                   대표 설정
                 </button>
@@ -255,7 +255,7 @@ function ImageGallery({
               <button
                 type="button"
                 onClick={() => removeImage(i)}
-                className="rounded bg-black/70 px-2 py-0.5 text-[16px] text-white hover:bg-black"
+                className="rounded bg-black/70 px-2 py-0.5 text-[12px] text-white hover:bg-black"
               >
                 삭제
               </button>
@@ -270,7 +270,7 @@ function ImageGallery({
             type="button"
             onClick={upload.triggerPick}
             disabled={upload.uploading}
-            className="flex items-center gap-1.5 rounded-sm border border-line px-3 py-1.5 text-[16px] text-ink-sub hover:border-brand hover:text-brand disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-sm border border-line px-3 py-1.5 text-[14px] text-ink-sub hover:border-brand hover:text-brand disabled:opacity-50"
           >
             {upload.uploading ? (
               "업로드 중…"
@@ -286,7 +286,7 @@ function ImageGallery({
           </button>
         )}
         {upload.uploadErr && (
-          <p className="text-[16px] text-brand">{upload.uploadErr}</p>
+          <p className="text-[14px] text-brand">{upload.uploadErr}</p>
         )}
       </div>
 
@@ -298,7 +298,7 @@ function ImageGallery({
         className="hidden"
         onChange={upload.handleChange}
       />
-      <p className="mt-2 text-[15px] text-ink-sub">
+      <p className="mt-2 text-[13px] text-ink-sub">
         최대 5장 · JPG/PNG/WEBP · 10MB 이하 · 이미지를 드래그하여 순서 변경 · 커서를 올리면 대표 설정/삭제
       </p>
     </div>
@@ -376,16 +376,16 @@ function ContentBlockEditor({
       {blocks.map((block, i) => (
         <div key={i} className="rounded border border-line p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[15px] font-bold text-ink-sub uppercase">
+            <span className="text-[13px] font-bold text-ink-sub uppercase">
               {block.type === "text" ? "텍스트" : "이미지"}
             </span>
             <div className="flex gap-1">
               <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0}
-                className="rounded px-1.5 py-0.5 text-[16px] text-ink-sub hover:text-ink disabled:opacity-30">↑</button>
+                className="rounded px-1.5 py-0.5 text-[14px] text-ink-sub hover:text-ink disabled:opacity-30">↑</button>
               <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}
-                className="rounded px-1.5 py-0.5 text-[16px] text-ink-sub hover:text-ink disabled:opacity-30">↓</button>
+                className="rounded px-1.5 py-0.5 text-[14px] text-ink-sub hover:text-ink disabled:opacity-30">↓</button>
               <button type="button" onClick={() => removeBlock(i)}
-                className="rounded px-1.5 py-0.5 text-[16px] text-brand hover:underline">삭제</button>
+                className="rounded px-1.5 py-0.5 text-[14px] text-brand hover:underline">삭제</button>
             </div>
           </div>
 
@@ -405,7 +405,7 @@ function ContentBlockEditor({
                 value={block.caption}
                 onChange={(e) => updateBlock(i, { caption: e.target.value })}
                 placeholder="이미지 캡션 (선택)"
-                className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[16px] outline-none focus:border-brand"
+                className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[14px] outline-none focus:border-brand"
               />
             </div>
           )}
@@ -417,7 +417,7 @@ function ContentBlockEditor({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`flex min-h-[64px] items-center justify-center rounded border-2 border-dashed p-4 text-[16px] transition-colors ${
+        className={`flex min-h-[64px] items-center justify-center rounded border-2 border-dashed p-4 text-[14px] transition-colors ${
           draggingOver ? "border-brand bg-brand-light text-brand font-bold" : "border-line text-ink-sub"
         }`}
       >
@@ -428,7 +428,7 @@ function ContentBlockEditor({
         <button
           type="button"
           onClick={() => onChange([...blocks, { type: "text", content: "" }])}
-          className="rounded-sm border border-line px-3 py-1.5 text-[16px] text-ink-sub hover:border-ink hover:text-ink"
+          className="rounded-sm border border-line px-3 py-1.5 text-[14px] text-ink-sub hover:border-ink hover:text-ink"
         >
           + 텍스트 블록 추가
         </button>
@@ -436,13 +436,13 @@ function ContentBlockEditor({
           type="button"
           onClick={() => { setUploadErr(null); fileInputRef.current?.click(); }}
           disabled={uploading}
-          className="rounded-sm border border-line px-3 py-1.5 text-[16px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50"
+          className="rounded-sm border border-line px-3 py-1.5 text-[14px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50"
         >
           {uploading ? "업로드 중…" : "+ 이미지 블록 추가 (복수 선택 가능)"}
         </button>
       </div>
 
-      {uploadErr && <p className="text-[16px] text-brand">{uploadErr}</p>}
+      {uploadErr && <p className="text-[14px] text-brand">{uploadErr}</p>}
 
       <input
         ref={fileInputRef}
@@ -477,11 +477,9 @@ export function ProductForm({
     setV((prev) => ({ ...prev, [key]: value }));
   }
 
-  // 상품명 → slug 자동 생성 (신규 등록 시)
   function handleNameChange(name: string) {
     set("name", name);
     if (mode === "create" && !v.slug) {
-      // 영문/숫자 있으면 사용, 한글만 있으면 타임스탬프 기반 생성
       const ascii = name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
@@ -545,7 +543,6 @@ export function ProductForm({
     start(async () => {
       const url = mode === "create" ? "/api/admin/products" : `/api/admin/products/${v.id}`;
       const method = mode === "create" ? "POST" : "PATCH";
-      // slug 미입력 시 자동 생성 (한글 상품명 대응)
       const slug = v.slug || `product-${Date.now().toString(36)}`;
       const res = await fetch(url, {
         method,
@@ -617,7 +614,7 @@ export function ProductForm({
               placeholder="0"
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             />
-            <p className="mt-1 text-[15px] text-ink-sub">
+            <p className="mt-1 text-[13px] text-ink-sub">
               단가표가 없을 때 기준 단가. 옵션에도 단가를 입력하면 합산됩니다 (기본 단가 + 옵션 단가).
             </p>
           </Field>
@@ -663,13 +660,13 @@ export function ProductForm({
           <button
             type="button"
             onClick={addGroup}
-            className="rounded-sm border border-line px-3 py-1 text-[16px] hover:border-ink"
+            className="rounded-sm border border-line px-3 py-1 text-[14px] hover:border-ink"
           >
             + 그룹 추가
           </button>
         </div>
         {v.optionGroups.length === 0 ? (
-          <p className="rounded border border-dashed border-line bg-bg px-4 py-8 text-center text-[16px] text-ink-sub">
+          <p className="rounded border border-dashed border-line bg-bg px-4 py-8 text-center text-[14px] text-ink-sub">
             옵션 그룹이 없습니다.
           </p>
         ) : (
@@ -696,7 +693,7 @@ export function ProductForm({
                   <button
                     type="button"
                     onClick={() => removeGroup(gi)}
-                    className="rounded-sm border border-line px-2.5 py-1.5 text-[16px] text-brand hover:border-brand"
+                    className="rounded-sm border border-line px-2.5 py-1.5 text-[14px] text-brand hover:border-brand"
                   >
                     그룹 삭제
                   </button>
@@ -704,9 +701,9 @@ export function ProductForm({
                 <div className="mt-3 border-t border-line pt-3">
                   {/* 컬럼 헤더 */}
                   <div className="mb-1 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
-                    <span className="text-[15px] font-bold text-ink-sub">옵션명</span>
-                    <span className="text-[15px] font-bold text-ink-sub">단가 (원)</span>
-                    <span className="text-[15px] font-bold text-ink-sub">정렬</span>
+                    <span className="text-[13px] font-bold text-ink-sub">옵션명</span>
+                    <span className="text-[13px] font-bold text-ink-sub">단가 (원)</span>
+                    <span className="text-[13px] font-bold text-ink-sub">정렬</span>
                     <span />
                   </div>
                   <div className="space-y-1.5">
@@ -736,7 +733,7 @@ export function ProductForm({
                       <button
                         type="button"
                         onClick={() => removeValue(gi, vi)}
-                        className="rounded-sm border border-line px-2.5 py-1 text-[15px] text-brand hover:border-brand"
+                        className="rounded-sm border border-line px-2.5 py-1 text-[13px] text-brand hover:border-brand"
                       >
                         ×
                       </button>
@@ -746,7 +743,7 @@ export function ProductForm({
                   <button
                     type="button"
                     onClick={() => addValue(gi)}
-                    className="rounded-sm border border-dashed border-line px-3 py-1 text-[16px] text-ink-sub hover:border-ink hover:text-ink"
+                    className="rounded-sm border border-dashed border-line px-3 py-1 text-[14px] text-ink-sub hover:border-ink hover:text-ink"
                   >
                     + 값 추가
                   </button>
@@ -760,7 +757,7 @@ export function ProductForm({
       {/* 상품 상세 내용 */}
       <section className="rounded border border-line p-5">
         <h2 className="mb-1 text-[16px] font-bold text-ink">상품 상세 내용</h2>
-        <p className="mb-4 text-[16px] text-ink-sub">
+        <p className="mb-4 text-[14px] text-ink-sub">
           상품 페이지 하단에 표시됩니다. 텍스트와 이미지를 자유롭게 조합하세요.
         </p>
         <ContentBlockEditor
@@ -804,7 +801,7 @@ function Field({
 }) {
   return (
     <label className={`block ${className ?? ""}`}>
-      <span className="mb-1 block text-[16px] font-bold text-ink">{label}</span>
+      <span className="mb-1 block text-[14px] font-bold text-ink">{label}</span>
       {children}
     </label>
   );
