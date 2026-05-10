@@ -233,20 +233,20 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
         <td colSpan={7} className="px-5 py-3 text-[13px]">
           <div className="flex flex-wrap gap-x-6 gap-y-1">
             <span>
-              <span className="font-semibold text-[#a8b0d0]">수령인:</span>{" "}
+              <span className="font-semibold text-[#f5c842]">수령인:</span>{" "}
               <span className="text-[#d8ddf0]">
                 {order.company ? `${order.company} (${order.customerName})` : order.customerName}
               </span>
             </span>
             <span>
-              <span className="font-semibold text-[#a8b0d0]">주소:</span>{" "}
+              <span className="font-semibold text-[#f5c842]">주소:</span>{" "}
               <span className="text-[#d8ddf0]">
                 {isPickup ? "직접 방문 수령" : (order.shippingAddress ?? "-")}
               </span>
             </span>
             {order.memo && (
               <span>
-                <span className="font-semibold text-[#a8b0d0]">배송메모:</span>{" "}
+                <span className="font-semibold text-[#f5c842]">배송메모:</span>{" "}
                 <span className="text-[#d8ddf0]">{order.memo}</span>
               </span>
             )}
