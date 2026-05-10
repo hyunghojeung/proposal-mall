@@ -3,17 +3,24 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { AdminOrderPrintModal } from "@/components/AdminOrderPrintModal";
+import { CancelOrderModal } from "@/components/CancelOrderModal";
 
 export function OrdersListActions({
   serial,
   status,
+  customerName,
+  totalAmount,
 }: {
   serial: string;
   status: string;
+  customerName: string;
+  totalAmount: number;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [showPrint, setShowPrint] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [localStatus, setLocalStatus] = useState(status);
 
   function handleDelete() {
     if (!confirm(`주문 [${serial}]을 완전히 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
@@ -24,20 +31,21 @@ export function OrdersListActions({
     });
   }
 
-  function handleCancel() {
-    if (!confirm(`주문 [${serial}]을 취소 처리하시겠습니까?`)) return;
+  function handleCancelConfirm(reason: string) {
+    setShowCancelModal(false);
     start(async () => {
       const res = await fetch(`/api/admin/orders/${serial}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "CANCELLED" }),
+        body: JSON.stringify({ status: "CANCELLED", cancelReason: reason }),
       });
       if (!res.ok) { alert("취소 처리 실패. 다시 시도해 주세요."); return; }
+      setLocalStatus("CANCELLED"); // 즉시 UI 반영
       router.refresh();
     });
   }
 
-  const isCancelled = status === "CANCELLED";
+  const isCancelled = localStatus === "CANCELLED";
 
   return (
     <>
@@ -59,16 +67,22 @@ export function OrdersListActions({
         </button>
 
         {/* 취소 */}
-        <button
-          type="button"
-          onClick={handleCancel}
-          disabled={pending || isCancelled}
-          className="rounded bg-[#6b7280] px-3 py-1.5 text-[13px] font-bold text-white transition-opacity hover:opacity-80 disabled:opacity-40"
-        >
-          취소
-        </button>
+        {isCancelled ? (
+          <span className="rounded bg-[#374151] px-3 py-1.5 text-[13px] font-bold text-[#6b7280]">
+            취소됨
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowCancelModal(true)}
+            disabled={pending}
+            className="rounded bg-[#6b7280] px-3 py-1.5 text-[13px] font-bold text-white transition-opacity hover:bg-red-500 disabled:opacity-40"
+          >
+            취소
+          </button>
+        )}
 
-        {/* 주문서 → 팝업 */}
+        {/* 주문서 */}
         <button
           type="button"
           onClick={() => setShowPrint(true)}
@@ -77,6 +91,17 @@ export function OrdersListActions({
           주문서
         </button>
       </div>
+
+      {/* 취소 확인 모달 */}
+      {showCancelModal && (
+        <CancelOrderModal
+          serial={serial}
+          customerName={customerName}
+          totalAmount={totalAmount}
+          onConfirm={handleCancelConfirm}
+          onClose={() => setShowCancelModal(false)}
+        />
+      )}
 
       {/* 주문서 팝업 모달 */}
       {showPrint && (

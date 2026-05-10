@@ -301,7 +301,12 @@ export default async function AdminOrdersPage({
 
                       {/* 관리 */}
                       <td className="whitespace-nowrap px-5 py-3.5">
-                        <OrdersListActions serial={o.serial} status={o.status} />
+                        <OrdersListActions
+                          serial={o.serial}
+                          status={o.status}
+                          customerName={o.customerName}
+                          totalAmount={Number(o.totalAmount)}
+                        />
                       </td>
                     </tr>
 
