@@ -1,10 +1,12 @@
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      {/* Pretendard — 얇고 깔끔한 한국어 산세리프 */}
+      {/* 나눔고딕 — Google Fonts */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link
         rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+        href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap"
       />
       <div className="admin-dark w-full">{children}</div>
     </>
