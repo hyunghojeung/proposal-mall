@@ -64,7 +64,7 @@ export default async function ProductDetailPage({
       <NoticeBar />
       <Header />
 
-      <main className="mx-auto min-h-[60vh] max-w-page px-6 py-10">
+      <main className="mx-auto min-h-[60vh] max-w-page px-4 py-6 md:px-6 md:py-10">
         <nav className="flex flex-wrap items-center gap-1 pb-5 text-[15px] text-ink-sub">
           <Link href="/" className="hover:text-ink">홈</Link>
           <span className="mx-1.5 text-ink-del">›</span>

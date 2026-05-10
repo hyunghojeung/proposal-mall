@@ -60,7 +60,7 @@ function ImageGallery({ images }: { images: string[] }) {
 
   if (images.length === 0) {
     return (
-      <div className="w-full rounded border border-line bg-bg flex items-center justify-center" style={{ height: 460 }}>
+      <div className="flex w-full items-center justify-center rounded border border-line bg-bg h-[220px] md:h-[460px]">
         <span className="text-[15px] text-ink-sub">이미지 없음</span>
       </div>
     );
@@ -68,7 +68,8 @@ function ImageGallery({ images }: { images: string[] }) {
 
   return (
     <div>
-      <div className="w-full overflow-hidden rounded border border-line bg-bg" style={{ height: 460 }}>
+      {/* 메인 이미지 — 모바일 220px, 데스크탑 460px */}
+      <div className="w-full overflow-hidden rounded border border-line bg-bg h-[220px] md:h-[460px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={images[active]}
@@ -77,14 +78,13 @@ function ImageGallery({ images }: { images: string[] }) {
         />
       </div>
       {images.length > 1 && (
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
           {images.map((url, i) => (
             <button
               key={i}
               type="button"
               onClick={() => setActive(i)}
-              style={{ width: 80, height: 80 }}
-              className={`shrink-0 overflow-hidden rounded border-2 transition-colors ${
+              className={`h-16 w-16 shrink-0 overflow-hidden rounded border-2 transition-colors md:h-20 md:w-20 ${
                 i === active ? "border-brand" : "border-line"
               }`}
             >
@@ -270,16 +270,10 @@ export function ProductDetailClient({ product }: Props) {
           {/* 통합 카드: 옵션선택 + 수량 + 가격 */}
           <div className="mt-5 overflow-hidden rounded border border-line">
 
-            {/* 옵션 그룹 */}
+            {/* 옵션 그룹 — 모바일: 라벨 위 / 버튼 아래 (세로형) */}
             {product.optionGroups.map((g) => (
-              <div
-                key={g.id}
-                className="flex items-center gap-3 border-b border-line px-4 py-3"
-              >
-                <span className="w-[100px] shrink-0 text-[14px] font-bold text-ink">
-                  {g.name}
-                </span>
-                <span className="h-4 w-px shrink-0 bg-line" />
+              <div key={g.id} className="border-b border-line px-4 py-3">
+                <p className="mb-2 text-[13px] font-bold text-ink-sub">{g.name}</p>
                 <div className="flex flex-wrap gap-2">
                   {g.values.map((v) => {
                     const selected = options[g.name] === v.label;
@@ -307,32 +301,32 @@ export function ProductDetailClient({ product }: Props) {
               </div>
             ))}
 
-            {/* 페이지 수 (내지 인쇄) */}
+            {/* 페이지 수 (내지 인쇄) — 세로형 */}
             {isPaper && (
-              <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-                <span className="w-[100px] shrink-0 text-[14px] font-bold text-ink">페이지 수</span>
-                <span className="h-4 w-px shrink-0 bg-line" />
-                <input
-                  type="number"
-                  min={1}
-                  max={2000}
-                  value={pageCount}
-                  onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
-                  className="w-24 rounded border border-line px-3 py-1.5 text-[15px] outline-none focus:border-brand"
-                />
-                <span className="text-[13px] text-ink-sub">50 / 51~100 / 101쪽↑ 구간 적용</span>
+              <div className="border-b border-line px-4 py-3">
+                <p className="mb-2 text-[13px] font-bold text-ink-sub">페이지 수</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min={1}
+                    max={2000}
+                    value={pageCount}
+                    onChange={(e) => setPageCount(Math.max(1, Number(e.target.value) || 0))}
+                    className="w-24 rounded border border-line px-3 py-1.5 text-[15px] outline-none focus:border-brand"
+                  />
+                  <span className="text-[12px] text-ink-sub">구간: 50 / 51~100 / 101쪽↑</span>
+                </div>
               </div>
             )}
 
-            {/* 수량 */}
-            <div className="flex items-center gap-3 border-b border-line px-4 py-3">
-              <span className="w-[100px] shrink-0 text-[14px] font-bold text-ink">수량</span>
-              <span className="h-4 w-px shrink-0 bg-line" />
-              <div className="flex items-stretch overflow-hidden rounded border border-line">
+            {/* 수량 — 세로형 */}
+            <div className="border-b border-line px-4 py-3">
+              <p className="mb-2 text-[13px] font-bold text-ink-sub">수량</p>
+              <div className="flex items-stretch overflow-hidden rounded border border-line w-fit">
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-4 py-2 text-[16px] text-ink hover:bg-bg"
+                  className="px-4 py-2 text-[18px] text-ink hover:bg-bg"
                   aria-label="수량 감소"
                 >
                   −
@@ -343,12 +337,12 @@ export function ProductDetailClient({ product }: Props) {
                   max={10000}
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(1, Number(e.target.value) || 1))}
-                  className="w-16 border-0 bg-transparent text-center text-[15px] outline-none"
+                  className="w-16 border-0 border-x border-line bg-transparent text-center text-[15px] outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="px-4 py-2 text-[16px] text-ink hover:bg-bg"
+                  className="px-4 py-2 text-[18px] text-ink hover:bg-bg"
                   aria-label="수량 증가"
                 >
                   +
