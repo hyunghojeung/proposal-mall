@@ -20,6 +20,15 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* <details> / <summary> 기본 화살표 제거 */
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
 }
 
 body {

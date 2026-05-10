@@ -11,6 +11,7 @@ const NAV = [
   { href: "/contact",  label: "고객문의" },
 ];
 
+
 export function Header() {
   const [menuOpen,   setMenuOpen]   = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -171,26 +172,112 @@ export function Header() {
         {/* ── 모바일 내비게이션 드롭다운 ── */}
         {menuOpen && (
           <nav className="border-t border-line bg-white md:hidden">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeAll}
-                className={`flex items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand ${
-                  pathname === item.href ? "text-brand" : "text-ink"
+
+            {/* 전체상품 — 네이티브 <details> 아코디언 (JS 상태 불필요) */}
+            <details className="group">
+              <summary
+                className={`flex cursor-pointer select-none items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand [&::-webkit-details-marker]:hidden [&::marker]:hidden ${
+                  pathname.startsWith("/products") ? "text-brand" : "text-ink"
                 }`}
               >
-                {item.label}
-                <svg className="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                전체상품
+                <svg
+                  className="ml-auto shrink-0 transition-transform duration-200 group-open:rotate-90"
+                  width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                >
                   <polyline points="9 18 15 12 9 6"/>
                 </svg>
-              </Link>
-            ))}
-            <Link
-              href="/admin"
-              onClick={closeAll}
-              className="flex items-center px-6 py-4 text-[15px] text-ink-sub transition-colors hover:text-brand"
-            >
+              </summary>
+
+              {/* 하위 카테고리 */}
+              <div className="border-b border-line bg-[#fafafa] py-1">
+                {/* 독립 카테고리 */}
+                <Link href="/products?category=carrier-box" onClick={closeAll}
+                  className="flex items-center px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
+                  제안서캐리어박스
+                </Link>
+                <Link href="/products?category=magnet-box" onClick={closeAll}
+                  className="flex items-center px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
+                  자석박스
+                </Link>
+
+                {/* 제안서 제본 그룹 */}
+                <div className="border-t border-line/60 px-8 pb-1 pt-3 text-[11px] font-bold tracking-widest text-ink-sub">
+                  제안서 제본
+                </div>
+                <Link href="/products?category=3hole-binder" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />3공바인더
+                </Link>
+                <Link href="/products?category=pt-binder" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />PT용바인더
+                </Link>
+                <Link href="/products?category=hardcover-spring" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />하드커버스프링제본
+                </Link>
+
+                {/* 내지 인쇄 그룹 */}
+                <div className="border-t border-line/60 px-8 pb-1 pt-3 text-[11px] font-bold tracking-widest text-ink-sub">
+                  내지 인쇄
+                </div>
+                <Link href="/products?category=mojo" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />모조지
+                </Link>
+                <Link href="/products?category=snow" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />스노우지
+                </Link>
+                <Link href="/products?category=art" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />아트지
+                </Link>
+                <Link href="/products?category=import" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />수입지
+                </Link>
+                <Link href="/products?category=texture" onClick={closeAll}
+                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
+                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />질감용지
+                </Link>
+                <div className="h-2" />
+              </div>
+            </details>
+
+            {/* 나머지 메뉴 항목 */}
+            <Link href="/orders" onClick={closeAll}
+              className={`flex items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand ${
+                pathname === "/orders" ? "text-brand" : "text-ink"
+              }`}>
+              주문현황
+              <svg className="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </Link>
+            <Link href="/cart" onClick={closeAll}
+              className={`flex items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand ${
+                pathname === "/cart" ? "text-brand" : "text-ink"
+              }`}>
+              장바구니
+              <svg className="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </Link>
+            <Link href="/contact" onClick={closeAll}
+              className={`flex items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand ${
+                pathname === "/contact" ? "text-brand" : "text-ink"
+              }`}>
+              고객문의
+              <svg className="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </Link>
+
+            <Link href="/admin" onClick={closeAll}
+              className="flex items-center px-6 py-4 text-[15px] text-ink-sub transition-colors hover:text-brand">
               관리자 페이지
               <svg className="ml-auto" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="9 18 15 12 9 6"/>
