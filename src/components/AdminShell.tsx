@@ -25,7 +25,7 @@ export function AdminShell({
     <div className="min-h-screen bg-[#131626]">
       {/* ── 헤더 ── */}
       <header className="border-b border-[#262a3d] bg-[#1a1d2e]">
-        <div className="mx-auto flex h-[72px] max-w-[1800px] items-center justify-between px-8">
+        <div className="flex h-[72px] w-full items-center justify-between px-8">
           <Link href="/admin" className="text-[24px] font-black italic text-brand">
             제안서박스몰 · 관리자
           </Link>
@@ -38,7 +38,7 @@ export function AdminShell({
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-[1800px] gap-8 px-8 py-8">
+      <div className="flex w-full gap-8 px-8 py-8">
         {/* ── 사이드바 ── */}
         <aside className="w-60 shrink-0">
           <nav className="space-y-1">
