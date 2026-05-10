@@ -195,14 +195,14 @@ export default async function AdminOrdersPage({
           <table className="w-full border-collapse text-[14px]">
             <thead>
               <tr className="bg-[#0f1220] text-[13px] text-[#a8b0d0]">
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">번호</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">고객정보</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">결제수단</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문상태</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-right font-semibold">결제금액</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문일</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">관리</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">번호</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">고객정보</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">상품</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">결제수단</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">주문상태</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-right font-medium">결제금액</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">주문일</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">관리</th>
               </tr>
             </thead>
             <tbody>

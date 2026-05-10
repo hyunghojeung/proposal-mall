@@ -104,14 +104,14 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
 
         {/* 번호 */}
         <td className="whitespace-nowrap px-5 py-3.5">
-          <Link href={`/admin/orders/${order.serial}`} className="font-bold text-[#60a5fa] hover:underline">
+          <Link href={`/admin/orders/${order.serial}`} className="font-medium text-[#60a5fa] hover:underline">
             {order.serial}
           </Link>
         </td>
 
         {/* 고객정보 */}
         <td className="px-5 py-3.5">
-          <p className="font-bold text-white">{order.customerName}</p>
+          <p className="font-medium text-white">{order.customerName}</p>
           {order.company && <p className="text-[13px] text-[#b8c0e0]">{order.company}</p>}
           <p className="text-[13px] text-[#b8c0e0]">{order.customerEmail}</p>
           <p className="text-[13px] text-[#b8c0e0]">{order.customerPhone}</p>
@@ -148,7 +148,7 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
               title={isCancelled ? "취소된 주문" : `클릭 → '${nextLbl}'로 변경`}
               className={[
                 "inline-flex items-center gap-1.5 rounded-sm px-3 py-1",
-                "text-[13px] font-bold text-white whitespace-nowrap select-none transition-all",
+                "text-[13px] font-medium text-white whitespace-nowrap select-none transition-all",
                 current.color,
                 pending         ? "cursor-wait opacity-50"
                   : isCancelled ? "cursor-default opacity-90"
@@ -176,7 +176,7 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
 
         {/* 결제금액 */}
         <td className="whitespace-nowrap px-5 py-3.5 text-right">
-          <span className="font-bold text-white">₩{order.totalAmount.toLocaleString()}</span>
+          <span className="font-medium text-white">₩{order.totalAmount.toLocaleString()}</span>
         </td>
 
         {/* 주문일 */}
@@ -203,13 +203,13 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
 
             {/* 취소 / 취소됨 */}
             {isCancelled ? (
-              <span className="rounded bg-[#262a3d] px-3 py-1.5 text-[13px] font-bold text-[#6b7280]">취소됨</span>
+              <span className="rounded bg-[#262a3d] px-3 py-1.5 text-[13px] font-medium text-[#6b7280]">취소됨</span>
             ) : (
               <button
                 type="button"
                 onClick={() => setShowCancel(true)}
                 disabled={pending}
-                className="rounded bg-[#6b7280] px-3 py-1.5 text-[13px] font-bold text-white hover:bg-red-500 disabled:opacity-40"
+                className="rounded bg-[#6b7280] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-red-500 disabled:opacity-40"
               >
                 취소
               </button>
@@ -219,7 +219,7 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
             <button
               type="button"
               onClick={() => setShowPrint(true)}
-              className="rounded bg-[#374151] px-3 py-1.5 text-[13px] font-bold text-white hover:bg-[#4b5563]"
+              className="rounded bg-[#374151] px-3 py-1.5 text-[13px] font-medium text-white hover:bg-[#4b5563]"
             >
               주문서
             </button>
@@ -233,20 +233,20 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
         <td colSpan={7} className="px-5 py-3 text-[13px]">
           <div className="flex flex-wrap gap-x-6 gap-y-1">
             <span>
-              <span className="font-semibold text-[#f5c842]">수령인:</span>{" "}
+              <span className="text-[#f5c842]">수령인:</span>{" "}
               <span className="text-[#d8ddf0]">
                 {order.company ? `${order.company} (${order.customerName})` : order.customerName}
               </span>
             </span>
             <span>
-              <span className="font-semibold text-[#f5c842]">주소:</span>{" "}
+              <span className="text-[#f5c842]">주소:</span>{" "}
               <span className="text-[#d8ddf0]">
                 {isPickup ? "직접 방문 수령" : (order.shippingAddress ?? "-")}
               </span>
             </span>
             {order.memo && (
               <span>
-                <span className="font-semibold text-[#f5c842]">배송메모:</span>{" "}
+                <span className="text-[#f5c842]">배송메모:</span>{" "}
                 <span className="text-[#d8ddf0]">{order.memo}</span>
               </span>
             )}
