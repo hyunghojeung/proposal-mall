@@ -3,8 +3,7 @@ import Link from "next/link";
 import { OrderStatus } from "@prisma/client";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { AdminShell } from "@/components/AdminShell";
-import { OrdersListActions } from "@/components/OrdersListActions";
-import { OrderStatusBadge } from "@/components/OrderStatusBadge";
+import { AdminOrderRowActions } from "@/components/AdminOrderRowActions";
 import { prisma } from "@/lib/prisma";
 import { DELIVERY_LABELS } from "@/lib/pricing";
 
@@ -276,10 +275,13 @@ export default async function AdminOrdersPage({
                         <PayMethodCell hasTid={!!o.paymentTid} tid={o.paymentTid} />
                       </td>
 
-                      {/* 주문상태 — 클릭으로 4단계 순환 */}
-                      <td className="whitespace-nowrap px-5 py-3.5">
-                        <OrderStatusBadge serial={o.serial} initialStatus={o.status} />
-                      </td>
+                      {/* 주문상태 배지 + 관리 버튼 (공유 상태) */}
+                      <AdminOrderRowActions
+                        serial={o.serial}
+                        initialStatus={o.status}
+                        customerName={o.customerName}
+                        totalAmount={Number(o.totalAmount)}
+                      />
 
                       {/* 결제금액 */}
                       <td className="whitespace-nowrap px-5 py-3.5 text-right">
@@ -297,16 +299,6 @@ export default async function AdminOrdersPage({
                           hour:   "2-digit",
                           minute: "2-digit",
                         })}
-                      </td>
-
-                      {/* 관리 */}
-                      <td className="whitespace-nowrap px-5 py-3.5">
-                        <OrdersListActions
-                          serial={o.serial}
-                          status={o.status}
-                          customerName={o.customerName}
-                          totalAmount={Number(o.totalAmount)}
-                        />
                       </td>
                     </tr>
 
