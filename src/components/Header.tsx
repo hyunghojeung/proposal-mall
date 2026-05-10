@@ -190,15 +190,16 @@ export function Header() {
                 </svg>
               </summary>
 
-              {/* 하위 카테고리 */}
+              {/* 하위 카테고리 — 관리자 DB 카테고리와 동일하게 맞춤 */}
               <div className="border-b border-line bg-[#fafafa] py-1">
+
                 {/* 독립 카테고리 */}
-                <Link href="/products?category=carrier-box" onClick={closeAll}
+                <Link href="/products?cat=carrier-box" onClick={closeAll}
                   className="flex items-center px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
                   제안서캐리어박스
                 </Link>
-                <Link href="/products?category=magnet-box" onClick={closeAll}
-                  className="flex items-center px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
+                <Link href="/products?cat=magnetic-box" onClick={closeAll}
+                  className="flex items-center border-t border-line/40 px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
                   자석박스
                 </Link>
 
@@ -206,43 +207,25 @@ export function Header() {
                 <div className="border-t border-line/60 px-8 pb-1 pt-3 text-[11px] font-bold tracking-widest text-ink-sub">
                   제안서 제본
                 </div>
-                <Link href="/products?category=3hole-binder" onClick={closeAll}
+                <Link href="/products?cat=binding-3-ring" onClick={closeAll}
                   className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
                   <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />3공바인더
                 </Link>
-                <Link href="/products?category=pt-binder" onClick={closeAll}
+                <Link href="/products?cat=binding-pt" onClick={closeAll}
                   className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
                   <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />PT용바인더
                 </Link>
-                <Link href="/products?category=hardcover-spring" onClick={closeAll}
+                <Link href="/products?cat=binding-hardcover" onClick={closeAll}
                   className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
                   <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />하드커버스프링제본
                 </Link>
 
-                {/* 내지 인쇄 그룹 */}
-                <div className="border-t border-line/60 px-8 pb-1 pt-3 text-[11px] font-bold tracking-widest text-ink-sub">
+                {/* 내지 인쇄 — 단독 카테고리 */}
+                <Link href="/products?cat=paper-inner" onClick={closeAll}
+                  className="flex items-center border-t border-line/60 px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
                   내지 인쇄
-                </div>
-                <Link href="/products?category=mojo" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />모조지
                 </Link>
-                <Link href="/products?category=snow" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />스노우지
-                </Link>
-                <Link href="/products?category=art" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />아트지
-                </Link>
-                <Link href="/products?category=import" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />수입지
-                </Link>
-                <Link href="/products?category=texture" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />질감용지
-                </Link>
+
                 <div className="h-2" />
               </div>
             </details>
