@@ -152,7 +152,7 @@ export default async function AdminOrdersPage({
           />
           <button
             type="submit"
-            className="rounded bg-[#3a4060] px-5 py-2.5 text-[15px] font-medium text-white hover:bg-[#4a5080]"
+            className="rounded bg-[#3a4060] px-5 py-2.5 text-[15px] font-normal text-white hover:bg-[#4a5080]"
           >
             검색
           </button>
@@ -180,13 +180,13 @@ export default async function AdminOrdersPage({
           <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#262a3d]">
             <p className="text-[15px] font-bold text-white">
               주문 목록{" "}
-              <span className="ml-1.5 rounded-full bg-[#262a3d] px-2.5 py-0.5 text-[13px] text-[#b8c0e0]">
+              <span className="ml-1.5 rounded-full bg-[#262a3d] px-2.5 py-0.5 text-[13px] font-normal text-[#b8c0e0]">
                 {orders.length}건
               </span>
             </p>
             <p className="text-[14px] text-[#b8c0e0]">
               총 주문 금액:{" "}
-              <span className="ml-1 font-bold text-white">
+              <span className="ml-1 text-white">
                 ₩{grandTotal.toLocaleString()}
               </span>
             </p>
@@ -195,14 +195,14 @@ export default async function AdminOrdersPage({
           <table className="w-full border-collapse text-[16px]">
             <thead>
               <tr className="bg-[#0f1220] text-[15px] text-[#a8b0d0]">
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">번호</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">고객정보</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">상품</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">결제수단</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">주문상태</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-right font-medium">결제금액</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">주문일</th>
-                <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">관리</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-normal">번호</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-normal">고객정보</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-normal">상품</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-normal">결제수단</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-normal">주문상태</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-right font-normal">결제금액</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-normal">주문일</th>
+                <th className="whitespace-nowrap px-5 py-3.5 text-left font-normal">관리</th>
               </tr>
             </thead>
             <tbody>
