@@ -197,12 +197,12 @@ function ImageGallery({
         }`}
       >
         {images.length === 0 && !fileDragOver && (
-          <p className="flex w-full items-center justify-center text-[12px] text-ink-sub">
+          <p className="flex w-full items-center justify-center text-[16px] text-ink-sub">
             이미지를 여기에 드래그하거나 아래 버튼으로 추가하세요
           </p>
         )}
         {fileDragOver && (
-          <p className="flex w-full items-center justify-center text-[12px] font-bold text-brand">
+          <p className="flex w-full items-center justify-center text-[16px] font-bold text-brand">
             여기에 놓으세요
           </p>
         )}
@@ -233,12 +233,12 @@ function ImageGallery({
             />
             {/* 대표 뱃지 */}
             {i === 0 && (
-              <span className="absolute left-0 top-0 rounded-br-sm rounded-tl-sm bg-brand px-1.5 py-0.5 text-[10px] font-bold text-white">
+              <span className="absolute left-0 top-0 rounded-br-sm rounded-tl-sm bg-brand px-1.5 py-0.5 text-[16px] font-bold text-white">
                 대표
               </span>
             )}
             {/* 드래그 핸들 아이콘 */}
-            <span className="absolute bottom-1 right-1 text-white/70 text-[14px] select-none pointer-events-none">
+            <span className="absolute bottom-1 right-1 text-white/70 text-[16px] select-none pointer-events-none">
               ⠿
             </span>
             {/* 호버 오버레이 */}
@@ -247,7 +247,7 @@ function ImageGallery({
                 <button
                   type="button"
                   onClick={() => setRepresentative(i)}
-                  className="rounded bg-brand px-2 py-0.5 text-[10px] font-bold text-white hover:bg-brand-dark"
+                  className="rounded bg-brand px-2 py-0.5 text-[16px] font-bold text-white hover:bg-brand-dark"
                 >
                   대표 설정
                 </button>
@@ -255,7 +255,7 @@ function ImageGallery({
               <button
                 type="button"
                 onClick={() => removeImage(i)}
-                className="rounded bg-black/70 px-2 py-0.5 text-[10px] text-white hover:bg-black"
+                className="rounded bg-black/70 px-2 py-0.5 text-[16px] text-white hover:bg-black"
               >
                 삭제
               </button>
@@ -270,7 +270,7 @@ function ImageGallery({
             type="button"
             onClick={upload.triggerPick}
             disabled={upload.uploading}
-            className="flex items-center gap-1.5 rounded-sm border border-line px-3 py-1.5 text-[12px] text-ink-sub hover:border-brand hover:text-brand disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-sm border border-line px-3 py-1.5 text-[16px] text-ink-sub hover:border-brand hover:text-brand disabled:opacity-50"
           >
             {upload.uploading ? (
               "업로드 중…"
@@ -286,7 +286,7 @@ function ImageGallery({
           </button>
         )}
         {upload.uploadErr && (
-          <p className="text-[12px] text-brand">{upload.uploadErr}</p>
+          <p className="text-[16px] text-brand">{upload.uploadErr}</p>
         )}
       </div>
 
@@ -298,7 +298,7 @@ function ImageGallery({
         className="hidden"
         onChange={upload.handleChange}
       />
-      <p className="mt-2 text-[11px] text-ink-sub">
+      <p className="mt-2 text-[15px] text-ink-sub">
         최대 5장 · JPG/PNG/WEBP · 10MB 이하 · 이미지를 드래그하여 순서 변경 · 커서를 올리면 대표 설정/삭제
       </p>
     </div>
@@ -376,16 +376,16 @@ function ContentBlockEditor({
       {blocks.map((block, i) => (
         <div key={i} className="rounded border border-line p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[11px] font-bold text-ink-sub uppercase">
+            <span className="text-[15px] font-bold text-ink-sub uppercase">
               {block.type === "text" ? "텍스트" : "이미지"}
             </span>
             <div className="flex gap-1">
               <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0}
-                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">↑</button>
+                className="rounded px-1.5 py-0.5 text-[16px] text-ink-sub hover:text-ink disabled:opacity-30">↑</button>
               <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}
-                className="rounded px-1.5 py-0.5 text-[12px] text-ink-sub hover:text-ink disabled:opacity-30">↓</button>
+                className="rounded px-1.5 py-0.5 text-[16px] text-ink-sub hover:text-ink disabled:opacity-30">↓</button>
               <button type="button" onClick={() => removeBlock(i)}
-                className="rounded px-1.5 py-0.5 text-[12px] text-brand hover:underline">삭제</button>
+                className="rounded px-1.5 py-0.5 text-[16px] text-brand hover:underline">삭제</button>
             </div>
           </div>
 
@@ -395,7 +395,7 @@ function ContentBlockEditor({
               onChange={(e) => updateBlock(i, { content: e.target.value })}
               rows={4}
               placeholder="본문 텍스트를 입력하세요"
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             />
           ) : (
             <div>
@@ -405,7 +405,7 @@ function ContentBlockEditor({
                 value={block.caption}
                 onChange={(e) => updateBlock(i, { caption: e.target.value })}
                 placeholder="이미지 캡션 (선택)"
-                className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[12px] outline-none focus:border-brand"
+                className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[16px] outline-none focus:border-brand"
               />
             </div>
           )}
@@ -417,7 +417,7 @@ function ContentBlockEditor({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`flex min-h-[64px] items-center justify-center rounded border-2 border-dashed p-4 text-[12px] transition-colors ${
+        className={`flex min-h-[64px] items-center justify-center rounded border-2 border-dashed p-4 text-[16px] transition-colors ${
           draggingOver ? "border-brand bg-brand-light text-brand font-bold" : "border-line text-ink-sub"
         }`}
       >
@@ -428,7 +428,7 @@ function ContentBlockEditor({
         <button
           type="button"
           onClick={() => onChange([...blocks, { type: "text", content: "" }])}
-          className="rounded-sm border border-line px-3 py-1.5 text-[12px] text-ink-sub hover:border-ink hover:text-ink"
+          className="rounded-sm border border-line px-3 py-1.5 text-[16px] text-ink-sub hover:border-ink hover:text-ink"
         >
           + 텍스트 블록 추가
         </button>
@@ -436,13 +436,13 @@ function ContentBlockEditor({
           type="button"
           onClick={() => { setUploadErr(null); fileInputRef.current?.click(); }}
           disabled={uploading}
-          className="rounded-sm border border-line px-3 py-1.5 text-[12px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50"
+          className="rounded-sm border border-line px-3 py-1.5 text-[16px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50"
         >
           {uploading ? "업로드 중…" : "+ 이미지 블록 추가 (복수 선택 가능)"}
         </button>
       </div>
 
-      {uploadErr && <p className="text-[12px] text-brand">{uploadErr}</p>}
+      {uploadErr && <p className="text-[16px] text-brand">{uploadErr}</p>}
 
       <input
         ref={fileInputRef}
@@ -571,7 +571,7 @@ export function ProductForm({
     <div className="space-y-6">
       {/* 기본 정보 */}
       <section className="rounded border border-line p-5">
-        <h2 className="mb-4 text-[14px] font-bold text-ink">기본 정보</h2>
+        <h2 className="mb-4 text-[16px] font-bold text-ink">기본 정보</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="slug (URL용 ID)">
             <input
@@ -579,14 +579,14 @@ export function ProductForm({
               onChange={(e) => set("slug", e.target.value)}
               disabled={mode === "edit"}
               placeholder="carrier-box"
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand disabled:bg-bg"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand disabled:bg-bg"
             />
           </Field>
           <Field label="카테고리">
             <select
               value={v.category}
               onChange={(e) => set("category", e.target.value as ProductCategory)}
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             >
               {CATEGORY_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -597,7 +597,7 @@ export function ProductForm({
             <input
               value={v.name}
               onChange={(e) => handleNameChange(e.target.value)}
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             />
           </Field>
           <Field label="정렬 순서">
@@ -605,7 +605,7 @@ export function ProductForm({
               type="number"
               value={v.sortOrder}
               onChange={(e) => set("sortOrder", Number(e.target.value) || 0)}
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             />
           </Field>
           <Field label="기본 단가 (원 / 1개 기준)" className="sm:col-span-2">
@@ -615,9 +615,9 @@ export function ProductForm({
               value={v.basePrice}
               onChange={(e) => set("basePrice", Math.max(0, Number(e.target.value) || 0))}
               placeholder="0"
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             />
-            <p className="mt-1 text-[11px] text-ink-sub">
+            <p className="mt-1 text-[15px] text-ink-sub">
               단가표가 없을 때 기준 단가. 옵션에도 단가를 입력하면 합산됩니다 (기본 단가 + 옵션 단가).
             </p>
           </Field>
@@ -626,11 +626,11 @@ export function ProductForm({
               value={v.description}
               onChange={(e) => set("description", e.target.value)}
               placeholder="한 줄 소개 문구"
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[13px] outline-none focus:border-brand"
+              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             />
           </Field>
         </div>
-        <label className="mt-3 flex items-center gap-2 text-[13px]">
+        <label className="mt-3 flex items-center gap-2 text-[15px]">
           <input
             type="checkbox"
             checked={v.isActive}
@@ -652,24 +652,24 @@ export function ProductForm({
 
       {/* 상품 이미지 */}
       <section className="rounded border border-line p-5">
-        <h2 className="mb-4 text-[14px] font-bold text-ink">상품 이미지</h2>
+        <h2 className="mb-4 text-[16px] font-bold text-ink">상품 이미지</h2>
         <ImageGallery images={v.images} onChange={(imgs) => set("images", imgs)} />
       </section>
 
       {/* 옵션 그룹 */}
       <section className="rounded border border-line p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[14px] font-bold text-ink">옵션 그룹</h2>
+          <h2 className="text-[16px] font-bold text-ink">옵션 그룹</h2>
           <button
             type="button"
             onClick={addGroup}
-            className="rounded-sm border border-line px-3 py-1 text-[12px] hover:border-ink"
+            className="rounded-sm border border-line px-3 py-1 text-[16px] hover:border-ink"
           >
             + 그룹 추가
           </button>
         </div>
         {v.optionGroups.length === 0 ? (
-          <p className="rounded border border-dashed border-line bg-bg px-4 py-8 text-center text-[12px] text-ink-sub">
+          <p className="rounded border border-dashed border-line bg-bg px-4 py-8 text-center text-[16px] text-ink-sub">
             옵션 그룹이 없습니다.
           </p>
         ) : (
@@ -682,7 +682,7 @@ export function ProductForm({
                       value={g.name}
                       onChange={(e) => setGroup(gi, { name: e.target.value })}
                       placeholder="형태 / 사이즈 / 용지"
-                      className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
+                      className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[15px] outline-none focus:border-brand"
                     />
                   </Field>
                   <Field label="정렬">
@@ -690,13 +690,13 @@ export function ProductForm({
                       type="number"
                       value={g.sortOrder}
                       onChange={(e) => setGroup(gi, { sortOrder: Number(e.target.value) || 0 })}
-                      className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
+                      className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[15px] outline-none focus:border-brand"
                     />
                   </Field>
                   <button
                     type="button"
                     onClick={() => removeGroup(gi)}
-                    className="rounded-sm border border-line px-2.5 py-1.5 text-[12px] text-brand hover:border-brand"
+                    className="rounded-sm border border-line px-2.5 py-1.5 text-[16px] text-brand hover:border-brand"
                   >
                     그룹 삭제
                   </button>
@@ -704,9 +704,9 @@ export function ProductForm({
                 <div className="mt-3 border-t border-line pt-3">
                   {/* 컬럼 헤더 */}
                   <div className="mb-1 grid gap-2 sm:grid-cols-[2fr_1fr_1fr_auto]">
-                    <span className="text-[11px] font-bold text-ink-sub">옵션명</span>
-                    <span className="text-[11px] font-bold text-ink-sub">단가 (원)</span>
-                    <span className="text-[11px] font-bold text-ink-sub">정렬</span>
+                    <span className="text-[15px] font-bold text-ink-sub">옵션명</span>
+                    <span className="text-[15px] font-bold text-ink-sub">단가 (원)</span>
+                    <span className="text-[15px] font-bold text-ink-sub">정렬</span>
                     <span />
                   </div>
                   <div className="space-y-1.5">
@@ -716,7 +716,7 @@ export function ProductForm({
                         value={val.label}
                         onChange={(e) => setValue(gi, vi, { label: e.target.value })}
                         placeholder="A4, 인쇄형, 소형 …"
-                        className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
+                        className="rounded-sm border border-line px-2.5 py-1.5 text-[15px] outline-none focus:border-brand"
                       />
                       <input
                         type="number"
@@ -724,19 +724,19 @@ export function ProductForm({
                         value={val.priceDelta}
                         onChange={(e) => setValue(gi, vi, { priceDelta: Math.max(0, Number(e.target.value) || 0) })}
                         placeholder="0"
-                        className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
+                        className="rounded-sm border border-line px-2.5 py-1.5 text-[15px] outline-none focus:border-brand"
                       />
                       <input
                         type="number"
                         value={val.sortOrder}
                         onChange={(e) => setValue(gi, vi, { sortOrder: Number(e.target.value) || 0 })}
                         placeholder="0"
-                        className="rounded-sm border border-line px-2.5 py-1.5 text-[13px] outline-none focus:border-brand"
+                        className="rounded-sm border border-line px-2.5 py-1.5 text-[15px] outline-none focus:border-brand"
                       />
                       <button
                         type="button"
                         onClick={() => removeValue(gi, vi)}
-                        className="rounded-sm border border-line px-2.5 py-1 text-[11px] text-brand hover:border-brand"
+                        className="rounded-sm border border-line px-2.5 py-1 text-[15px] text-brand hover:border-brand"
                       >
                         ×
                       </button>
@@ -746,7 +746,7 @@ export function ProductForm({
                   <button
                     type="button"
                     onClick={() => addValue(gi)}
-                    className="rounded-sm border border-dashed border-line px-3 py-1 text-[12px] text-ink-sub hover:border-ink hover:text-ink"
+                    className="rounded-sm border border-dashed border-line px-3 py-1 text-[16px] text-ink-sub hover:border-ink hover:text-ink"
                   >
                     + 값 추가
                   </button>
@@ -759,8 +759,8 @@ export function ProductForm({
 
       {/* 상품 상세 내용 */}
       <section className="rounded border border-line p-5">
-        <h2 className="mb-1 text-[14px] font-bold text-ink">상품 상세 내용</h2>
-        <p className="mb-4 text-[12px] text-ink-sub">
+        <h2 className="mb-1 text-[16px] font-bold text-ink">상품 상세 내용</h2>
+        <p className="mb-4 text-[16px] text-ink-sub">
           상품 페이지 하단에 표시됩니다. 텍스트와 이미지를 자유롭게 조합하세요.
         </p>
         <ContentBlockEditor
@@ -769,14 +769,14 @@ export function ProductForm({
         />
       </section>
 
-      {err && <p className="text-[13px] font-medium text-brand">{err}</p>}
+      {err && <p className="text-[15px] font-medium text-brand">{err}</p>}
 
       <div className="flex gap-2">
         <button
           type="button"
           disabled={pending || !v.name}
           onClick={submit}
-          className="rounded-sm bg-brand px-5 py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-sm bg-brand px-5 py-2.5 text-[16px] font-bold text-white hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
         >
           {mode === "create" ? "상품 등록" : "변경 사항 저장"}
         </button>
@@ -784,7 +784,7 @@ export function ProductForm({
           type="button"
           onClick={() => router.push("/admin/products")}
           disabled={pending}
-          className="rounded-sm border border-line px-5 py-2.5 text-[14px] hover:border-ink"
+          className="rounded-sm border border-line px-5 py-2.5 text-[16px] hover:border-ink"
         >
           취소
         </button>
@@ -804,7 +804,7 @@ function Field({
 }) {
   return (
     <label className={`block ${className ?? ""}`}>
-      <span className="mb-1 block text-[12px] font-bold text-ink">{label}</span>
+      <span className="mb-1 block text-[16px] font-bold text-ink">{label}</span>
       {children}
     </label>
   );
