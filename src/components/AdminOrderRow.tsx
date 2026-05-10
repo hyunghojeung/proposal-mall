@@ -112,15 +112,15 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
         {/* 고객정보 */}
         <td className="px-5 py-3.5">
           <p className="font-bold text-white">{order.customerName}</p>
-          {order.company && <p className="text-[12px] text-[#c8c8d4]">{order.company}</p>}
-          <p className="text-[12px] text-[#c8c8d4]">{order.customerEmail}</p>
-          <p className="text-[12px] text-[#c8c8d4]">{order.customerPhone}</p>
+          {order.company && <p className="text-[13px] text-[#b8c0e0]">{order.company}</p>}
+          <p className="text-[13px] text-[#b8c0e0]">{order.customerEmail}</p>
+          <p className="text-[13px] text-[#b8c0e0]">{order.customerPhone}</p>
         </td>
 
         {/* 상품 */}
         <td className="px-5 py-3.5">
-          <p className="max-w-[220px] truncate text-[14px] text-[#e2e2e8]">{order.productSummary}</p>
-          <p className="mt-0.5 text-[12px] text-[#a8a8b4]">{deliveryLabel}</p>
+          <p className="max-w-[220px] truncate text-[14px] text-[#d8ddf0]">{order.productSummary}</p>
+          <p className="mt-0.5 text-[13px] text-[#8890b8]">{deliveryLabel}</p>
         </td>
 
         {/* 결제수단 */}
@@ -131,10 +131,10 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
                 <span className="text-[#4ade80] text-[13px]">✓</span>
                 <span className="text-white text-[14px] font-medium">카드결제</span>
               </div>
-              <p className="mt-0.5 text-[12px] text-[#c8c8d4]">{order.paymentTid}</p>
+              <p className="mt-0.5 text-[13px] text-[#b8c0e0]">{order.paymentTid}</p>
             </div>
           ) : (
-            <span className="text-[14px] text-[#e2e2e8]">무통장입금</span>
+            <span className="text-[14px] text-[#d8ddf0]">무통장입금</span>
           )}
         </td>
 
@@ -180,7 +180,7 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
         </td>
 
         {/* 주문일 */}
-        <td className="whitespace-nowrap px-5 py-3.5 text-[13px] text-[#c8c8d4]">{dateStr}</td>
+        <td className="whitespace-nowrap px-5 py-3.5 text-[13px] text-[#b8c0e0]">{dateStr}</td>
 
         {/* 관리 버튼 */}
         <td className="whitespace-nowrap px-5 py-3.5">
@@ -230,24 +230,24 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
       {/* ── 배송지 서브 행 ── */}
       <tr className="border-t border-[#1c2030] bg-[#0f1220]">
         <td />
-        <td colSpan={7} className="px-5 py-3 text-[12px]">
+        <td colSpan={7} className="px-5 py-3 text-[13px]">
           <div className="flex flex-wrap gap-x-6 gap-y-1">
             <span>
-              <span className="font-semibold text-[#b8b8c8]">수령인:</span>{" "}
-              <span className="text-[#e2e2e8]">
+              <span className="font-semibold text-[#a8b0d0]">수령인:</span>{" "}
+              <span className="text-[#d8ddf0]">
                 {order.company ? `${order.company} (${order.customerName})` : order.customerName}
               </span>
             </span>
             <span>
-              <span className="font-semibold text-[#b8b8c8]">주소:</span>{" "}
-              <span className="text-[#e2e2e8]">
+              <span className="font-semibold text-[#a8b0d0]">주소:</span>{" "}
+              <span className="text-[#d8ddf0]">
                 {isPickup ? "직접 방문 수령" : (order.shippingAddress ?? "-")}
               </span>
             </span>
             {order.memo && (
               <span>
-                <span className="font-semibold text-[#b8b8c8]">배송메모:</span>{" "}
-                <span className="text-[#e2e2e8]">{order.memo}</span>
+                <span className="font-semibold text-[#a8b0d0]">배송메모:</span>{" "}
+                <span className="text-[#d8ddf0]">{order.memo}</span>
               </span>
             )}
           </div>

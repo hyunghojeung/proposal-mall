@@ -180,11 +180,11 @@ export default async function AdminOrdersPage({
           <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#262a3d]">
             <p className="text-[15px] font-bold text-white">
               주문 목록{" "}
-              <span className="ml-1.5 rounded-full bg-[#262a3d] px-2.5 py-0.5 text-[13px] text-[#c8c8d4]">
+              <span className="ml-1.5 rounded-full bg-[#262a3d] px-2.5 py-0.5 text-[13px] text-[#b8c0e0]">
                 {orders.length}건
               </span>
             </p>
-            <p className="text-[14px] text-[#c8c8d4]">
+            <p className="text-[14px] text-[#b8c0e0]">
               총 주문 금액:{" "}
               <span className="ml-1 font-bold text-white">
                 ₩{grandTotal.toLocaleString()}
@@ -194,7 +194,7 @@ export default async function AdminOrdersPage({
 
           <table className="w-full border-collapse text-[14px]">
             <thead>
-              <tr className="bg-[#0f1220] text-[13px] text-[#b8b8c8]">
+              <tr className="bg-[#0f1220] text-[13px] text-[#a8b0d0]">
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">번호</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">고객정보</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
