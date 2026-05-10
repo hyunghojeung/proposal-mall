@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 
@@ -8,6 +8,11 @@ const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "제안서박스몰 — 제안서 제작 전문 쇼핑몰",

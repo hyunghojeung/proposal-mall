@@ -243,10 +243,12 @@ export function ProductDetailClient({ product }: Props) {
     <>
       <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
         {/* 좌측: 이미지 갤러리 */}
-        <ImageGallery images={product.images} />
+        <div className="min-w-0">
+          <ImageGallery images={product.images} />
+        </div>
 
         {/* 우측: 옵션 + 가격 */}
-        <div>
+        <div className="min-w-0">
           <Link
             href={`/products?cat=${CATEGORY_PARAMS[product.category]}`}
             className="mb-2 inline-block text-[14px] font-medium text-brand hover:underline"
@@ -369,7 +371,7 @@ export function ProductDetailClient({ product }: Props) {
                   <div className="border-t border-line pt-2.5">
                     <div className="flex items-baseline justify-between">
                       <span className="text-[16px] font-bold text-ink">합계 (VAT 포함)</span>
-                      <span className="text-[28px] font-black tracking-tight text-brand">
+                      <span className="text-[22px] font-black tracking-tight text-brand md:text-[28px]">
                         {Math.round(displaySubtotal * 1.1).toLocaleString()}원
                       </span>
                     </div>

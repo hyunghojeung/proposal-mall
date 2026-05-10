@@ -37,6 +37,8 @@ body {
   font-family: var(--font-noto-sans-kr), "Noto Sans KR", sans-serif;
   font-size: 14px;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative; /* iOS Safari: overflow-x:hidden 적용되려면 필요 */
 }
 
 a {
