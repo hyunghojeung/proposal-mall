@@ -100,7 +100,7 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
   return (
     <>
       {/* ── 메인 행 ── */}
-      <tr className="border-t border-[#2e2e33] align-middle transition-colors hover:bg-[#222226]">
+      <tr className="border-t border-[#262a3d] align-middle transition-colors hover:bg-[#252840]">
 
         {/* 번호 */}
         <td className="whitespace-nowrap px-5 py-3.5">
@@ -203,7 +203,7 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
 
             {/* 취소 / 취소됨 */}
             {isCancelled ? (
-              <span className="rounded bg-[#2e2e33] px-3 py-1.5 text-[13px] font-bold text-[#6b7280]">취소됨</span>
+              <span className="rounded bg-[#262a3d] px-3 py-1.5 text-[13px] font-bold text-[#6b7280]">취소됨</span>
             ) : (
               <button
                 type="button"
@@ -228,7 +228,7 @@ export function AdminOrderRow({ order }: { order: AdminOrderRowData }) {
       </tr>
 
       {/* ── 배송지 서브 행 ── */}
-      <tr className="border-t border-[#1a1a1e] bg-[#111114]">
+      <tr className="border-t border-[#1c2030] bg-[#0f1220]">
         <td />
         <td colSpan={7} className="px-5 py-3 text-[12px]">
           <div className="flex flex-wrap gap-x-6 gap-y-1">

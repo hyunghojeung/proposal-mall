@@ -123,14 +123,14 @@ export default async function AdminOrdersPage({
                 href={href}
                 className={`rounded border px-5 py-2.5 text-[15px] transition-colors ${
                   active
-                    ? "border-brand bg-brand-light font-bold text-brand"
-                    : "border-line text-ink hover:border-ink"
+                    ? "border-brand bg-brand/20 font-bold text-brand"
+                    : "border-[#262a3d] text-[#9095b8] hover:border-[#4a5080] hover:text-white"
                 }`}
               >
                 {f.label}
                 {cnt > 0 && (
                   <span className={`ml-2 rounded-full px-2 py-0.5 text-[12px] font-bold ${
-                    active ? "bg-brand text-white" : "bg-bg text-ink-sub"
+                    active ? "bg-brand text-white" : "bg-[#262a3d] text-[#9095b8]"
                   }`}>
                     {cnt}
                   </span>
@@ -148,18 +148,18 @@ export default async function AdminOrdersPage({
             name="q"
             defaultValue={q}
             placeholder="주문번호 / 이름 / 연락처 / 이메일"
-            className="w-80 rounded border border-line px-4 py-2.5 text-[15px] outline-none focus:border-brand"
+            className="w-80 rounded border border-[#262a3d] bg-[#131626] px-4 py-2.5 text-[15px] text-white placeholder:text-[#4a5070] outline-none focus:border-brand"
           />
           <button
             type="submit"
-            className="rounded bg-ink px-5 py-2.5 text-[15px] font-medium text-white hover:bg-black"
+            className="rounded bg-[#3a4060] px-5 py-2.5 text-[15px] font-medium text-white hover:bg-[#4a5080]"
           >
             검색
           </button>
           {q && (
             <Link
               href={statusParam !== "ALL" && statusValid ? `/admin/orders?status=${statusParam}` : "/admin/orders"}
-              className="rounded border border-line px-4 py-2.5 text-[15px] text-ink-sub hover:border-ink"
+              className="rounded border border-[#262a3d] px-4 py-2.5 text-[15px] text-[#8a90b0] hover:border-[#4a5080] hover:text-white"
             >
               초기화
             </Link>
@@ -167,20 +167,20 @@ export default async function AdminOrdersPage({
         </form>
       </div>
 
-      {/* ── 다크 테이블 영역 ── */}
+      {/* ── 테이블 영역 ── */}
       {orders.length === 0 ? (
-        <div className="rounded-xl border border-line bg-bg px-4 py-16 text-center">
-          <p className="text-[17px] text-ink-sub">
+        <div className="rounded-xl border border-[#262a3d] bg-[#131626] px-4 py-16 text-center">
+          <p className="text-[17px] text-[#8a90b0]">
             {q ? `"${q}" 검색 결과가 없습니다.` : "주문이 없습니다."}
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl bg-[#18181b]">
+        <div className="overflow-x-auto rounded-xl bg-[#151829]">
           {/* 테이블 헤더 바 */}
-          <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#2e2e33]">
+          <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#262a3d]">
             <p className="text-[15px] font-bold text-white">
               주문 목록{" "}
-              <span className="ml-1.5 rounded-full bg-[#2e2e33] px-2.5 py-0.5 text-[13px] text-[#c8c8d4]">
+              <span className="ml-1.5 rounded-full bg-[#262a3d] px-2.5 py-0.5 text-[13px] text-[#c8c8d4]">
                 {orders.length}건
               </span>
             </p>
@@ -194,7 +194,7 @@ export default async function AdminOrdersPage({
 
           <table className="w-full border-collapse text-[14px]">
             <thead>
-              <tr className="bg-[#111114] text-[13px] text-[#b8b8c8]">
+              <tr className="bg-[#0f1220] text-[13px] text-[#b8b8c8]">
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">번호</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">고객정보</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
