@@ -192,9 +192,9 @@ export default async function AdminOrdersPage({
             </p>
           </div>
 
-          <table className="w-full border-collapse text-[14px]">
+          <table className="w-full border-collapse text-[13px]">
             <thead>
-              <tr className="bg-[#0f1220] text-[13px] text-[#a8b0d0]">
+              <tr className="bg-[#0f1220] text-[12px] text-[#a8b0d0]">
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">번호</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">고객정보</th>
                 <th className="whitespace-nowrap px-5 py-3.5 text-left font-medium">상품</th>
