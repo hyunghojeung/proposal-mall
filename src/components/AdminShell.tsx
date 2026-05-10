@@ -22,7 +22,7 @@ export function AdminShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#131626]">
+    <div className="min-h-screen w-full bg-[#131626]">
       {/* ── 헤더 ── */}
       <header className="border-b border-[#262a3d] bg-[#1a1d2e]">
         <div className="flex h-[72px] w-full items-center justify-between px-8">

@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Pretendard — 관리자 패널 전용 */
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
-
 :root {
   --brand: #e8481a;
   --brand-dark: #c93a10;
@@ -62,6 +59,9 @@ button {
 }
 body:has(.admin-dark) {
   background: #0f0f10;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
 }
 .admin-dark .bg-bg { background-color: #0f0f10; }
 .admin-dark .bg-white { background-color: #1c1c1f; }
