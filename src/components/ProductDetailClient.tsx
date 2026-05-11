@@ -115,7 +115,7 @@ function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
             );
           }
           return (
-            <figure key={i} className="mx-auto max-w-2xl">
+            <figure key={i} className="mx-auto w-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={block.url}
