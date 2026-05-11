@@ -25,9 +25,21 @@ interface InquiryRow {
   subject: string;
   name: string;
   isPrivate: boolean;
+  hasPassword: boolean;
   status: "OPEN" | "ANSWERED" | "CLOSED";
   createdAt: string;
   answeredAt: string | null;
+}
+
+interface InquiryDetail {
+  id: number;
+  subject: string;
+  message: string;
+  answer: string | null;
+  answeredAt: string | null;
+  status: string;
+  createdAt: string;
+  name: string;
 }
 
 export function ContactView() {
@@ -44,10 +56,18 @@ export function ContactView() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
+  const [inquiryPassword, setInquiryPassword] = useState("");
   const [agree, setAgree] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // 상세 조회 모달 상태
+  const [detailTarget, setDetailTarget] = useState<InquiryRow | null>(null);
+  const [detailPassword, setDetailPassword] = useState("");
+  const [detailData, setDetailData] = useState<InquiryDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/faqs").then((r) => r.json()).then((d) => setFaqs(d.faqs ?? [])).catch(() => {});
@@ -64,7 +84,10 @@ export function ContactView() {
       const res = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, email, subject, message }),
+        body: JSON.stringify({
+          name, phone, email, subject, message,
+          password: inquiryPassword || undefined,
+        }),
       });
       if (res.ok) {
         setSubmitted(true);
@@ -82,7 +105,42 @@ export function ContactView() {
 
   function resetForm() {
     setName(""); setPhone(""); setEmail(""); setSubject(""); setMessage("");
-    setAgree(false); setSubmitted(false); setFormError(null);
+    setInquiryPassword(""); setAgree(false); setSubmitted(false); setFormError(null);
+  }
+
+  async function openDetail(inq: InquiryRow) {
+    setDetailTarget(inq);
+    setDetailPassword("");
+    setDetailData(null);
+    setDetailError(null);
+    // 비밀번호 없는 문의는 바로 조회
+    if (!inq.hasPassword) await fetchDetail(inq.id, "");
+  }
+
+  async function fetchDetail(id: number, pw: string) {
+    setDetailLoading(true);
+    setDetailError(null);
+    try {
+      const res = await fetch(`/api/inquiries/${id}?password=${encodeURIComponent(pw)}`);
+      if (!res.ok) {
+        const d = (await res.json().catch(() => ({}))) as { error?: string };
+        setDetailError(d.error ?? "확인 실패");
+      } else {
+        const d = (await res.json()) as { inquiry: InquiryDetail };
+        setDetailData(d.inquiry);
+      }
+    } catch {
+      setDetailError("네트워크 오류");
+    } finally {
+      setDetailLoading(false);
+    }
+  }
+
+  function closeDetail() {
+    setDetailTarget(null);
+    setDetailData(null);
+    setDetailError(null);
+    setDetailPassword("");
   }
 
   const faqCategories = Array.from(new Set(faqs.map((f) => f.category)));
@@ -242,6 +300,20 @@ export function ContactView() {
                       />
                     </div>
 
+                    {/* 조회 비밀번호 */}
+                    <div className="mb-5">
+                      <label className="mb-2 block text-[14px] font-bold text-ink">
+                        조회 비밀번호 <span className="font-normal text-ink-sub">(선택)</span>
+                      </label>
+                      <input
+                        type="password"
+                        value={inquiryPassword}
+                        onChange={(e) => setInquiryPassword(e.target.value)}
+                        placeholder="답변 확인 시 사용할 비밀번호 (설정 시 본인만 조회 가능)"
+                        className="w-full rounded border border-line bg-white px-4 py-3 text-[15px] text-ink outline-none transition-colors placeholder:text-[#AAAAAA] focus:border-brand"
+                      />
+                    </div>
+
                     {/* Privacy agree */}
                     <div className="mb-5">
                       <div className="flex items-start gap-3 rounded bg-bg px-4 py-4">
@@ -358,20 +430,22 @@ export function ContactView() {
                       inquiries.map((inq) => {
                         const badge = statusBadge(inq.status);
                         return (
-                          <tr key={inq.id} className="transition-colors hover:bg-[#FAFAFA]">
+                          <tr
+                            key={inq.id}
+                            onClick={() => openDetail(inq)}
+                            className="cursor-pointer transition-colors hover:bg-orange-50/50"
+                          >
                             <td className="border-b border-line px-4 py-4 text-[14px] text-ink-sub">{inq.id}</td>
                             <td className="border-b border-line px-4 py-4 text-[14px] font-medium text-ink">
-                              {inq.isPrivate ? (
-                                <span className="flex items-center gap-1.5 text-ink-sub">
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                              <span className="flex items-center gap-1.5">
+                                {inq.hasPassword && (
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
                                     <rect x="3" y="11" width="18" height="11" rx="2" />
                                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                                   </svg>
-                                  비공개 문의
-                                </span>
-                              ) : (
-                                inq.subject
-                              )}
+                                )}
+                                {inq.isPrivate ? "비공개 문의" : inq.subject}
+                              </span>
                             </td>
                             <td className="border-b border-line px-4 py-4 text-[14px] text-ink-sub">{inq.name}</td>
                             <td className="border-b border-line px-4 py-4">
@@ -509,6 +583,112 @@ export function ContactView() {
           </div>
         </div>
       </div>
+
+      {/* ── 문의 상세 모달 ── */}
+      {detailTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={closeDetail}
+        >
+          <div
+            className="w-full max-w-[600px] overflow-hidden rounded-xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* 모달 헤더 */}
+            <div className="flex items-center justify-between border-b border-line bg-bg px-6 py-4">
+              <span className="text-[16px] font-extrabold text-ink">문의 상세</span>
+              <button onClick={closeDetail} className="text-ink-sub hover:text-ink">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="max-h-[75vh] overflow-y-auto p-6">
+              {/* 비밀번호 입력 폼 */}
+              {detailTarget.hasPassword && !detailData && (
+                <div className="py-6 text-center">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-bg">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round">
+                      <rect x="3" y="11" width="18" height="11" rx="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
+                  </div>
+                  <p className="mb-1 text-[16px] font-bold text-ink">비밀번호 확인</p>
+                  <p className="mb-5 text-[14px] text-ink-sub">문의 작성 시 설정한 비밀번호를 입력하세요</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="password"
+                      value={detailPassword}
+                      onChange={(e) => setDetailPassword(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && fetchDetail(detailTarget.id, detailPassword)}
+                      placeholder="비밀번호"
+                      autoFocus
+                      className="flex-1 rounded border border-line px-4 py-2.5 text-[15px] outline-none focus:border-brand"
+                    />
+                    <button
+                      onClick={() => fetchDetail(detailTarget.id, detailPassword)}
+                      disabled={detailLoading || !detailPassword}
+                      className="rounded bg-brand px-5 py-2.5 text-[15px] font-bold text-white hover:bg-brand-dark disabled:opacity-50"
+                    >
+                      {detailLoading ? "확인 중…" : "확인"}
+                    </button>
+                  </div>
+                  {detailError && <p className="mt-3 text-[14px] text-brand">{detailError}</p>}
+                </div>
+              )}
+
+              {/* 비밀번호 없는 경우 로딩 */}
+              {!detailTarget.hasPassword && detailLoading && (
+                <p className="py-10 text-center text-[15px] text-ink-sub">불러오는 중…</p>
+              )}
+
+              {/* 상세 내용 */}
+              {detailData && (
+                <div>
+                  {/* 제목 + 메타 */}
+                  <h3 className="text-[18px] font-extrabold text-ink">{detailData.subject}</h3>
+                  <p className="mt-1 text-[13px] text-ink-sub">
+                    {detailData.name} · {new Date(detailData.createdAt).toLocaleString("ko-KR")}
+                  </p>
+
+                  {/* 문의 내용 */}
+                  <div className="mt-4 whitespace-pre-wrap rounded border border-line bg-bg p-4 text-[15px] leading-relaxed text-ink">
+                    {detailData.message}
+                  </div>
+
+                  {/* 답변 */}
+                  {detailData.answer ? (
+                    <div className="mt-4 flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className="mt-1 h-4 w-4 rounded-bl border-b-2 border-l-2 border-brand/40" />
+                        <div className="w-0.5 flex-1 bg-brand/20" />
+                      </div>
+                      <div className="flex-1 rounded border border-brand/20 bg-orange-50/50 p-4">
+                        <div className="mb-2 flex items-center gap-2">
+                          <span className="rounded-full bg-brand px-2.5 py-0.5 text-[11px] font-black text-white">관리자</span>
+                          {detailData.answeredAt && (
+                            <span className="text-[12px] text-ink-sub">
+                              {new Date(detailData.answeredAt).toLocaleString("ko-KR")}
+                            </span>
+                          )}
+                        </div>
+                        <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink">
+                          {detailData.answer}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded border border-line bg-bg px-5 py-4 text-center text-[14px] text-ink-sub">
+                      아직 답변이 등록되지 않았습니다. 평일 09:00~18:00 순차 처리됩니다.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -24,12 +24,20 @@ export async function GET(req: NextRequest) {
       subject: true,
       name: true,
       isPrivate: true,
+      password: true,
       status: true,
       createdAt: true,
       answeredAt: true,
     },
   });
-  return NextResponse.json({ inquiries });
+  // password 값 자체는 노출하지 않고 설정 여부만 반환
+  return NextResponse.json({
+    inquiries: inquiries.map((inq) => ({
+      ...inq,
+      hasPassword: !!inq.password,
+      password: undefined,
+    })),
+  });
 }
 
 export async function POST(req: NextRequest) {
