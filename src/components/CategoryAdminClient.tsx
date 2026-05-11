@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 const ENUM_OPTIONS = [
   { key: "CARRIER_BOX",      slug: "carrier-box",      label: "제안서캐리어박스" },
@@ -23,6 +23,96 @@ export interface CategoryRow {
   isActive: boolean;
 }
 
+/* ── 이미지 업로드 버튼 컴포넌트 ── */
+function ThumbnailUploader({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadErr, setUploadErr] = useState<string | null>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadErr(null);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: fd,
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const d = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(d?.error ?? "업로드 실패");
+      }
+      const { url } = (await res.json()) as { url: string };
+      onChange(url);
+    } catch (err) {
+      setUploadErr(err instanceof Error ? err.message : "업로드 실패");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={() => fileRef.current?.click()}
+          className="rounded border border-[#3a3a40] px-4 py-2 text-[14px] font-bold text-white hover:border-brand hover:text-brand disabled:opacity-50"
+        >
+          {uploading ? "업로드 중…" : "이미지 파일 선택"}
+        </button>
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="text-[13px] text-[#6b6b73] hover:text-brand"
+          >
+            삭제
+          </button>
+        )}
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleFile}
+      />
+      {uploadErr && <p className="text-[13px] text-brand">{uploadErr}</p>}
+      {value && (
+        <div className="relative inline-block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={value}
+            alt="대표 이미지"
+            className="h-32 w-48 rounded border border-[#3a3a40] object-cover"
+          />
+        </div>
+      )}
+      {!value && (
+        <div
+          className="flex h-32 w-48 cursor-pointer items-center justify-center rounded border-2 border-dashed border-[#3a3a40] text-[13px] text-[#6b6b73] hover:border-brand"
+          onClick={() => fileRef.current?.click()}
+        >
+          클릭하여 업로드
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
   const [rows, setRows]         = useState<CategoryRow[]>(initial);
   const [editing, setEditing]   = useState<CategoryRow | null>(null);
@@ -35,7 +125,6 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
     (o) => !usedEnumKeys.includes(o.key) || o.key === editing?.enumKey,
   );
 
-  /* ── 저장 (신규/수정) ── */
   async function handleSave(form: Omit<CategoryRow, "id" | "isActive">) {
     setSaving(true); setErr(null);
     try {
@@ -69,7 +158,6 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
     } finally { setSaving(false); }
   }
 
-  /* ── 활성/비활성 토글 ── */
   async function toggleActive(row: CategoryRow) {
     const res = await fetch(`/api/admin/categories/${row.id}`, {
       method: "PATCH", credentials: "include",
@@ -81,9 +169,8 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
     setRows((prev) => prev.map((r) => r.id === updated.id ? updated : r));
   }
 
-  /* ── 삭제 ── */
   async function handleDelete(id: number) {
-    if (!confirm("이 카테고리를 삭제하시겠습니까?\n해당 카테고리 상품은 카테고리 미지정 상태가 됩니다.")) return;
+    if (!confirm("이 카테고리를 삭제하시겠습니까?")) return;
     const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE", credentials: "include" });
     if (!res.ok) return;
     setRows((prev) => prev.filter((r) => r.id !== id));
@@ -91,14 +178,11 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
 
   return (
     <div className="space-y-6">
-
-      {/* 안내 */}
       <div className="rounded border border-[#2e2e33] bg-[#18181b] px-5 py-3 text-[14px] text-[#a0a0a8]">
-        카테고리별 <strong className="text-white">대표 이미지</strong>와 <strong className="text-white">뱃지</strong>를 설정하면 홈페이지 카드에 자동 반영됩니다.
-        이미지는 업로드 후 URL을 붙여넣거나, 상품 이미지 URL을 직접 입력하세요.
+        카테고리별 <strong className="text-white">대표 이미지</strong>를 업로드하면 홈페이지 카드에 자동 반영됩니다.
+        이미지는 Dropbox에 저장됩니다.
       </div>
 
-      {/* 등록 버튼 */}
       {availableEnums.length > 0 && (
         <button onClick={() => { setCreating(true); setEditing(null); setErr(null); }}
           className="rounded bg-brand px-5 py-2 text-[15px] font-bold text-white hover:bg-brand-dark">
@@ -106,7 +190,6 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
         </button>
       )}
 
-      {/* 신규 등록 폼 */}
       {creating && (
         <CategoryForm
           enumOptions={availableEnums}
@@ -137,7 +220,7 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
                 <td className="px-4 py-3 text-[#a0a0a8]">{row.sortOrder}</td>
                 <td className="px-4 py-3">
                   {row.thumbnail ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={row.thumbnail} alt={row.label}
                       className="h-14 w-20 rounded object-cover border border-[#3a3a40]" />
                   ) : (
@@ -160,9 +243,7 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
                 <td className="px-4 py-3">
                   <button onClick={() => toggleActive(row)}
                     className={`rounded-full px-3 py-0.5 text-[12px] font-bold ${
-                      row.isActive
-                        ? "bg-green-900/40 text-green-400"
-                        : "bg-gray-800 text-[#6b6b73]"
+                      row.isActive ? "bg-green-900/40 text-green-400" : "bg-gray-800 text-[#6b6b73]"
                     }`}>
                     {row.isActive ? "노출" : "숨김"}
                   </button>
@@ -216,7 +297,7 @@ function CategoryForm({
   onSave: (data: Omit<CategoryRow, "id" | "isActive">) => void;
   onCancel: () => void;
 }) {
-  const [enumKey, setEnumKey] = useState(enumOptions[0]?.key ?? "");
+  const [enumKey,   setEnumKey]   = useState(enumOptions[0]?.key ?? "");
   const selected = enumOptions.find((o) => o.key === enumKey);
   const [label,     setLabel]     = useState(selected?.label ?? "");
   const [desc,      setDesc]      = useState("");
@@ -231,8 +312,9 @@ function CategoryForm({
   }
 
   return (
-    <div className="rounded border border-brand/40 bg-[#18181b] p-5 space-y-3">
+    <div className="rounded border border-brand/40 bg-[#18181b] p-5 space-y-4">
       <h3 className="text-[16px] font-bold text-white">새 카테고리 등록</h3>
+
       <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">카테고리 유형</span>
         <select value={enumKey} onChange={(e) => handleEnumChange(e.target.value)}
@@ -240,37 +322,37 @@ function CategoryForm({
           {enumOptions.map((o) => <option key={o.key} value={o.key}>{o.label} ({o.slug})</option>)}
         </select>
       </label>
+
       <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">표시명</span>
         <input value={label} onChange={(e) => setLabel(e.target.value)}
           className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
       </label>
+
       <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">설명 (홈페이지 카드)</span>
         <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2}
           className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[14px] text-white outline-none focus:border-brand" />
       </label>
+
+      <div>
+        <span className="mb-2 block text-[13px] font-bold text-[#a0a0a8]">대표 이미지 (Dropbox 업로드)</span>
+        <ThumbnailUploader value={thumbnail} onChange={setThumbnail} />
+      </div>
+
       <label className="block">
-        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">대표 이미지 URL</span>
-        <input value={thumbnail} onChange={(e) => setThumbnail(e.target.value)}
-          placeholder="https://... 또는 /uploads/..."
-          className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[14px] text-white outline-none focus:border-brand" />
-        {thumbnail && (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={thumbnail} alt="미리보기" className="mt-2 h-24 w-36 rounded object-cover border border-[#3a3a40]" />
-        )}
-      </label>
-      <label className="block">
-        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">뱃지 텍스트 (선택) — BEST / NEW / 준비중 등</span>
+        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">뱃지 (선택) — BEST / NEW / 준비중 등</span>
         <input value={badge} onChange={(e) => setBadge(e.target.value)}
           placeholder="BEST"
           className="w-48 rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
       </label>
+
       <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">노출 순서</span>
         <input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value) || 0)}
           className="w-28 rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
       </label>
+
       {err && <p className="text-[14px] text-brand">{err}</p>}
       <div className="flex gap-2">
         <button disabled={saving || !label}
@@ -302,38 +384,37 @@ function CategoryEditForm({
   const [order,     setOrder]     = useState(row.sortOrder);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">표시명</span>
         <input value={label} onChange={(e) => setLabel(e.target.value)}
           className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
       </label>
+
       <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">설명 (홈페이지 카드)</span>
         <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2}
           className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[14px] text-white outline-none focus:border-brand" />
       </label>
+
+      <div>
+        <span className="mb-2 block text-[13px] font-bold text-[#a0a0a8]">대표 이미지 (Dropbox 업로드)</span>
+        <ThumbnailUploader value={thumbnail} onChange={setThumbnail} />
+      </div>
+
       <label className="block">
-        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">대표 이미지 URL</span>
-        <input value={thumbnail} onChange={(e) => setThumbnail(e.target.value)}
-          placeholder="https://... 또는 /uploads/..."
-          className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[14px] text-white outline-none focus:border-brand" />
-        {thumbnail && (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={thumbnail} alt="미리보기" className="mt-2 h-24 w-36 rounded object-cover border border-[#3a3a40]" />
-        )}
-      </label>
-      <label className="block">
-        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">뱃지 텍스트 (선택) — BEST / NEW / 준비중 등</span>
+        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">뱃지 (선택) — BEST / NEW / 준비중 등</span>
         <input value={badge} onChange={(e) => setBadge(e.target.value)}
           placeholder="BEST"
           className="w-48 rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
       </label>
+
       <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">노출 순서</span>
         <input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value) || 0)}
           className="w-28 rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
       </label>
+
       {err && <p className="text-[14px] text-brand">{err}</p>}
       <div className="flex gap-2">
         <button disabled={saving || !label}
