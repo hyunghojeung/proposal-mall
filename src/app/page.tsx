@@ -36,7 +36,7 @@ export default async function Home() {
       <NoticeBar />
       <Header />
 
-      <section className="relative flex min-h-[500px] items-center overflow-hidden bg-bg">
+      <section className="relative flex min-h-[350px] items-center overflow-hidden bg-bg">
         <div className="absolute bottom-0 right-0 w-[58%]" style={{ top: "-200px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -52,7 +52,7 @@ export default async function Home() {
               "linear-gradient(to right, #F5F5F5 0%, #F5F5F5 38%, rgba(245,245,245,0.95) 46%, rgba(245,245,245,0.7) 56%, rgba(245,245,245,0.2) 68%, transparent 80%)",
           }}
         />
-        <div className="relative z-10 mx-auto w-full max-w-page px-6 py-20">
+        <div className="relative z-10 mx-auto w-full max-w-page px-6 py-10">
           <p className="mb-3 text-[15px] font-medium tracking-wide text-brand">
             B2B 제안서 제작 전문
           </p>
