@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ProductCategory, BindingType, PaperType } from "@prisma/client";
 
 export type ContentBlock =
-  | { type: "text"; content: string }
+  | { type: "text"; content: string; fontSize?: "sm" | "md" | "lg" | "xl"; align?: "left" | "center" | "right"; bold?: boolean }
   | { type: "image"; url: string; caption: string }
   | { type: "image_text"; imageUrl: string; imagePosition: "left" | "right"; title: string; content: string }
   | { type: "feature_grid"; heading: string; columns: 2 | 3; items: { icon: string; title: string; desc: string }[] }
@@ -457,9 +457,36 @@ function ContentBlockEditor({
 
           {/* ── 텍스트 ── */}
           {block.type === "text" && (
-            <textarea value={block.content} rows={4} placeholder="본문 텍스트를 입력하세요"
-              onChange={(e) => updateBlock(i, { content: e.target.value })}
-              className={textareaCls} />
+            <div className="space-y-2">
+              {/* 서식 컨트롤 */}
+              <div className="flex flex-wrap items-center gap-2">
+                <select value={block.fontSize ?? "md"}
+                  onChange={(e) => updateBlock(i, { fontSize: e.target.value })}
+                  className="rounded-sm border border-line px-2 py-1 text-[13px] outline-none focus:border-brand">
+                  <option value="sm">작게 (13px)</option>
+                  <option value="md">보통 (15px)</option>
+                  <option value="lg">크게 (18px)</option>
+                  <option value="xl">제목 (24px)</option>
+                </select>
+                <select value={block.align ?? "left"}
+                  onChange={(e) => updateBlock(i, { align: e.target.value })}
+                  className="rounded-sm border border-line px-2 py-1 text-[13px] outline-none focus:border-brand">
+                  <option value="left">왼쪽</option>
+                  <option value="center">가운데</option>
+                  <option value="right">오른쪽</option>
+                </select>
+                <button type="button"
+                  onClick={() => updateBlock(i, { bold: !block.bold })}
+                  className={`rounded-sm border px-3 py-1 text-[13px] font-bold transition-colors ${
+                    block.bold ? "border-brand bg-brand-light text-brand" : "border-line text-ink-sub hover:border-ink"
+                  }`}>
+                  B 굵게
+                </button>
+              </div>
+              <textarea value={block.content} rows={4} placeholder="본문 텍스트를 입력하세요"
+                onChange={(e) => updateBlock(i, { content: e.target.value })}
+                className={textareaCls} />
+            </div>
           )}
 
           {/* ── 이미지 ── */}

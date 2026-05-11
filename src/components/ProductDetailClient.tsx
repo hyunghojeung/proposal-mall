@@ -110,8 +110,16 @@ function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
 
           /* 텍스트 */
           if (block.type === "text") {
+            const sizeClass = {
+              sm: "text-[13px]",
+              md: "text-[15px]",
+              lg: "text-[18px]",
+              xl: "text-[22px] md:text-[26px]",
+            }[block.fontSize ?? "md"];
+            const alignClass = { left: "text-left", center: "text-center", right: "text-right" }[block.align ?? "left"];
+            const boldClass  = block.bold ? "font-bold text-ink" : "text-ink-sub";
             return (
-              <p key={i} className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink-sub">
+              <p key={i} className={`whitespace-pre-wrap leading-relaxed ${sizeClass} ${alignClass} ${boldClass}`}>
                 {block.content}
               </p>
             );

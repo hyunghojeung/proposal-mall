@@ -29,7 +29,12 @@ const imageGridItemSchema = z.object({
 });
 
 const contentBlockSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("text"),    content: z.string().max(5000) }),
+  z.object({ type: z.literal("text"),
+    content:  z.string().max(5000),
+    fontSize: z.enum(["sm", "md", "lg", "xl"]).optional(),
+    align:    z.enum(["left", "center", "right"]).optional(),
+    bold:     z.boolean().optional(),
+  }),
   z.object({ type: z.literal("image"),   url: z.string().url(), caption: z.string().max(200).default("") }),
   z.object({ type: z.literal("image_text"),
     imageUrl:      z.string().default(""),
