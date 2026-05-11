@@ -19,6 +19,7 @@ export interface CategoryRow {
   description: string;
   thumbnail: string;
   badge: string;
+  customLink: string;
   sortOrder: number;
   isActive: boolean;
 }
@@ -137,6 +138,7 @@ export function CategoryAdminClient({ initial }: { initial: CategoryRow[] }) {
             description: form.description,
             thumbnail: form.thumbnail,
             badge: form.badge,
+            customLink: form.customLink,
             sortOrder: form.sortOrder,
           }),
         });
@@ -299,11 +301,12 @@ function CategoryForm({
 }) {
   const [enumKey,   setEnumKey]   = useState(enumOptions[0]?.key ?? "");
   const selected = enumOptions.find((o) => o.key === enumKey);
-  const [label,     setLabel]     = useState(selected?.label ?? "");
-  const [desc,      setDesc]      = useState("");
-  const [thumbnail, setThumbnail] = useState("");
-  const [badge,     setBadge]     = useState("");
-  const [order,     setOrder]     = useState(0);
+  const [label,      setLabel]      = useState(selected?.label ?? "");
+  const [desc,       setDesc]       = useState("");
+  const [thumbnail,  setThumbnail]  = useState("");
+  const [badge,      setBadge]      = useState("");
+  const [customLink, setCustomLink] = useState("");
+  const [order,      setOrder]      = useState(0);
 
   function handleEnumChange(key: string) {
     setEnumKey(key);
@@ -348,6 +351,16 @@ function CategoryForm({
       </label>
 
       <label className="block">
+        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">클릭 링크 (선택)</span>
+        <p className="mb-1.5 text-[12px] text-[#6b6b73]">
+          비워두면 카테고리 목록으로 이동 · 입력하면 해당 상품 상세페이지로 이동
+        </p>
+        <input value={customLink} onChange={(e) => setCustomLink(e.target.value)}
+          placeholder="/products/carrier-box-single"
+          className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[14px] text-white outline-none focus:border-brand" />
+      </label>
+
+      <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">노출 순서</span>
         <input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value) || 0)}
           className="w-28 rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
@@ -356,7 +369,7 @@ function CategoryForm({
       {err && <p className="text-[14px] text-brand">{err}</p>}
       <div className="flex gap-2">
         <button disabled={saving || !label}
-          onClick={() => onSave({ enumKey, slug: selected?.slug ?? "", label, description: desc, thumbnail, badge, sortOrder: order })}
+          onClick={() => onSave({ enumKey, slug: selected?.slug ?? "", label, description: desc, thumbnail, badge, customLink, sortOrder: order })}
           className="rounded bg-brand px-4 py-2 text-[14px] font-bold text-white hover:bg-brand-dark disabled:opacity-50">
           {saving ? "저장 중…" : "등록"}
         </button>
@@ -374,14 +387,15 @@ function CategoryEditForm({
   row, saving, err, onSave, onCancel,
 }: {
   row: CategoryRow; saving: boolean; err: string | null;
-  onSave: (data: { label: string; description: string; thumbnail: string; badge: string; sortOrder: number }) => void;
+  onSave: (data: { label: string; description: string; thumbnail: string; badge: string; customLink: string; sortOrder: number }) => void;
   onCancel: () => void;
 }) {
-  const [label,     setLabel]     = useState(row.label);
-  const [desc,      setDesc]      = useState(row.description);
-  const [thumbnail, setThumbnail] = useState(row.thumbnail ?? "");
-  const [badge,     setBadge]     = useState(row.badge ?? "");
-  const [order,     setOrder]     = useState(row.sortOrder);
+  const [label,      setLabel]      = useState(row.label);
+  const [desc,       setDesc]       = useState(row.description);
+  const [thumbnail,  setThumbnail]  = useState(row.thumbnail ?? "");
+  const [badge,      setBadge]      = useState(row.badge ?? "");
+  const [customLink, setCustomLink] = useState(row.customLink ?? "");
+  const [order,      setOrder]      = useState(row.sortOrder);
 
   return (
     <div className="space-y-4">
@@ -410,6 +424,16 @@ function CategoryEditForm({
       </label>
 
       <label className="block">
+        <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">클릭 링크 (선택)</span>
+        <p className="mb-1.5 text-[12px] text-[#6b6b73]">
+          비워두면 카테고리 목록으로 이동 · 입력하면 해당 상품 상세페이지로 이동
+        </p>
+        <input value={customLink} onChange={(e) => setCustomLink(e.target.value)}
+          placeholder="/products/carrier-box-single"
+          className="w-full rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[14px] text-white outline-none focus:border-brand" />
+      </label>
+
+      <label className="block">
         <span className="mb-1 block text-[13px] font-bold text-[#a0a0a8]">노출 순서</span>
         <input type="number" value={order} onChange={(e) => setOrder(Number(e.target.value) || 0)}
           className="w-28 rounded border border-[#3a3a40] bg-[#2a2a2e] px-3 py-2 text-[15px] text-white outline-none focus:border-brand" />
@@ -418,7 +442,7 @@ function CategoryEditForm({
       {err && <p className="text-[14px] text-brand">{err}</p>}
       <div className="flex gap-2">
         <button disabled={saving || !label}
-          onClick={() => onSave({ label, description: desc, thumbnail, badge, sortOrder: order })}
+          onClick={() => onSave({ label, description: desc, thumbnail, badge, customLink, sortOrder: order })}
           className="rounded bg-brand px-4 py-2 text-[14px] font-bold text-white hover:bg-brand-dark disabled:opacity-50">
           {saving ? "저장 중…" : "저장"}
         </button>

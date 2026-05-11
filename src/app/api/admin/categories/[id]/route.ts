@@ -10,6 +10,7 @@ const patchSchema = z.object({
   description: z.string().max(300).optional(),
   thumbnail:   z.string().max(500).optional(),
   badge:       z.string().max(20).optional(),
+  customLink:  z.string().max(300).optional(),
   sortOrder:   z.number().int().optional(),
   isActive:    z.boolean().optional(),
 });

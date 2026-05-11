@@ -25,6 +25,7 @@ export default async function AdminCategoriesPage() {
           description: r.description,
           thumbnail:   (r as { thumbnail?: string }).thumbnail ?? "",
           badge:       (r as { badge?: string }).badge ?? "",
+          customLink:  (r as { customLink?: string }).customLink ?? "",
           sortOrder:   r.sortOrder,
           isActive:    r.isActive,
         }))}

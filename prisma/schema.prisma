@@ -245,6 +245,7 @@ model CategoryConfig {
   description String   @default("")
   thumbnail   String   @default("")  // 카테고리 대표 이미지 URL
   badge       String   @default("")  // 뱃지 텍스트 (예: BEST, NEW, 준비중)
+  customLink  String   @default("")  // 비어있으면 카테고리 목록, 입력시 해당 URL로 이동
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())

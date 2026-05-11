@@ -17,6 +17,7 @@ const createSchema = z.object({
   description: z.string().max(300).default(""),
   thumbnail:   z.string().max(500).default(""),
   badge:       z.string().max(20).default(""),
+  customLink:  z.string().max(300).default(""),
   sortOrder:   z.number().int().default(0),
   isActive:    z.boolean().default(true),
 });

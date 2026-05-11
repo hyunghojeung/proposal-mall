@@ -20,13 +20,16 @@ export default async function Home() {
 
   const categories = configs
     .filter((c) => activeEnumKeys.has(c.enumKey))
-    .map((c) => ({
-      title:     c.label,
-      desc:      c.description,
-      href:      `/products?cat=${c.slug}`,
-      thumbnail: (c as { thumbnail?: string }).thumbnail ?? "",
-      badge:     (c as { badge?: string }).badge ?? "",
-    }));
+    .map((c) => {
+      const customLink = (c as { customLink?: string }).customLink ?? "";
+      return {
+        title:     c.label,
+        desc:      c.description,
+        href:      customLink || `/products?cat=${c.slug}`,
+        thumbnail: (c as { thumbnail?: string }).thumbnail ?? "",
+        badge:     (c as { badge?: string }).badge ?? "",
+      };
+    });
 
   return (
     <>
