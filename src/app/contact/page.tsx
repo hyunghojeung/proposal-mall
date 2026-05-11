@@ -1,4 +1,5 @@
 ﻿import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
@@ -12,7 +13,9 @@ export default function ContactPage() {
       <NoticeBar />
       <Header />
       <main>
-        <ContactView />
+        <Suspense fallback={null}>
+          <ContactView />
+        </Suspense>
       </main>
       <Footer />
     </>

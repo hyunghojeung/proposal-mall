@@ -18,7 +18,7 @@ export function Footer() {
             <h3 className="text-[16px] font-bold text-ink">고객지원</h3>
             <ul className="mt-3 space-y-2.5 text-[15px] text-ink-sub">
               <li>
-                <Link href="/contact" className="hover:text-brand">
+                <Link href="/contact?tab=history" className="hover:text-brand">
                   1:1 문의
                 </Link>
               </li>

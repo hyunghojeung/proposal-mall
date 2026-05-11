@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Tab = "inquiry" | "faq" | "history";
 
@@ -30,7 +31,9 @@ interface InquiryRow {
 }
 
 export function ContactView() {
-  const [tab, setTab] = useState<Tab>("inquiry");
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab | null) ?? "inquiry";
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
