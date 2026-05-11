@@ -23,6 +23,8 @@ export default async function AdminCategoriesPage() {
           slug:        r.slug,
           label:       r.label,
           description: r.description,
+          thumbnail:   (r as { thumbnail?: string }).thumbnail ?? "",
+          badge:       (r as { badge?: string }).badge ?? "",
           sortOrder:   r.sortOrder,
           isActive:    r.isActive,
         }))}

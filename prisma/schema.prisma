@@ -243,6 +243,8 @@ model CategoryConfig {
   slug        String   @unique  // URL 파라미터 값 (예: carrier-box)
   label       String            // 화면 표시명
   description String   @default("")
+  thumbnail   String   @default("")  // 카테고리 대표 이미지 URL
+  badge       String   @default("")  // 뱃지 텍스트 (예: BEST, NEW, 준비중)
   sortOrder   Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())

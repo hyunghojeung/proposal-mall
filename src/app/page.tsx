@@ -20,7 +20,13 @@ export default async function Home() {
 
   const categories = configs
     .filter((c) => activeEnumKeys.has(c.enumKey))
-    .map((c) => ({ title: c.label, desc: c.description, href: `/products?cat=${c.slug}` }));
+    .map((c) => ({
+      title:     c.label,
+      desc:      c.description,
+      href:      `/products?cat=${c.slug}`,
+      thumbnail: (c as { thumbnail?: string }).thumbnail ?? "",
+      badge:     (c as { badge?: string }).badge ?? "",
+    }));
 
   return (
     <>
@@ -90,34 +96,76 @@ export default async function Home() {
           {categories.length === 0 ? (
             <p className="text-[15px] text-ink-sub">등록된 상품이 없습니다.</p>
           ) : (
-            <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {categories.map((cat) => (
                 <li key={cat.href}>
                   <Link
                     href={cat.href}
-                    className="group block rounded border border-line bg-white p-7 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-[0_8px_24px_rgba(0,0,0,.06)]"
+                    className="group block overflow-hidden rounded-xl border border-line bg-white transition-all hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,.10)]"
                   >
-                    <h3 className="mb-2.5 text-[18px] font-bold text-ink group-hover:text-brand">
-                      {cat.title}
-                    </h3>
-                    <p className="text-[15px] leading-relaxed text-ink-sub">
-                      {cat.desc}
-                    </p>
-                    <span className="mt-5 inline-flex items-center gap-1.5 text-[15px] font-bold text-brand">
-                      살펴보기
-                      <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M5 12h14M13 5l7 7-7 7" />
-                      </svg>
-                    </span>
+                    {/* 이미지 영역 */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-[#f0f0f0]">
+                      {/* 뱃지 */}
+                      {cat.badge && (
+                        <span className={`absolute left-3 top-3 z-10 rounded-full px-3 py-1 text-[12px] font-black tracking-wide text-white shadow ${
+                          cat.badge === "BEST"
+                            ? "bg-brand"
+                            : cat.badge === "NEW"
+                            ? "bg-blue-500"
+                            : "bg-[#333]"
+                        }`}>
+                          {cat.badge}
+                        </span>
+                      )}
+
+                      {/* 대표 이미지 */}
+                      {cat.thumbnail ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={cat.thumbnail}
+                          alt={cat.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      ) : (
+                        /* 이미지 없을 때 패턴 배경 */
+                        <div className="h-full w-full"
+                          style={{
+                            backgroundImage: "repeating-linear-gradient(45deg, #e8e8e8 0, #e8e8e8 1px, transparent 0, transparent 50%)",
+                            backgroundSize: "12px 12px",
+                            backgroundColor: "#f5f5f5",
+                          }}
+                        />
+                      )}
+
+                      {/* 이미지 위 상품명 오버레이 */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/65 to-transparent px-5 pb-4 pt-10">
+                        <h3 className="text-[18px] font-black text-white drop-shadow-sm">
+                          {cat.title}
+                        </h3>
+                      </div>
+                    </div>
+
+                    {/* 카드 하단 본문 */}
+                    <div className="px-5 py-4">
+                      <p className="mb-3 text-[14px] leading-relaxed text-ink-sub">
+                        {cat.desc || " "}
+                      </p>
+                      <span className="inline-flex items-center gap-1.5 text-[14px] font-bold text-brand">
+                        살펴보기
+                        <svg
+                          width="13"
+                          height="13"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M5 12h14M13 5l7 7-7 7" />
+                        </svg>
+                      </span>
+                    </div>
                   </Link>
                 </li>
               ))}

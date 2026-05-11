@@ -8,6 +8,8 @@ export const dynamic = "force-dynamic";
 const patchSchema = z.object({
   label:       z.string().min(1).max(60).optional(),
   description: z.string().max(300).optional(),
+  thumbnail:   z.string().max(500).optional(),
+  badge:       z.string().max(20).optional(),
   sortOrder:   z.number().int().optional(),
   isActive:    z.boolean().optional(),
 });

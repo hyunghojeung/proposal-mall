@@ -15,6 +15,8 @@ const createSchema = z.object({
   slug:        z.string().min(1).max(80).regex(/^[a-z0-9-]+$/),
   label:       z.string().min(1).max(60),
   description: z.string().max(300).default(""),
+  thumbnail:   z.string().max(500).default(""),
+  badge:       z.string().max(20).default(""),
   sortOrder:   z.number().int().default(0),
   isActive:    z.boolean().default(true),
 });
