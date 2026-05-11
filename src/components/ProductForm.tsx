@@ -494,7 +494,7 @@ function ContentBlockEditor({
             <div className="space-y-2">
               {block.url && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={block.url} alt={block.caption || "이미지"} className="max-h-52 w-full rounded-sm border border-line object-contain" />
+                <img src={block.url} alt={block.caption || "이미지"} className="w-full rounded-sm border border-line object-contain" />
               )}
               {btnUpload(block.url ? "이미지 교체" : "이미지 업로드", () => pickImage((url) => updateBlock(i, { url })))}
               <input value={block.caption} placeholder="이미지 캡션 (선택)"
@@ -516,7 +516,7 @@ function ContentBlockEditor({
               </div>
               {block.imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={block.imageUrl} alt="이미지" className="max-h-40 rounded-sm border border-line object-contain" />
+                <img src={block.imageUrl} alt="이미지" className="w-full rounded-sm border border-line object-contain" />
               )}
               {btnUpload(block.imageUrl ? "이미지 교체" : "이미지 업로드", () => pickImage((url) => updateBlock(i, { imageUrl: url })))}
               <input value={block.title} placeholder="제목 (선택)"
