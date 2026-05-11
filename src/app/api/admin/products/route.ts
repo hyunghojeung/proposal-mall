@@ -24,6 +24,11 @@ const featureItemSchema = z.object({
   title: z.string().max(200).default(""),
   desc:  z.string().max(2000).default(""),
 });
+const imageGridItemSchema = z.object({
+  imageUrl: z.string().default(""),
+  title:    z.string().max(200).default(""),
+  desc:     z.string().max(2000).default(""),
+});
 
 const contentBlockSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("text"),    content: z.string().max(5000) }),
@@ -38,6 +43,11 @@ const contentBlockSchema = z.discriminatedUnion("type", [
     heading: z.string().max(200).default(""),
     columns: z.union([z.literal(2), z.literal(3)]).default(3),
     items:   z.array(featureItemSchema).default([]),
+  }),
+  z.object({ type: z.literal("image_grid"),
+    heading: z.string().max(200).default(""),
+    columns: z.union([z.literal(2), z.literal(3)]).default(2),
+    items:   z.array(imageGridItemSchema).default([]),
   }),
   z.object({ type: z.literal("banner"),
     imageUrl: z.string().default(""),

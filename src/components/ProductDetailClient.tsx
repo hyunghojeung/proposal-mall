@@ -180,6 +180,34 @@ function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
             );
           }
 
+          /* 이미지 카드 그리드 */
+          if (block.type === "image_grid") {
+            return (
+              <div key={i}>
+                {block.heading && (
+                  <h3 className="mb-6 text-[20px] font-black tracking-tight text-ink">{block.heading}</h3>
+                )}
+                <div className={`grid gap-6 grid-cols-1 ${block.columns === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
+                  {block.items.map((item, ii) => (
+                    <div key={ii} className="text-center">
+                      {item.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={item.imageUrl} alt={item.title || "이미지"}
+                          className="mb-4 w-full rounded-xl border border-line object-cover aspect-square" />
+                      )}
+                      {item.title && (
+                        <h4 className="text-[17px] font-bold text-ink mb-1">{item.title}</h4>
+                      )}
+                      {item.desc && (
+                        <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-ink-sub">{item.desc}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
           /* 배너 */
           if (block.type === "banner") {
             return (

@@ -9,6 +9,7 @@ export type ContentBlock =
   | { type: "image"; url: string; caption: string }
   | { type: "image_text"; imageUrl: string; imagePosition: "left" | "right"; title: string; content: string }
   | { type: "feature_grid"; heading: string; columns: 2 | 3; items: { icon: string; title: string; desc: string }[] }
+  | { type: "image_grid"; heading: string; columns: 2 | 3; items: { imageUrl: string; title: string; desc: string }[] }
   | { type: "banner"; imageUrl: string; title: string; subtitle: string; align: "left" | "center" }
   | { type: "divider"; label: string };
 
@@ -315,6 +316,7 @@ const BLOCK_LABEL: Record<ContentBlock["type"], string> = {
   image:        "이미지",
   image_text:   "이미지 + 텍스트",
   feature_grid: "특징 그리드",
+  image_grid:   "이미지 카드 그리드",
   banner:       "배너",
   divider:      "구분선",
 };
@@ -399,6 +401,20 @@ function ContentBlockEditor({
   }
   function removeItem(bi: number, ii: number) {
     const b = blocks[bi]; if (b.type !== "feature_grid") return;
+    updateBlock(bi, { items: b.items.filter((_, idx) => idx !== ii) });
+  }
+
+  /* ── image_grid 항목 helpers ── */
+  function updateGridItem(bi: number, ii: number, patch: Partial<{ imageUrl: string; title: string; desc: string }>) {
+    const b = blocks[bi]; if (b.type !== "image_grid") return;
+    updateBlock(bi, { items: b.items.map((it, idx) => idx === ii ? { ...it, ...patch } : it) });
+  }
+  function addGridItem(bi: number) {
+    const b = blocks[bi]; if (b.type !== "image_grid") return;
+    updateBlock(bi, { items: [...b.items, { imageUrl: "", title: "", desc: "" }] });
+  }
+  function removeGridItem(bi: number, ii: number) {
+    const b = blocks[bi]; if (b.type !== "image_grid") return;
     updateBlock(bi, { items: b.items.filter((_, idx) => idx !== ii) });
   }
 
@@ -523,6 +539,55 @@ function ContentBlockEditor({
             </div>
           )}
 
+          {/* ── 이미지 카드 그리드 ── */}
+          {block.type === "image_grid" && (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input value={block.heading} placeholder="섹션 제목 (선택)"
+                  onChange={(e) => updateBlock(i, { heading: e.target.value })}
+                  className="flex-1 rounded-sm border border-line px-2.5 py-1.5 text-[14px] outline-none focus:border-brand" />
+                <select value={block.columns}
+                  onChange={(e) => updateBlock(i, { columns: Number(e.target.value) })}
+                  className="rounded-sm border border-line px-2 py-1.5 text-[14px] outline-none focus:border-brand">
+                  <option value={2}>2열</option>
+                  <option value={3}>3열</option>
+                </select>
+              </div>
+              <div className={`grid gap-3 ${block.columns === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+                {block.items.map((item, ii) => (
+                  <div key={ii} className="rounded border border-line bg-bg p-2 space-y-1.5">
+                    {item.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.imageUrl} alt={item.title || "이미지"}
+                        className="w-full rounded-sm object-cover aspect-square" />
+                    ) : (
+                      <div className="w-full aspect-square rounded-sm bg-line flex items-center justify-center text-[12px] text-ink-sub">
+                        이미지 없음
+                      </div>
+                    )}
+                    <button type="button" disabled={uploading}
+                      onClick={() => pickImage((url) => updateGridItem(i, ii, { imageUrl: url }))}
+                      className="w-full rounded-sm border border-line py-1 text-[12px] text-ink-sub hover:border-brand disabled:opacity-50">
+                      {uploading ? "…" : item.imageUrl ? "교체" : "업로드"}
+                    </button>
+                    <input value={item.title} placeholder="제목"
+                      onChange={(e) => updateGridItem(i, ii, { title: e.target.value })}
+                      className="w-full rounded-sm border border-line px-2 py-1 text-[13px] outline-none focus:border-brand" />
+                    <textarea value={item.desc} rows={2} placeholder="설명"
+                      onChange={(e) => updateGridItem(i, ii, { desc: e.target.value })}
+                      className="w-full rounded-sm border border-line px-2 py-1 text-[12px] outline-none focus:border-brand" />
+                    <button type="button" onClick={() => removeGridItem(i, ii)}
+                      className="w-full text-[12px] text-brand hover:underline">카드 삭제</button>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => addGridItem(i)}
+                className="rounded-sm border border-dashed border-line px-3 py-1 text-[13px] text-ink-sub hover:border-ink hover:text-ink">
+                + 카드 추가
+              </button>
+            </div>
+          )}
+
           {/* ── 배너 ── */}
           {block.type === "banner" && (
             <div className="space-y-2">
@@ -574,8 +639,9 @@ function ContentBlockEditor({
           ["+ 텍스트",       () => onChange([...blocks, { type: "text", content: "" }])],
           ["+ 이미지",       () => { uploadCbRef.current = null; if (fileInputRef.current) { fileInputRef.current.multiple = true; fileInputRef.current.click(); } }],
           ["+ 이미지+텍스트", () => onChange([...blocks, { type: "image_text", imageUrl: "", imagePosition: "left", title: "", content: "" }])],
-          ["+ 특징 그리드",  () => onChange([...blocks, { type: "feature_grid", heading: "", columns: 3, items: [{ icon: "", title: "", desc: "" }, { icon: "", title: "", desc: "" }, { icon: "", title: "", desc: "" }] }])],
-          ["+ 배너",         () => onChange([...blocks, { type: "banner", imageUrl: "", title: "", subtitle: "", align: "center" }])],
+          ["+ 특징 그리드",      () => onChange([...blocks, { type: "feature_grid", heading: "", columns: 3, items: [{ icon: "", title: "", desc: "" }, { icon: "", title: "", desc: "" }, { icon: "", title: "", desc: "" }] }])],
+          ["+ 이미지 카드 그리드", () => onChange([...blocks, { type: "image_grid", heading: "", columns: 2, items: [{ imageUrl: "", title: "", desc: "" }, { imageUrl: "", title: "", desc: "" }] }])],
+          ["+ 배너",             () => onChange([...blocks, { type: "banner", imageUrl: "", title: "", subtitle: "", align: "center" }])],
           ["+ 구분선",       () => onChange([...blocks, { type: "divider", label: "" }])],
         ] as [string, () => void][]).map(([label, onClick]) => (
           <button key={label} type="button" onClick={onClick} disabled={uploading && label === "+ 이미지"}
