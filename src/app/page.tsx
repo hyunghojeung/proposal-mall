@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ProductCategory } from "@prisma/client";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { NoticeBar } from "@/components/NoticeBar";
@@ -7,53 +6,21 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// 카테고리별 표시 정보 (DB 카테고리 → 화면 텍스트)
-const CATEGORY_INFO: Record<ProductCategory, { title: string; desc: string; href: string }> = {
-  CARRIER_BOX: {
-    title: "제안서캐리어박스",
-    desc: "튼튼한 손잡이 + 깔끔한 외형의 B2B 캐리어 박스",
-    href: "/products?cat=carrier-box",
-  },
-  MAGNETIC_BOX: {
-    title: "자석박스",
-    desc: "고급스러운 마감의 자석 잠금 케이스",
-    href: "/products?cat=magnetic-box",
-  },
-  BINDING_3_RING: {
-    title: "3공바인더",
-    desc: "인쇄형/원단형 내용이 많은 제안서에 적합",
-    href: "/products?cat=binding-3-ring",
-  },
-  BINDING_PT: {
-    title: "PT용바인더",
-    desc: "프레젠테이션용 슬림 바인더 — 인쇄형 / 원단형",
-    href: "/products?cat=binding-pt",
-  },
-  BINDING_HARDCOVER: {
-    title: "하드커버 스프링제본",
-    desc: "고급 하드커버 + 스프링 — 인쇄형 / 원단형",
-    href: "/products?cat=binding-hardcover",
-  },
-  PAPER_INNER: {
-    title: "내지 인쇄",
-    desc: "모조지 / 스노우지 / 아트지 / 수입지 / 질감용지",
-    href: "/products?cat=paper-inner",
-  },
-};
-
 export default async function Home() {
-  // 활성 상품이 1개 이상 있는 카테고리만 조회
-  const rows = await prisma.product
-    .findMany({
-      where: { isActive: true },
-      select: { category: true },
-      distinct: ["category"],
-    })
-    .catch(() => [] as { category: ProductCategory }[]);
+  // CategoryConfig에서 활성 카테고리 + 실제 상품이 있는 것만 표시
+  const configs = await prisma.categoryConfig
+    .findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" } })
+    .catch(() => []);
 
-  const categories = rows
-    .map((r) => CATEGORY_INFO[r.category])
-    .filter(Boolean);
+  // 각 카테고리에 실제 활성 상품이 있는지 확인
+  const activeEnumKeys = await prisma.product
+    .findMany({ where: { isActive: true }, select: { category: true }, distinct: ["category"] })
+    .catch(() => [] as { category: string }[])
+    .then((rows) => new Set(rows.map((r) => r.category)));
+
+  const categories = configs
+    .filter((c) => activeEnumKeys.has(c.enumKey))
+    .map((c) => ({ title: c.label, desc: c.description, href: `/products?cat=${c.slug}` }));
 
   return (
     <>

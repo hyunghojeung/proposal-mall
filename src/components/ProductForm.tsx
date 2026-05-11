@@ -13,6 +13,11 @@ export type ContentBlock =
   | { type: "banner"; imageUrl: string; title: string; subtitle: string; align: "left" | "center" }
   | { type: "divider"; label: string };
 
+export interface CategoryOption {
+  enumKey: string;
+  label:   string;
+}
+
 export interface ProductFormValue {
   id?: number;
   slug: string;
@@ -35,13 +40,14 @@ export interface ProductFormValue {
   }[];
 }
 
-const CATEGORY_OPTIONS: { value: ProductCategory; label: string }[] = [
-  { value: "CARRIER_BOX", label: "제안서캐리어박스" },
-  { value: "MAGNETIC_BOX", label: "자석박스" },
-  { value: "BINDING_3_RING", label: "3공바인더" },
-  { value: "BINDING_PT", label: "PT용바인더" },
-  { value: "BINDING_HARDCOVER", label: "하드커버스프링제본" },
-  { value: "PAPER_INNER", label: "내지인쇄" },
+// 폴백: CategoryConfig DB 데이터가 없을 때 사용
+const FALLBACK_CATEGORIES: CategoryOption[] = [
+  { enumKey: "CARRIER_BOX",       label: "제안서캐리어박스" },
+  { enumKey: "MAGNETIC_BOX",      label: "자석박스" },
+  { enumKey: "BINDING_3_RING",    label: "3공바인더" },
+  { enumKey: "BINDING_PT",        label: "PT용바인더" },
+  { enumKey: "BINDING_HARDCOVER", label: "하드커버스프링제본" },
+  { enumKey: "PAPER_INNER",       label: "내지인쇄" },
 ];
 const BINDING_OPTIONS: { value: BindingType; label: string }[] = [
   { value: "NONE", label: "—" },
@@ -690,11 +696,14 @@ function ContentBlockEditor({
 export function ProductForm({
   initial,
   mode,
+  categories: categoriesProp,
 }: {
   initial: ProductFormValue;
   mode: "create" | "edit";
+  categories?: CategoryOption[];
 }) {
   const router = useRouter();
+  const categories = (categoriesProp && categoriesProp.length > 0) ? categoriesProp : FALLBACK_CATEGORIES;
   const [v, setV] = useState<ProductFormValue>(initial);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -811,8 +820,8 @@ export function ProductForm({
               onChange={(e) => set("category", e.target.value as ProductCategory)}
               className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
             >
-              {CATEGORY_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+              {categories.map((o) => (
+                <option key={o.enumKey} value={o.enumKey}>{o.label}</option>
               ))}
             </select>
           </Field>

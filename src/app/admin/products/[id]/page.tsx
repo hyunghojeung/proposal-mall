@@ -15,24 +15,32 @@ export default async function AdminProductEditPage({
   const id = Number(params.id);
   if (!Number.isFinite(id)) notFound();
 
-  const product = await prisma.product
-    .findUnique({
-      where: { id },
-      include: {
-        optionGroups: {
-          orderBy: { sortOrder: "asc" },
-          include: { values: { orderBy: { sortOrder: "asc" } } },
+  const [product, cats] = await Promise.all([
+    prisma.product
+      .findUnique({
+        where: { id },
+        include: {
+          optionGroups: {
+            orderBy: { sortOrder: "asc" },
+            include: { values: { orderBy: { sortOrder: "asc" } } },
+          },
         },
-      },
-    })
-    .catch(() => null);
+      })
+      .catch(() => null),
+    prisma.categoryConfig
+      .findMany({ where: { isActive: true }, orderBy: { sortOrder: "asc" } })
+      .catch(() => []),
+  ]);
 
   if (!product) notFound();
+
+  const categories = cats.map((c) => ({ enumKey: c.enumKey, label: c.label }));
 
   return (
     <AdminShell active="products" title={`상품 편집 — ${product.name}`}>
       <ProductForm
         mode="edit"
+        categories={categories}
         initial={{
           id: product.id,
           slug: product.slug,

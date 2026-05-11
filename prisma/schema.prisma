@@ -236,3 +236,17 @@ model Setting {
 
   @@map("settings")
 }
+
+model CategoryConfig {
+  id          Int      @id @default(autoincrement())
+  enumKey     String   @unique  // ProductCategory enum 값 (예: CARRIER_BOX)
+  slug        String   @unique  // URL 파라미터 값 (예: carrier-box)
+  label       String            // 화면 표시명
+  description String   @default("")
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("category_configs")
+}
