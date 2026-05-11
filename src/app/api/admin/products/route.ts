@@ -19,9 +19,33 @@ const optionGroupSchema = z.object({
   values: z.array(optionValueSchema).default([]),
 });
 
+const featureItemSchema = z.object({
+  icon:  z.string().max(100).default(""),
+  title: z.string().max(200).default(""),
+  desc:  z.string().max(2000).default(""),
+});
+
 const contentBlockSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("text"), content: z.string().max(5000) }),
-  z.object({ type: z.literal("image"), url: z.string().url(), caption: z.string().max(200).default("") }),
+  z.object({ type: z.literal("text"),    content: z.string().max(5000) }),
+  z.object({ type: z.literal("image"),   url: z.string().url(), caption: z.string().max(200).default("") }),
+  z.object({ type: z.literal("image_text"),
+    imageUrl:      z.string().default(""),
+    imagePosition: z.enum(["left", "right"]).default("left"),
+    title:         z.string().max(200).default(""),
+    content:       z.string().max(5000).default(""),
+  }),
+  z.object({ type: z.literal("feature_grid"),
+    heading: z.string().max(200).default(""),
+    columns: z.union([z.literal(2), z.literal(3)]).default(3),
+    items:   z.array(featureItemSchema).default([]),
+  }),
+  z.object({ type: z.literal("banner"),
+    imageUrl: z.string().default(""),
+    title:    z.string().max(200).default(""),
+    subtitle: z.string().max(500).default(""),
+    align:    z.enum(["left", "center"]).default("center"),
+  }),
+  z.object({ type: z.literal("divider"), label: z.string().max(100).default("") }),
 ]);
 
 const createSchema = z.object({
