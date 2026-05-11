@@ -6,7 +6,11 @@ import { ProductCategory, BindingType, PaperType } from "@prisma/client";
 
 export type ContentBlock =
   | { type: "text"; content: string }
-  | { type: "image"; url: string; caption: string };
+  | { type: "image"; url: string; caption: string }
+  | { type: "image_text"; imageUrl: string; imagePosition: "left" | "right"; title: string; content: string }
+  | { type: "feature_grid"; heading: string; columns: 2 | 3; items: { icon: string; title: string; desc: string }[] }
+  | { type: "banner"; imageUrl: string; title: string; subtitle: string; align: "left" | "center" }
+  | { type: "divider"; label: string };
 
 export interface ProductFormValue {
   id?: number;
@@ -306,6 +310,15 @@ function ImageGallery({
 }
 
 // ── 콘텐츠 블록 에디터 ───────────────────────────────────────
+const BLOCK_LABEL: Record<ContentBlock["type"], string> = {
+  text:         "텍스트",
+  image:        "이미지",
+  image_text:   "이미지 + 텍스트",
+  feature_grid: "특징 그리드",
+  banner:       "배너",
+  divider:      "구분선",
+};
+
 function ContentBlockEditor({
   blocks,
   onChange,
@@ -313,71 +326,108 @@ function ContentBlockEditor({
   blocks: ContentBlock[];
   onChange: (b: ContentBlock[]) => void;
 }) {
-  const [uploading, setUploading] = useState(false);
-  const [uploadErr, setUploadErr] = useState<string | null>(null);
+  const [uploading, setUploading]   = useState(false);
+  const [uploadErr, setUploadErr]   = useState<string | null>(null);
   const [draggingOver, setDraggingOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef  = useRef<HTMLInputElement>(null);
+  // 단일 이미지 업로드 콜백 (블록 내부 이미지 교체용)
+  const uploadCbRef   = useRef<((url: string) => void) | null>(null);
 
-  async function uploadImages(files: File[]) {
-    const imageFiles = files.filter((f) =>
-      ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type)
+  /* ── 다중 이미지 → 새 이미지 블록들 ── */
+  async function uploadNewImageBlocks(files: File[]) {
+    const imgs = files.filter((f) =>
+      ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(f.type),
     );
-    if (imageFiles.length === 0) return;
+    if (!imgs.length) return;
     setUploading(true);
     setUploadErr(null);
-    const newBlocks: ContentBlock[] = [];
-    for (const file of imageFiles) {
-      try {
-        const url = await uploadFile(file);
-        newBlocks.push({ type: "image", url, caption: "" });
-      } catch (err) {
-        setUploadErr(err instanceof Error ? err.message : "업로드 실패");
-      }
+    const added: ContentBlock[] = [];
+    for (const f of imgs) {
+      try { added.push({ type: "image", url: await uploadFile(f), caption: "" }); }
+      catch (e) { setUploadErr(e instanceof Error ? e.message : "업로드 실패"); }
     }
-    if (newBlocks.length > 0) onChange([...blocks, ...newBlocks]);
+    if (added.length) onChange([...blocks, ...added]);
     setUploading(false);
   }
 
-  function updateBlock(i: number, patch: Partial<ContentBlock>) {
+  /* ── 단일 이미지 → 콜백으로 URL 전달 ── */
+  function pickImage(onDone: (url: string) => void) {
+    uploadCbRef.current = onDone;
+    if (fileInputRef.current) { fileInputRef.current.multiple = false; fileInputRef.current.click(); }
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (!files.length) return;
+    if (uploadCbRef.current) {
+      setUploading(true); setUploadErr(null);
+      try { uploadCbRef.current(await uploadFile(files[0])); }
+      catch (er) { setUploadErr(er instanceof Error ? er.message : "업로드 실패"); }
+      finally {
+        setUploading(false);
+        uploadCbRef.current = null;
+        if (fileInputRef.current) fileInputRef.current.multiple = true;
+      }
+    } else {
+      await uploadNewImageBlocks(files);
+    }
+  }
+
+  /* ── 블록 공통 helpers ── */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function updateBlock(i: number, patch: Record<string, any>) {
     const next = [...blocks];
     next[i] = { ...next[i], ...patch } as ContentBlock;
     onChange(next);
   }
-
-  function removeBlock(i: number) {
-    onChange(blocks.filter((_, j) => j !== i));
-  }
-
+  function removeBlock(i: number) { onChange(blocks.filter((_, j) => j !== i)); }
   function moveBlock(i: number, dir: -1 | 1) {
-    const next = [...blocks];
-    const j = i + dir;
+    const next = [...blocks]; const j = i + dir;
     if (j < 0 || j >= next.length) return;
-    [next[i], next[j]] = [next[j], next[i]];
-    onChange(next);
+    [next[i], next[j]] = [next[j], next[i]]; onChange(next);
   }
 
-  function handleDragOver(e: React.DragEvent) {
-    e.preventDefault();
-    setDraggingOver(true);
+  /* ── feature_grid 항목 helpers ── */
+  function updateItem(bi: number, ii: number, patch: Partial<{ icon: string; title: string; desc: string }>) {
+    const b = blocks[bi]; if (b.type !== "feature_grid") return;
+    updateBlock(bi, { items: b.items.map((it, idx) => idx === ii ? { ...it, ...patch } : it) });
+  }
+  function addItem(bi: number) {
+    const b = blocks[bi]; if (b.type !== "feature_grid") return;
+    updateBlock(bi, { items: [...b.items, { icon: "", title: "", desc: "" }] });
+  }
+  function removeItem(bi: number, ii: number) {
+    const b = blocks[bi]; if (b.type !== "feature_grid") return;
+    updateBlock(bi, { items: b.items.filter((_, idx) => idx !== ii) });
   }
 
-  function handleDragLeave() {
-    setDraggingOver(false);
-  }
-
+  /* ── 드래그앤드롭 ── */
+  function handleDragOver(e: React.DragEvent) { e.preventDefault(); setDraggingOver(true); }
+  function handleDragLeave() { setDraggingOver(false); }
   async function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDraggingOver(false);
-    await uploadImages(Array.from(e.dataTransfer.files));
+    e.preventDefault(); setDraggingOver(false);
+    await uploadNewImageBlocks(Array.from(e.dataTransfer.files));
   }
+
+  const inputCls = "w-full rounded-sm border border-line px-2.5 py-1.5 text-[14px] outline-none focus:border-brand";
+  const textareaCls = "w-full rounded-sm border border-line px-2.5 py-2 text-[14px] outline-none focus:border-brand";
+  const btnUpload = (label: string, onClick: () => void) => (
+    <button type="button" disabled={uploading} onClick={onClick}
+      className="rounded-sm border border-line px-3 py-1.5 text-[13px] text-ink-sub hover:border-brand disabled:opacity-50">
+      {uploading ? "업로드 중…" : label}
+    </button>
+  );
 
   return (
     <div className="space-y-3">
       {blocks.map((block, i) => (
         <div key={i} className="rounded border border-line p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-[13px] font-bold text-ink-sub uppercase">
-              {block.type === "text" ? "텍스트" : "이미지"}
+
+          {/* 블록 헤더 */}
+          <div className="mb-3 flex items-center justify-between">
+            <span className="rounded bg-bg px-2 py-0.5 text-[12px] font-bold text-ink-sub">
+              {BLOCK_LABEL[block.type]}
             </span>
             <div className="flex gap-1">
               <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0}
@@ -385,77 +435,160 @@ function ContentBlockEditor({
               <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1}
                 className="rounded px-1.5 py-0.5 text-[14px] text-ink-sub hover:text-ink disabled:opacity-30">↓</button>
               <button type="button" onClick={() => removeBlock(i)}
-                className="rounded px-1.5 py-0.5 text-[14px] text-brand hover:underline">삭제</button>
+                className="rounded px-2 py-0.5 text-[13px] text-brand hover:underline">삭제</button>
             </div>
           </div>
 
-          {block.type === "text" ? (
-            <textarea
-              value={block.content}
+          {/* ── 텍스트 ── */}
+          {block.type === "text" && (
+            <textarea value={block.content} rows={4} placeholder="본문 텍스트를 입력하세요"
               onChange={(e) => updateBlock(i, { content: e.target.value })}
-              rows={4}
-              placeholder="본문 텍스트를 입력하세요"
-              className="w-full rounded-sm border border-line px-2.5 py-2 text-[15px] outline-none focus:border-brand"
-            />
-          ) : (
-            <div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={block.url} alt={block.caption || "상품 이미지"} className="mb-2 max-h-60 w-full rounded-sm object-contain" />
-              <input
-                value={block.caption}
-                onChange={(e) => updateBlock(i, { caption: e.target.value })}
-                placeholder="이미지 캡션 (선택)"
-                className="w-full rounded-sm border border-line px-2.5 py-1.5 text-[14px] outline-none focus:border-brand"
-              />
+              className={textareaCls} />
+          )}
+
+          {/* ── 이미지 ── */}
+          {block.type === "image" && (
+            <div className="space-y-2">
+              {block.url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={block.url} alt={block.caption || "이미지"} className="max-h-52 w-full rounded-sm border border-line object-contain" />
+              )}
+              {btnUpload(block.url ? "이미지 교체" : "이미지 업로드", () => pickImage((url) => updateBlock(i, { url })))}
+              <input value={block.caption} placeholder="이미지 캡션 (선택)"
+                onChange={(e) => updateBlock(i, { caption: e.target.value })} className={inputCls} />
             </div>
           )}
+
+          {/* ── 이미지 + 텍스트 ── */}
+          {block.type === "image_text" && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <span className="text-[13px] font-bold text-ink-sub">이미지 위치</span>
+                <select value={block.imagePosition}
+                  onChange={(e) => updateBlock(i, { imagePosition: e.target.value })}
+                  className="rounded-sm border border-line px-2 py-1 text-[14px] outline-none focus:border-brand">
+                  <option value="left">왼쪽</option>
+                  <option value="right">오른쪽</option>
+                </select>
+              </div>
+              {block.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={block.imageUrl} alt="이미지" className="max-h-40 rounded-sm border border-line object-contain" />
+              )}
+              {btnUpload(block.imageUrl ? "이미지 교체" : "이미지 업로드", () => pickImage((url) => updateBlock(i, { imageUrl: url })))}
+              <input value={block.title} placeholder="제목 (선택)"
+                onChange={(e) => updateBlock(i, { title: e.target.value })} className={inputCls} />
+              <textarea value={block.content} rows={4} placeholder="본문 내용"
+                onChange={(e) => updateBlock(i, { content: e.target.value })} className={textareaCls} />
+            </div>
+          )}
+
+          {/* ── 특징 그리드 ── */}
+          {block.type === "feature_grid" && (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input value={block.heading} placeholder="섹션 제목 (선택)"
+                  onChange={(e) => updateBlock(i, { heading: e.target.value })}
+                  className="flex-1 rounded-sm border border-line px-2.5 py-1.5 text-[14px] outline-none focus:border-brand" />
+                <select value={block.columns}
+                  onChange={(e) => updateBlock(i, { columns: Number(e.target.value) })}
+                  className="rounded-sm border border-line px-2 py-1.5 text-[14px] outline-none focus:border-brand">
+                  <option value={2}>2열</option>
+                  <option value={3}>3열</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                {block.items.map((item, ii) => (
+                  <div key={ii} className="rounded border border-line/60 bg-bg p-2 space-y-1.5">
+                    <div className="flex gap-2 items-center">
+                      <input value={item.icon} placeholder="아이콘 (01 / ✓)"
+                        onChange={(e) => updateItem(i, ii, { icon: e.target.value })}
+                        className="w-20 rounded-sm border border-line px-2 py-1 text-[14px] outline-none focus:border-brand" />
+                      <input value={item.title} placeholder="제목"
+                        onChange={(e) => updateItem(i, ii, { title: e.target.value })}
+                        className="flex-1 rounded-sm border border-line px-2 py-1 text-[14px] outline-none focus:border-brand" />
+                      <button type="button" onClick={() => removeItem(i, ii)}
+                        className="text-[13px] text-brand hover:underline">삭제</button>
+                    </div>
+                    <textarea value={item.desc} rows={2} placeholder="설명"
+                      onChange={(e) => updateItem(i, ii, { desc: e.target.value })}
+                      className="w-full rounded-sm border border-line px-2 py-1 text-[13px] outline-none focus:border-brand" />
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => addItem(i)}
+                className="rounded-sm border border-dashed border-line px-3 py-1 text-[13px] text-ink-sub hover:border-ink hover:text-ink">
+                + 항목 추가
+              </button>
+            </div>
+          )}
+
+          {/* ── 배너 ── */}
+          {block.type === "banner" && (
+            <div className="space-y-2">
+              {block.imageUrl && (
+                <div className="relative h-20 overflow-hidden rounded-sm border border-line"
+                  style={{ backgroundImage: `url(${block.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <span className="text-white text-[12px]">배경 미리보기</span>
+                  </div>
+                </div>
+              )}
+              {btnUpload(block.imageUrl ? "배경 이미지 교체" : "배경 이미지 업로드", () => pickImage((url) => updateBlock(i, { imageUrl: url })))}
+              <input value={block.title} placeholder="메인 제목"
+                onChange={(e) => updateBlock(i, { title: e.target.value })} className={inputCls} />
+              <input value={block.subtitle} placeholder="부제목 (선택)"
+                onChange={(e) => updateBlock(i, { subtitle: e.target.value })} className={inputCls} />
+              <div className="flex items-center gap-3">
+                <span className="text-[13px] font-bold text-ink-sub">텍스트 정렬</span>
+                <select value={block.align}
+                  onChange={(e) => updateBlock(i, { align: e.target.value })}
+                  className="rounded-sm border border-line px-2 py-1 text-[14px] outline-none focus:border-brand">
+                  <option value="left">왼쪽</option>
+                  <option value="center">가운데</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {/* ── 구분선 ── */}
+          {block.type === "divider" && (
+            <input value={block.label} placeholder="구분선 텍스트 (선택 — 비우면 선만 표시)"
+              onChange={(e) => updateBlock(i, { label: e.target.value })} className={inputCls} />
+          )}
+
         </div>
       ))}
 
       {/* 드래그앤드롭 존 */}
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        className={`flex min-h-[64px] items-center justify-center rounded border-2 border-dashed p-4 text-[14px] transition-colors ${
+      <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+        className={`flex min-h-[56px] items-center justify-center rounded border-2 border-dashed p-4 text-[13px] transition-colors ${
           draggingOver ? "border-brand bg-brand-light text-brand font-bold" : "border-line text-ink-sub"
-        }`}
-      >
-        {uploading ? "업로드 중…" : draggingOver ? "여기에 놓으세요" : "이미지를 여기에 드래그하거나 아래 버튼을 사용하세요"}
+        }`}>
+        {uploading ? "업로드 중…" : draggingOver ? "여기에 놓으세요" : "이미지를 드래그하면 이미지 블록으로 추가됩니다"}
       </div>
 
+      {/* 블록 추가 버튼 */}
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => onChange([...blocks, { type: "text", content: "" }])}
-          className="rounded-sm border border-line px-3 py-1.5 text-[14px] text-ink-sub hover:border-ink hover:text-ink"
-        >
-          + 텍스트 블록 추가
-        </button>
-        <button
-          type="button"
-          onClick={() => { setUploadErr(null); fileInputRef.current?.click(); }}
-          disabled={uploading}
-          className="rounded-sm border border-line px-3 py-1.5 text-[14px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50"
-        >
-          {uploading ? "업로드 중…" : "+ 이미지 블록 추가 (복수 선택 가능)"}
-        </button>
+        {([
+          ["+ 텍스트",       () => onChange([...blocks, { type: "text", content: "" }])],
+          ["+ 이미지",       () => { uploadCbRef.current = null; if (fileInputRef.current) { fileInputRef.current.multiple = true; fileInputRef.current.click(); } }],
+          ["+ 이미지+텍스트", () => onChange([...blocks, { type: "image_text", imageUrl: "", imagePosition: "left", title: "", content: "" }])],
+          ["+ 특징 그리드",  () => onChange([...blocks, { type: "feature_grid", heading: "", columns: 3, items: [{ icon: "", title: "", desc: "" }, { icon: "", title: "", desc: "" }, { icon: "", title: "", desc: "" }] }])],
+          ["+ 배너",         () => onChange([...blocks, { type: "banner", imageUrl: "", title: "", subtitle: "", align: "center" }])],
+          ["+ 구분선",       () => onChange([...blocks, { type: "divider", label: "" }])],
+        ] as [string, () => void][]).map(([label, onClick]) => (
+          <button key={label} type="button" onClick={onClick} disabled={uploading && label === "+ 이미지"}
+            className="rounded-sm border border-line px-3 py-1.5 text-[13px] text-ink-sub hover:border-ink hover:text-ink disabled:opacity-50">
+            {label}
+          </button>
+        ))}
       </div>
 
-      {uploadErr && <p className="text-[14px] text-brand">{uploadErr}</p>}
+      {uploadErr && <p className="text-[13px] text-brand">{uploadErr}</p>}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/gif"
-        multiple
-        className="hidden"
-        onChange={async (e) => {
-          const files = Array.from(e.target.files ?? []);
-          e.target.value = "";
-          await uploadImages(files);
-        }}
-      />
+      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+        multiple className="hidden" onChange={handleFileChange} />
     </div>
   );
 }

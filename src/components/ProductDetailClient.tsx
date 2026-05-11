@@ -105,30 +105,113 @@ function ContentBlockRenderer({ blocks }: { blocks: ContentBlock[] }) {
   return (
     <section className="mt-14 border-t border-line pt-10">
       <h2 className="mb-8 text-[22px] font-black tracking-tight text-ink">상품 상세 설명</h2>
-      <div className="space-y-6 text-[16px] leading-relaxed text-ink">
+      <div className="space-y-10">
         {blocks.map((block, i) => {
+
+          /* 텍스트 */
           if (block.type === "text") {
             return (
-              <p key={i} className="whitespace-pre-wrap text-ink-sub">
+              <p key={i} className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink-sub">
                 {block.content}
               </p>
             );
           }
-          return (
-            <figure key={i} className="mx-auto w-full">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={block.url}
-                alt={block.caption || "상품 이미지"}
-                className="w-full rounded border border-line object-contain"
-              />
-              {block.caption && (
-                <figcaption className="mt-2 text-center text-[14px] text-ink-sub">
-                  {block.caption}
-                </figcaption>
-              )}
-            </figure>
-          );
+
+          /* 이미지 */
+          if (block.type === "image") {
+            return (
+              <figure key={i} className="w-full">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={block.url} alt={block.caption || "상품 이미지"}
+                  className="w-full rounded border border-line object-contain" />
+                {block.caption && (
+                  <figcaption className="mt-2 text-center text-[14px] text-ink-sub">{block.caption}</figcaption>
+                )}
+              </figure>
+            );
+          }
+
+          /* 이미지 + 텍스트 (좌우) */
+          if (block.type === "image_text") {
+            return (
+              <div key={i} className={`flex flex-col gap-6 md:flex-row md:items-center ${
+                block.imagePosition === "right" ? "md:flex-row-reverse" : ""
+              }`}>
+                <div className="w-full min-w-0 md:w-1/2">
+                  {block.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={block.imageUrl} alt={block.title || "이미지"}
+                      className="w-full rounded border border-line object-contain" />
+                  )}
+                </div>
+                <div className="w-full min-w-0 md:w-1/2">
+                  {block.title && (
+                    <h3 className="mb-3 text-[20px] font-black tracking-tight text-ink">{block.title}</h3>
+                  )}
+                  <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-ink-sub">{block.content}</p>
+                </div>
+              </div>
+            );
+          }
+
+          /* 특징 그리드 */
+          if (block.type === "feature_grid") {
+            return (
+              <div key={i}>
+                {block.heading && (
+                  <h3 className="mb-6 text-[20px] font-black tracking-tight text-ink">{block.heading}</h3>
+                )}
+                <div className={`grid gap-4 grid-cols-1 ${block.columns === 3 ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
+                  {block.items.map((item, ii) => (
+                    <div key={ii} className="rounded border border-line bg-bg p-5">
+                      {item.icon && (
+                        <div className="mb-2 text-[26px] font-black text-brand">{item.icon}</div>
+                      )}
+                      {item.title && (
+                        <h4 className="mb-1 text-[16px] font-bold text-ink">{item.title}</h4>
+                      )}
+                      {item.desc && (
+                        <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-ink-sub">{item.desc}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
+          /* 배너 */
+          if (block.type === "banner") {
+            return (
+              <div key={i} className="relative overflow-hidden rounded-xl"
+                style={{ backgroundImage: `url(${block.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+                <div className="absolute inset-0 bg-black/50" />
+                <div className={`relative z-10 px-8 py-14 ${block.align === "center" ? "text-center" : "text-left"}`}>
+                  {block.title && (
+                    <h3 className="text-[24px] font-black text-white md:text-[32px]">{block.title}</h3>
+                  )}
+                  {block.subtitle && (
+                    <p className="mt-2 text-[15px] text-white/80">{block.subtitle}</p>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          /* 구분선 */
+          if (block.type === "divider") {
+            return (
+              <div key={i} className="flex items-center gap-4 py-2">
+                <div className="flex-1 border-t border-line" />
+                {block.label && (
+                  <span className="shrink-0 text-[14px] font-bold text-ink-sub">{block.label}</span>
+                )}
+                <div className="flex-1 border-t border-line" />
+              </div>
+            );
+          }
+
+          return null;
         })}
       </div>
     </section>
