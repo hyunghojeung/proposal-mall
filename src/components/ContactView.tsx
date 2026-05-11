@@ -123,7 +123,7 @@ export function ContactView() {
 
       {/* Main content */}
       <div className="mx-auto max-w-page px-6 pb-20 pt-10">
-        <div className="grid grid-cols-[1fr_360px] items-start gap-7">
+        <div className="grid grid-cols-[1fr_260px] items-start gap-7">
 
           {/* ── Left column ── */}
           <div>
@@ -148,13 +148,22 @@ export function ContactView() {
                       평일 09:00 ~ 18:00 내 순차적으로 답변드리겠습니다.<br />
                       <span className="font-bold text-brand">빠른 상담이 필요하신 경우 전화로 연락주세요.</span>
                     </p>
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="mt-6 rounded border border-line px-7 py-3 text-[15px] font-bold text-ink transition-colors hover:border-brand hover:text-brand"
-                    >
-                      새 문의 작성
-                    </button>
+                    <div className="mt-6 flex justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { resetForm(); setTab("history"); }}
+                        className="rounded bg-brand px-7 py-3 text-[15px] font-bold text-white transition-colors hover:bg-brand-dark"
+                      >
+                        문의 내역 보기
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="rounded border border-line px-7 py-3 text-[15px] font-bold text-ink transition-colors hover:border-brand hover:text-brand"
+                      >
+                        새 문의 작성
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="p-8">
