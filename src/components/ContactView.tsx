@@ -184,7 +184,7 @@ export function ContactView() {
 
       {/* Main content */}
       <div className="mx-auto max-w-page px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
-        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_260px] lg:gap-7">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_300px] lg:gap-7">
 
           {/* ── Left column ── */}
           <div>
@@ -510,90 +510,90 @@ export function ContactView() {
 
             {/* 빠른 상담 채널 */}
             <div className="overflow-hidden rounded border border-line bg-white">
-              <div className="border-b border-line bg-bg px-6 py-4">
-                <span className="text-[16px] font-extrabold text-ink">빠른 상담 채널</span>
+              <div className="border-b border-line bg-bg px-4 py-3">
+                <span className="text-[15px] font-extrabold text-ink">빠른 상담 채널</span>
               </div>
               {/* Phone */}
               <a
                 href="tel:070-0000-0000"
-                className="flex items-center gap-4 border-b border-line px-6 py-5 transition-colors hover:bg-[#FAFAFA]"
+                className="flex items-center gap-3 border-b border-line px-4 py-4 transition-colors hover:bg-[#FAFAFA]"
               >
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded border border-line bg-bg">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded border border-line bg-bg">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.84a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[15px] font-bold text-ink">전화 상담</p>
-                  <p className="mt-0.5 text-[13px] text-ink-sub">070-0000-0000 · 평일 09~18시</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold text-ink">전화 상담</p>
+                  <p className="mt-0.5 text-[12px] text-ink-sub">070-0000-0000 · 평일 09~18시</p>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </a>
               {/* Kakao */}
-              <div className="flex cursor-pointer items-center gap-4 border-b border-line px-6 py-5 transition-colors hover:bg-[#FAFAFA]">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded border border-line bg-bg">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex cursor-pointer items-center gap-3 border-b border-line px-4 py-4 transition-colors hover:bg-[#FAFAFA]">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded border border-line bg-bg">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[15px] font-bold text-ink">카카오채널 채팅</p>
-                  <p className="mt-0.5 text-[13px] text-ink-sub">@제안서박스몰 · 평일 09~18시</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold text-ink">카카오채널 채팅</p>
+                  <p className="mt-0.5 text-[12px] text-ink-sub">@제안서박스몰 · 평일 09~18시</p>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </div>
               {/* Email */}
               <a
                 href="mailto:blackcopy2@naver.com"
-                className="flex items-center gap-4 px-6 py-5 transition-colors hover:bg-[#FAFAFA]"
+                className="flex items-center gap-3 px-4 py-4 transition-colors hover:bg-[#FAFAFA]"
               >
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded border border-line bg-bg">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded border border-line bg-bg">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                     <polyline points="22,6 12,13 2,6" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <p className="text-[15px] font-bold text-ink">이메일</p>
-                  <p className="mt-0.5 text-[13px] text-ink-sub">blackcopy2@naver.com</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-bold text-ink">이메일</p>
+                  <p className="mt-0.5 text-[12px] text-ink-sub break-all">blackcopy2@naver.com</p>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </a>
             </div>
 
             {/* 운영 안내 */}
-            <div className="rounded border border-line bg-bg p-6">
-              <p className="mb-4 text-[15px] font-extrabold text-ink">운영 안내</p>
-              <div className="mb-3 flex justify-between text-[15px]">
+            <div className="rounded border border-line bg-bg p-4">
+              <p className="mb-3 text-[14px] font-extrabold text-ink">운영 안내</p>
+              <div className="mb-2 flex justify-between text-[14px]">
                 <span className="text-ink-sub">평일</span>
                 <span className="font-bold text-ink">09:00 ~ 18:00</span>
               </div>
-              <div className="mb-3 flex justify-between text-[15px]">
+              <div className="mb-2 flex justify-between text-[14px]">
                 <span className="text-ink-sub">점심</span>
                 <span className="font-bold text-ink">12:00 ~ 13:00</span>
               </div>
-              <div className="mb-3 flex justify-between text-[15px]">
-                <span className="text-ink-sub">토 · 일 · 공휴일</span>
+              <div className="mb-2 flex justify-between text-[14px]">
+                <span className="text-ink-sub">토·일·공휴일</span>
                 <span className="font-bold text-ink">휴무</span>
               </div>
-              <hr className="my-4 border-line" />
-              <p className="text-[13px] leading-relaxed text-[#AAAAAA]">
-                야간·주말에 접수된 문의는<br />
+              <hr className="my-3 border-line" />
+              <p className="text-[12px] leading-relaxed text-[#AAAAAA]">
+                야간·주말 접수 문의는<br />
                 다음 영업일 순차 처리됩니다.<br />
-                급행 납기 문의는 전화로 연락주세요.
+                급행 납기는 전화로 연락주세요.
               </p>
             </div>
 
             {/* 공지사항 */}
             <div className="overflow-hidden rounded border border-line bg-white">
-              <div className="border-b border-line bg-bg px-6 py-4">
-                <span className="text-[16px] font-extrabold text-ink">공지사항</span>
+              <div className="border-b border-line bg-bg px-4 py-3">
+                <span className="text-[15px] font-extrabold text-ink">공지사항</span>
               </div>
               {notices.length === 0 ? (
                 <p className="py-8 text-center text-[14px] text-ink-sub">등록된 공지사항이 없습니다.</p>
@@ -601,9 +601,9 @@ export function ContactView() {
                 notices.slice(0, 5).map((notice) => (
                   <div
                     key={notice.id}
-                    className="cursor-pointer border-b border-line px-6 py-4 transition-colors last:border-none hover:bg-[#FAFAFA]"
+                    className="cursor-pointer border-b border-line px-4 py-3 transition-colors last:border-none hover:bg-[#FAFAFA]"
                   >
-                    <p className="mb-1.5 text-[15px] font-semibold leading-snug text-ink">
+                    <p className="mb-1 text-[13px] font-semibold leading-snug text-ink">
                       {notice.isPinned && (
                         <span className="mr-2 inline-block rounded-[2px] border border-brand/30 px-1.5 py-0.5 text-[11px] font-bold text-brand">
                           공지
