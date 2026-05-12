@@ -173,62 +173,16 @@ export function Header() {
         {menuOpen && (
           <nav className="border-t border-line bg-white md:hidden">
 
-            {/* 전체상품 — 네이티브 <details> 아코디언 (JS 상태 불필요) */}
-            <details className="group">
-              <summary
-                className={`flex cursor-pointer select-none items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand [&::-webkit-details-marker]:hidden [&::marker]:hidden ${
-                  pathname.startsWith("/products") ? "text-brand" : "text-ink"
-                }`}
-              >
-                전체상품
-                <svg
-                  className="ml-auto shrink-0 transition-transform duration-200 group-open:rotate-90"
-                  width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                >
-                  <polyline points="9 18 15 12 9 6"/>
-                </svg>
-              </summary>
-
-              {/* 하위 카테고리 — 관리자 DB 카테고리와 동일하게 맞춤 */}
-              <div className="border-b border-line bg-[#fafafa] py-1">
-
-                {/* 독립 카테고리 */}
-                <Link href="/products?cat=carrier-box" onClick={closeAll}
-                  className="flex items-center px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
-                  제안서캐리어박스
-                </Link>
-                <Link href="/products?cat=magnetic-box" onClick={closeAll}
-                  className="flex items-center border-t border-line/40 px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
-                  자석박스
-                </Link>
-
-                {/* 제안서 제본 그룹 */}
-                <div className="border-t border-line/60 px-8 pb-1 pt-3 text-[11px] font-bold tracking-widest text-ink-sub">
-                  제안서 제본
-                </div>
-                <Link href="/products?cat=binding-3-ring" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />3공바인더
-                </Link>
-                <Link href="/products?cat=binding-pt" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />PT용바인더
-                </Link>
-                <Link href="/products?cat=binding-hardcover" onClick={closeAll}
-                  className="flex items-center py-2.5 pl-12 pr-8 text-[14px] text-ink transition-colors hover:text-brand">
-                  <span className="mr-2 h-1 w-1 shrink-0 rounded-full bg-ink-del" />하드커버스프링제본
-                </Link>
-
-                {/* 내지 인쇄 — 단독 카테고리 */}
-                <Link href="/products?cat=paper-inner" onClick={closeAll}
-                  className="flex items-center border-t border-line/60 px-8 py-3 text-[15px] text-ink transition-colors hover:text-brand">
-                  내지 인쇄
-                </Link>
-
-                <div className="h-2" />
-              </div>
-            </details>
+            {/* 전체상품 — 직접 링크 */}
+            <Link href="/products" onClick={closeAll}
+              className={`flex items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand ${
+                pathname.startsWith("/products") ? "text-brand" : "text-ink"
+              }`}>
+              전체상품
+              <svg className="ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </Link>
 
             {/* 나머지 메뉴 항목 */}
             <Link href="/orders" onClick={closeAll}
