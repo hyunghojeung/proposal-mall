@@ -48,7 +48,7 @@ function parseHeroMeta(contentBlocks: unknown): HeroMeta {
 export function ProductHeroCard({ product, index, total, flip = false }: Props) {
   const meta = parseHeroMeta(product.contentBlocks);
 
-  const bg              = meta.bg           ?? (flip ? "#ffffff" : "#F5F2EE");
+  const bg              = meta.bg           ?? "#F5F2EE";
   const categoryLabel   = meta.categoryLabel ?? "";
   const subtitle        = meta.subtitle      ?? "";
   const tags            = meta.tags          ?? [];
