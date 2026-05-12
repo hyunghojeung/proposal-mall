@@ -454,7 +454,7 @@ export function ContactView() {
                       <th className="border-b border-line bg-bg px-4 py-3.5 text-left text-[13px] font-bold text-ink-sub" style={{ width: 60 }}>번호</th>
                       <th className="border-b border-line bg-bg px-4 py-3.5 text-left text-[13px] font-bold text-ink-sub">제목</th>
                       <th className="border-b border-line bg-bg px-4 py-3.5 text-left text-[13px] font-bold text-ink-sub" style={{ width: 96 }}>작성자</th>
-                      <th className="border-b border-line bg-bg px-4 py-3.5 text-left text-[13px] font-bold text-ink-sub" style={{ width: 90 }}>상태</th>
+                      <th className="border-b border-line bg-bg px-4 py-3.5 text-left text-[13px] font-bold text-ink-sub" style={{ width: 120 }}>상태</th>
                       <th className="border-b border-line bg-bg px-4 py-3.5 text-left text-[13px] font-bold text-ink-sub" style={{ width: 108 }}>작성일</th>
                     </tr>
                   </thead>
@@ -488,7 +488,7 @@ export function ContactView() {
                             </td>
                             <td className="border-b border-line px-4 py-4 text-[14px] text-ink-sub">{inq.name}</td>
                             <td className="border-b border-line px-4 py-4">
-                              <span className={`inline-flex items-center rounded-full px-3 py-1 text-[12px] font-bold ${badge.cls}`}>
+                              <span className={`inline-flex items-center whitespace-nowrap rounded-full px-3 py-1 text-[12px] font-bold ${badge.cls}`}>
                                 {badge.text}
                               </span>
                             </td>
