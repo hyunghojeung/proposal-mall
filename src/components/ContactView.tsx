@@ -590,8 +590,8 @@ export function ContactView() {
               </p>
             </div>
 
-            {/* 공지사항 */}
-            <div className="overflow-hidden rounded border border-line bg-white">
+            {/* 공지사항 — 모바일 숨김 */}
+            <div className="hidden lg:block overflow-hidden rounded border border-line bg-white">
               <div className="border-b border-line bg-bg px-4 py-3">
                 <span className="text-[15px] font-extrabold text-ink">공지사항</span>
               </div>
