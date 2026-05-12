@@ -8,7 +8,7 @@ const NAV = [
   { href: "/products", label: "전체상품" },
   { href: "/orders",   label: "주문현황" },
   { href: "/cart",     label: "장바구니" },
-  { href: "/contact",  label: "고객문의" },
+  { href: "/contact?tab=history",  label: "고객문의" },
 ];
 
 
@@ -249,7 +249,7 @@ export function Header() {
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
             </Link>
-            <Link href="/contact" onClick={closeAll}
+            <Link href="/contact?tab=history" onClick={closeAll}
               className={`flex items-center border-b border-line px-6 py-4 text-[17px] font-bold transition-colors hover:text-brand ${
                 pathname === "/contact" ? "text-brand" : "text-ink"
               }`}>
