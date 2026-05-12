@@ -131,6 +131,76 @@ export async function uploadProductImage(opts: {
   return sharedUrl.replace("www.dropbox.com", "dl.dropboxusercontent.com").replace(/\?dl=\d$/, "") + "?raw=1";
 }
 
+// 전개도 파일 업로드 (PDF, AI, ZIP 등 모든 형식 허용)
+// 다운로드 강제 URL(?dl=1) 반환
+export async function uploadDiagramFile(opts: {
+  filename: string;
+  buffer: Buffer;
+  mimeType: string;
+}): Promise<string> {
+  if (!isConfigured()) {
+    return `https://www.dropbox.com/stub/${encodeURIComponent(opts.filename)}?dl=1`;
+  }
+
+  const folder = (process.env.DROPBOX_DIAGRAM_FOLDER ?? "/proposal-mall-diagrams").replace(/\/$/, "");
+  const ext = opts.filename.split(".").pop()?.toLowerCase() ?? "bin";
+  const destPath = `${folder}/${Date.now()}.${ext}`;
+
+  const token = await getAccessToken();
+
+  const uploadRes = await fetch("https://content.dropboxapi.com/2/files/upload", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/octet-stream",
+      "Dropbox-API-Arg": JSON.stringify({
+        path: destPath,
+        mode: "add",
+        autorename: true,
+        mute: true,
+      }),
+    },
+    body: new Uint8Array(opts.buffer),
+  });
+  if (!uploadRes.ok) {
+    const t = await uploadRes.text();
+    throw new Error(`Dropbox upload failed: ${uploadRes.status} ${t}`);
+  }
+  const uploadData = (await uploadRes.json()) as { path_lower: string };
+
+  const linkRes = await fetch("https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      path: uploadData.path_lower,
+      settings: { requested_visibility: "public" },
+    }),
+  });
+
+  let sharedUrl: string;
+  if (linkRes.ok) {
+    const linkData = (await linkRes.json()) as { url: string };
+    sharedUrl = linkData.url;
+  } else {
+    const errData = (await linkRes.json()) as {
+      error?: { shared_link_already_exists?: { metadata?: { url?: string } } };
+    };
+    const existing = errData?.error?.shared_link_already_exists?.metadata?.url;
+    if (existing) {
+      sharedUrl = existing;
+    } else {
+      throw new Error(`Dropbox shared link failed: ${linkRes.status}`);
+    }
+  }
+
+  // dl=1 로 강제 다운로드 URL 반환
+  const base = sharedUrl.replace(/[?&]dl=\d/, "");
+  return base + (base.includes("?") ? "&dl=1" : "?dl=1");
+}
+
 export async function createOrderFileRequest(opts: {
   orderSerial: string;
   customerName: string;

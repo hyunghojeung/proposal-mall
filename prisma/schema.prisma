@@ -237,6 +237,23 @@ model Setting {
   @@map("settings")
 }
 
+model Diagram {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String   @default("")
+  category      String   @default("")   // 예: 제안서캐리어박스, 자석박스 등
+  fileUrl       String                  // Dropbox 다운로드 URL (?dl=1)
+  fileName      String                  // 사용자에게 표시할 파일명
+  fileSize      String   @default("")   // 예: 2.3 MB
+  downloadCount Int      @default(0)
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("diagrams")
+}
+
 model CategoryConfig {
   id          Int      @id @default(autoincrement())
   enumKey     String   @unique  // ProductCategory enum 값 (예: CARRIER_BOX)

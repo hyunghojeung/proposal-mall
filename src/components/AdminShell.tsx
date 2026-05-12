@@ -8,6 +8,7 @@ const NAV = [
   { href: "/admin/categories", label: "카테고리 관리" },
   { href: "/admin/pricing", label: "단가표" },
   { href: "/admin/inquiries", label: "고객문의" },
+  { href: "/admin/diagrams", label: "전개도 관리" },
   { href: "/admin/faqs", label: "FAQ" },
   { href: "/admin/notices", label: "공지사항" },
   { href: "/admin/stamp", label: "도장 이미지" },

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
-type Tab = "inquiry" | "faq" | "history";
+type Tab = "inquiry" | "faq" | "history" | "diagram";
 
 interface Faq {
   id: number;
@@ -17,6 +17,17 @@ interface Notice {
   id: number;
   title: string;
   isPinned: boolean;
+  createdAt: string;
+}
+
+interface DiagramRow {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  fileName: string;
+  fileSize: string;
+  downloadCount: number;
   createdAt: string;
 }
 
@@ -49,6 +60,15 @@ export function ContactView() {
   const [faqs, setFaqs] = useState<Faq[]>([]);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
+  const [diagrams, setDiagrams] = useState<DiagramRow[]>([]);
+
+  // 관리자 진입 모달 상태
+  const [adminModal, setAdminModal] = useState(false);
+  const [adminPw, setAdminPw] = useState("");
+  const [adminPwError, setAdminPwError] = useState<string | null>(null);
+
+  // 다운로드 중 상태
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [openFaqId, setOpenFaqId] = useState<number | null>(null);
 
   const [name, setName] = useState("");
@@ -73,6 +93,7 @@ export function ContactView() {
     fetch("/api/faqs").then((r) => r.json()).then((d) => setFaqs(d.faqs ?? [])).catch(() => {});
     fetch("/api/notices").then((r) => r.json()).then((d) => setNotices(d.notices ?? [])).catch(() => {});
     fetch("/api/inquiries").then((r) => r.json()).then((d) => setInquiries(d.inquiries ?? [])).catch(() => {});
+    fetch("/api/diagrams").then((r) => r.json()).then((d) => setDiagrams(d.diagrams ?? [])).catch(() => {});
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -151,10 +172,38 @@ export function ContactView() {
     return { text: "대기중", cls: "bg-bg text-ink-sub border border-line" };
   }
 
+  async function handleDownload(id: number) {
+    setDownloadingId(id);
+    try {
+      const res = await fetch(`/api/diagrams/${id}`, { method: "POST" });
+      const data = (await res.json()) as { fileUrl?: string };
+      if (data.fileUrl) {
+        window.open(data.fileUrl, "_blank");
+        // 다운로드 수 로컬 반영
+        setDiagrams((prev) =>
+          prev.map((d) => d.id === id ? { ...d, downloadCount: d.downloadCount + 1 } : d)
+        );
+      }
+    } catch {
+      // silent
+    } finally {
+      setDownloadingId(null);
+    }
+  }
+
+  function handleAdminLogin() {
+    if (adminPw === "111") {
+      window.location.href = "/admin/diagrams";
+    } else {
+      setAdminPwError("비밀번호가 올바르지 않습니다.");
+    }
+  }
+
   const TABS: { id: Tab; label: string }[] = [
     { id: "inquiry", label: "1:1 문의" },
     { id: "faq",     label: "자주 묻는 질문" },
     { id: "history", label: "문의 내역" },
+    { id: "diagram", label: "전개도Down" },
   ];
 
   return (
@@ -503,6 +552,95 @@ export function ContactView() {
                 </table>
               </div>
             )}
+            {/* ④ 전개도 다운로드 */}
+            {tab === "diagram" && (
+              <div className="overflow-hidden rounded border border-line bg-white">
+                {/* 헤더 */}
+                <div className="flex items-center justify-between border-b border-line bg-bg px-6 py-4">
+                  <span className="text-[16px] font-extrabold text-ink">전개도 다운로드</span>
+                  {/* 관리자 진입 버튼 */}
+                  <button
+                    type="button"
+                    onClick={() => { setAdminModal(true); setAdminPw(""); setAdminPwError(null); }}
+                    aria-label="관리자 전개도 관리"
+                    className="flex h-8 w-8 items-center justify-center rounded border border-line text-ink-sub transition-colors hover:border-brand hover:text-brand"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* 안내 문구 */}
+                <div className="border-b border-line bg-orange-50/40 px-6 py-3">
+                  <p className="text-[13px] text-ink-sub">
+                    제품 패키지 제작에 필요한 전개도 파일을 다운로드하세요.
+                    파일 형식: AI · PDF · ZIP 등
+                  </p>
+                </div>
+
+                {diagrams.length === 0 ? (
+                  <p className="py-14 text-center text-[15px] text-ink-sub">
+                    등록된 전개도 파일이 없습니다.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-line">
+                    {diagrams.map((d) => (
+                      <li key={d.id} className="flex items-center gap-4 px-6 py-5 transition-colors hover:bg-orange-50/30">
+                        {/* 파일 아이콘 */}
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-line bg-bg">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
+                          </svg>
+                        </div>
+
+                        {/* 정보 */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            {d.category && (
+                              <span className="rounded bg-brand/10 px-2 py-0.5 text-[11px] font-bold text-brand">
+                                {d.category}
+                              </span>
+                            )}
+                            <span className="text-[15px] font-bold text-ink">{d.title}</span>
+                          </div>
+                          {d.description && (
+                            <p className="mt-0.5 text-[13px] text-ink-sub">{d.description}</p>
+                          )}
+                          <p className="mt-1 flex flex-wrap items-center gap-2 text-[12px] text-[#AAAAAA]">
+                            <span>{d.fileName}{d.fileSize ? ` (${d.fileSize})` : ""}</span>
+                            <span>·</span>
+                            <span>다운로드 {d.downloadCount}회</span>
+                            <span>·</span>
+                            <span>{new Date(d.createdAt).toLocaleDateString("ko-KR")}</span>
+                          </p>
+                        </div>
+
+                        {/* 다운로드 버튼 */}
+                        <button
+                          type="button"
+                          onClick={() => handleDownload(d.id)}
+                          disabled={downloadingId === d.id}
+                          className="flex shrink-0 items-center gap-1.5 rounded border border-brand px-4 py-2 text-[13px] font-bold text-brand transition-colors hover:bg-brand hover:text-white disabled:opacity-60"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                          {downloadingId === d.id ? "…" : "다운로드"}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
           </div>
 
           {/* ── Right sidebar ── */}
@@ -622,6 +760,52 @@ export function ContactView() {
           </div>
         </div>
       </div>
+
+      {/* ── 관리자 비밀번호 모달 ── */}
+      {adminModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          onClick={() => setAdminModal(false)}
+        >
+          <div
+            className="w-full max-w-[360px] overflow-hidden rounded-xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="border-b border-line bg-bg px-6 py-4">
+              <span className="text-[15px] font-extrabold text-ink">관리자 확인</span>
+            </div>
+            <div className="p-6">
+              <p className="mb-4 text-[14px] text-ink-sub">관리자 비밀번호를 입력하세요.</p>
+              <input
+                type="password"
+                value={adminPw}
+                onChange={(e) => { setAdminPw(e.target.value); setAdminPwError(null); }}
+                onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
+                placeholder="비밀번호"
+                autoFocus
+                className="mb-3 w-full rounded border border-line px-4 py-2.5 text-[15px] outline-none focus:border-brand"
+              />
+              {adminPwError && (
+                <p className="mb-3 text-[13px] text-brand">{adminPwError}</p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAdminLogin}
+                  className="flex-1 rounded bg-brand py-2.5 text-[14px] font-bold text-white hover:bg-brand-dark"
+                >
+                  확인
+                </button>
+                <button
+                  onClick={() => setAdminModal(false)}
+                  className="flex-1 rounded border border-line py-2.5 text-[14px] text-ink-sub hover:border-ink"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── 문의 상세 모달 ── */}
       {detailTarget && (
