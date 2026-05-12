@@ -160,17 +160,17 @@ export function ContactView() {
   return (
     <>
       {/* Page title */}
-      <div className="border-b border-line bg-white pt-12 pb-0 text-center">
-        <h1 className="text-[34px] font-black tracking-tight text-ink">고객문의</h1>
+      <div className="border-b border-line bg-white pt-8 pb-0 text-center md:pt-12">
+        <h1 className="text-[22px] font-black tracking-tight text-ink md:text-[34px]">고객문의</h1>
 
         {/* Tabs */}
-        <div className="mt-6 flex justify-center">
+        <div className="mt-4 flex justify-center md:mt-6">
           {TABS.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`-mb-px border-b-2 px-9 py-4 text-[17px] font-bold transition-all ${
+              className={`-mb-px border-b-2 px-3 py-3 text-[13px] font-bold transition-all sm:px-9 sm:py-4 sm:text-[17px] ${
                 tab === t.id
                   ? "border-ink text-ink"
                   : "border-transparent text-ink-sub hover:text-ink"
@@ -183,8 +183,8 @@ export function ContactView() {
       </div>
 
       {/* Main content */}
-      <div className="mx-auto max-w-page px-6 pb-20 pt-10">
-        <div className="grid grid-cols-[1fr_260px] items-start gap-7">
+      <div className="mx-auto max-w-page px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[1fr_260px] lg:gap-7">
 
           {/* ── Left column ── */}
           <div>
@@ -194,7 +194,7 @@ export function ContactView() {
               <div className="overflow-hidden rounded border border-line bg-white">
                 <div className="flex items-center justify-between border-b border-line bg-bg px-6 py-4">
                   <span className="text-[16px] font-extrabold text-ink">1:1 문의 작성</span>
-                  <span className="text-[14px] text-ink-sub">평일 09:00 ~ 18:00 순차 처리</span>
+                  <span className="hidden text-[14px] text-ink-sub sm:block">평일 09:00 ~ 18:00 순차 처리</span>
                 </div>
 
                 {submitted ? (
@@ -227,9 +227,9 @@ export function ContactView() {
                     </div>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="p-8">
+                  <form onSubmit={handleSubmit} className="p-4 sm:p-8">
                     {/* Name + Phone */}
-                    <div className="mb-5 grid grid-cols-2 gap-4">
+                    <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
                         <label className="mb-2 block text-[14px] font-bold text-ink">
                           이름<span className="ml-0.5 text-brand">*</span>
@@ -409,7 +409,46 @@ export function ContactView() {
                   <span className="text-[16px] font-extrabold text-ink">문의 내역</span>
                   <span className="text-[14px] text-ink-sub">최근 30건</span>
                 </div>
-                <table className="w-full border-collapse">
+                {/* 모바일 — 카드형 */}
+                <div className="sm:hidden">
+                  {inquiries.length === 0 ? (
+                    <p className="py-14 text-center text-[15px] text-ink-sub">문의 내역이 없습니다.</p>
+                  ) : (
+                    inquiries.map((inq) => {
+                      const badge = statusBadge(inq.status);
+                      return (
+                        <div
+                          key={inq.id}
+                          onClick={() => openDetail(inq)}
+                          className="cursor-pointer border-b border-line px-4 py-4 transition-colors hover:bg-orange-50/50 last:border-none"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="flex items-center gap-1.5 flex-1 min-w-0 text-[14px] font-medium text-ink truncate">
+                              {inq.hasPassword && (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
+                                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                              )}
+                              {inq.isPrivate ? "비공개 문의" : inq.subject}
+                            </span>
+                            <span className={`flex-shrink-0 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${badge.cls}`}>
+                              {badge.text}
+                            </span>
+                          </div>
+                          <div className="mt-1.5 flex items-center gap-2 text-[12px] text-ink-sub">
+                            <span>{inq.name}</span>
+                            <span>·</span>
+                            <span>{new Date(inq.createdAt).toLocaleDateString("ko-KR")}</span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* PC — 테이블형 */}
+                <table className="hidden w-full border-collapse sm:table">
                   <thead>
                     <tr>
                       <th className="border-b border-line bg-bg px-4 py-3.5 text-left text-[13px] font-bold text-ink-sub" style={{ width: 60 }}>번호</th>
