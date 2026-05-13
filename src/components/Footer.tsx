@@ -12,6 +12,30 @@ export function Footer() {
               <br />
               proposal.blackcopy.co.kr
             </p>
+            <div className="mt-4 space-y-3 border-t border-line pt-4">
+              <div>
+                <p className="text-[13px] text-ink-sub">하드커버제본/바인더/북케이스 전문쇼핑몰</p>
+                <a
+                  href="https://www.blackcopy.co.kr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[13px] text-brand hover:underline"
+                >
+                  www.blackcopy.co.kr
+                </a>
+              </div>
+              <div>
+                <p className="text-[13px] text-ink-sub">하드커버 제품 갤러리</p>
+                <a
+                  href="https://www.hardcover.co.kr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[13px] text-brand hover:underline"
+                >
+                  www.hardcover.co.kr
+                </a>
+              </div>
+            </div>
           </div>
 
           <div>
