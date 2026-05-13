@@ -80,7 +80,7 @@ function monthDates(year: number, month: number, count: number): Date[] {
     const base = i * step + 1;
     days.push(rand(base, Math.min(base + step - 1, daysInMonth)));
   }
-  return [...new Set(days)].sort((a,b) => a-b)
+  return Array.from(new Set(days)).sort((a,b) => a-b)
     .map(d => new Date(year, month-1, d, rand(8,20), rand(0,59)))
     .filter(dt => dt <= today)
     .slice(0, count);
