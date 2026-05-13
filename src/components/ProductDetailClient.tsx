@@ -124,6 +124,25 @@ function ImageGallery({ images }: { images: string[] }) {
             ))}
           </div>
         )}
+
+        {/* 모바일 썸네일 */}
+        {images.length > 1 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {images.map((url, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                className={`h-16 w-16 shrink-0 overflow-hidden rounded border-2 transition-colors ${
+                  i === active ? "border-brand" : "border-line"
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt={`썸네일 ${i + 1}`} className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ────────── PC: 화살표 캐러셀 (md 이상) ────────── */}
