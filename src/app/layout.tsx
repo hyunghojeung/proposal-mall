@@ -14,12 +14,36 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://proposal.blackcopy.co.kr";
+const SITE_TITLE = "제안서박스몰 — 제안서 제작 전문 쇼핑몰";
+const SITE_DESC  = "B2B 제안서 인쇄·제본·박스 전문. A4/A3 표준·맞춤 제작, 빠른 납기, 합리적인 가격.";
+
 export const metadata: Metadata = {
-  title: "제안서박스몰 — 제안서 제작 전문 쇼핑몰",
-  description: "B2B 제안서 인쇄·제본·박스 전문. 빠른 제작, 합리적인 가격.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://proposal.blackcopy.co.kr",
-  ),
+  title: SITE_TITLE,
+  description: SITE_DESC,
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    title:       SITE_TITLE,
+    description: SITE_DESC,
+    url:         SITE_URL,
+    siteName:    "제안서박스몰",
+    locale:      "ko_KR",
+    type:        "website",
+    images: [
+      {
+        url:    "/og-image.png",
+        width:  1200,
+        height: 630,
+        alt:    "제안서박스몰 — 제안서 제작 전문 쇼핑몰",
+      },
+    ],
+  },
+  twitter: {
+    card:        "summary_large_image",
+    title:       SITE_TITLE,
+    description: SITE_DESC,
+    images:      ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
