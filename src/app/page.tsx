@@ -177,6 +177,49 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* ── 카카오채널 배너 ── */}
+      <section style={{ backgroundColor: "#FEE500" }} className="py-12">
+        <div className="mx-auto max-w-page px-6">
+          <div className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-left">
+
+            {/* 아이콘 + 텍스트 */}
+            <div className="flex flex-col items-center gap-4 md:flex-row md:items-center md:gap-5">
+              {/* 카카오 말풍선 아이콘 */}
+              <div className="flex h-[64px] w-[64px] shrink-0 items-center justify-center rounded-2xl bg-black/10">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="#1A1A1A">
+                  <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.55 5.08 3.9 6.52-.16.58-.98 3.54-1.01 3.73 0 0-.01.11.06.15.07.04.15.01.15.01.2-.03 3.47-2.27 4.07-2.68.59.08 1.19.13 1.83.13 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
+                </svg>
+              </div>
+
+              <div>
+                <p className="text-[12px] font-bold tracking-widest text-black/40 uppercase">Kakao Channel</p>
+                <h3 className="mt-0.5 text-[20px] font-black text-[#1A1A1A] md:text-[22px]">
+                  카카오채널로 빠르게 상담하세요
+                </h3>
+                <p className="mt-1 text-[14px] leading-relaxed text-[#1A1A1A]/70">
+                  견적 문의·제작 상담을 채팅으로 빠르게 해결하세요.<br className="hidden md:block" />
+                  채널 추가 후 편하게 메시지를 보내주세요. 평일 09:00 ~ 18:00 운영
+                </p>
+              </div>
+            </div>
+
+            {/* CTA 버튼 */}
+            <a
+              href="http://pf.kakao.com/_XxeRTn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#1A1A1A] px-7 py-3.5 text-[15px] font-bold text-[#FEE500] transition-colors hover:bg-[#333]"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#FEE500">
+                <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.55 5.08 3.9 6.52-.16.58-.98 3.54-1.01 3.73 0 0-.01.11.06.15.07.04.15.01.15.01.2-.03 3.47-2.27 4.07-2.68.59.08 1.19.13 1.83.13 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
+              </svg>
+              카카오채널 상담하기
+            </a>
+
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </>
   );

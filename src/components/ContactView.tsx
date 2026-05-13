@@ -670,20 +670,25 @@ export function ContactView() {
                 </svg>
               </a>
               {/* Kakao */}
-              <div className="flex cursor-pointer items-center gap-3 border-b border-line px-4 py-4 transition-colors hover:bg-[#FAFAFA]">
+              <a
+                href="http://pf.kakao.com/_XxeRTn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 border-b border-line px-4 py-4 transition-colors hover:bg-[#FAFAFA]"
+              >
                 <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded border border-line bg-bg">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="#FAE300">
+                    <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.55 5.08 3.9 6.52-.16.58-.98 3.54-1.01 3.73 0 0-.01.11.06.15.07.04.15.01.15.01.2-.03 3.47-2.27 4.07-2.68.59.08 1.19.13 1.83.13 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-bold text-ink">카카오채널 채팅</p>
-                  <p className="mt-0.5 text-[12px] text-ink-sub">@제안서박스몰 · 평일 09~18시</p>
+                  <p className="mt-0.5 text-[12px] text-ink-sub">채널 추가 후 문의 · 평일 09~18시</p>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
-              </div>
+              </a>
               {/* Email */}
               <a
                 href="mailto:blackcopy2@naver.com"
