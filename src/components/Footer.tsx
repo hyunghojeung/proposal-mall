@@ -88,18 +88,15 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-[16px] font-bold text-ink">파일 접수</h3>
-            <p className="mt-3 text-[15px] leading-7 text-ink-sub">
-              결제 완료 후 Dropbox 링크를 통해 파일을 전달해 주세요.
-              <br />
-              이메일:{" "}
-              <a
-                href="mailto:blackcopy2@naver.com"
-                className="text-brand hover:underline"
-              >
-                blackcopy2@naver.com
-              </a>
-            </p>
+            <h3 className="text-[16px] font-bold text-ink">사업자 정보</h3>
+            <ul className="mt-3 space-y-1.5 text-[13px] leading-relaxed text-ink-sub">
+              <li><span className="text-ink-del">상호명</span> &nbsp;인쇄의창</li>
+              <li><span className="text-ink-del">대표이사</span> &nbsp;정형호</li>
+              <li><span className="text-ink-del">사업자등록번호</span> &nbsp;114-04-56136</li>
+              <li><span className="text-ink-del">통신판매업신고</span> &nbsp;2011-서울용산-01204호</li>
+              <li><span className="text-ink-del">개인정보취급책임자</span> &nbsp;정형호</li>
+              <li className="pt-1"><span className="text-ink-del">주소</span> &nbsp;서울특별시 용산구 한강대로40길 33 성산빌딩 2층</li>
+            </ul>
           </div>
         </div>
 
