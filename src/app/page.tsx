@@ -180,7 +180,7 @@ export default async function Home() {
       {/* ── 카카오채널 배너 ── */}
       <section style={{ backgroundColor: "#FEE500" }} className="py-12">
         <div className="mx-auto max-w-page px-6">
-          <div className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-left">
+          <div className="flex flex-col items-center gap-8 text-center md:flex-row md:justify-between md:text-left">
 
             {/* 아이콘 + 텍스트 */}
             <div className="flex flex-col items-center gap-4 md:flex-row md:items-center md:gap-5">
@@ -200,21 +200,49 @@ export default async function Home() {
                   견적 문의·제작 상담을 채팅으로 빠르게 해결하세요.<br className="hidden md:block" />
                   채널 추가 후 편하게 메시지를 보내주세요. 평일 09:00 ~ 18:00 운영
                 </p>
+                {/* CTA 버튼 (모바일) */}
+                <a
+                  href="http://pf.kakao.com/_XxeRTn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#1A1A1A] px-6 py-3 text-[14px] font-bold text-[#FEE500] transition-colors hover:bg-[#333] md:hidden"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="#FEE500">
+                    <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.55 5.08 3.9 6.52-.16.58-.98 3.54-1.01 3.73 0 0-.01.11.06.15.07.04.15.01.15.01.2-.03 3.47-2.27 4.07-2.68.59.08 1.19.13 1.83.13 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
+                  </svg>
+                  카카오채널 상담하기
+                </a>
               </div>
             </div>
 
-            {/* CTA 버튼 */}
-            <a
-              href="http://pf.kakao.com/_XxeRTn"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#1A1A1A] px-7 py-3.5 text-[15px] font-bold text-[#FEE500] transition-colors hover:bg-[#333]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#FEE500">
-                <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.55 5.08 3.9 6.52-.16.58-.98 3.54-1.01 3.73 0 0-.01.11.06.15.07.04.15.01.15.01.2-.03 3.47-2.27 4.07-2.68.59.08 1.19.13 1.83.13 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
-              </svg>
-              카카오채널 상담하기
-            </a>
+            {/* QR코드 + CTA 버튼 (PC) */}
+            <div className="hidden flex-col items-center gap-3 md:flex">
+              <a
+                href="http://pf.kakao.com/_XxeRTn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block rounded-2xl bg-white p-3 shadow-md transition-transform hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/kakao-qr.png"
+                  alt="카카오채널 QR코드"
+                  className="h-[130px] w-[130px] rounded-xl object-contain"
+                />
+              </a>
+              <p className="text-[11px] font-bold text-[#1A1A1A]/50">QR 스캔으로 채널 추가</p>
+              <a
+                href="http://pf.kakao.com/_XxeRTn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-[#1A1A1A] px-6 py-2.5 text-[14px] font-bold text-[#FEE500] transition-colors hover:bg-[#333]"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#FEE500">
+                  <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.7 1.55 5.08 3.9 6.52-.16.58-.98 3.54-1.01 3.73 0 0-.01.11.06.15.07.04.15.01.15.01.2-.03 3.47-2.27 4.07-2.68.59.08 1.19.13 1.83.13 5.523 0 10-3.477 10-7.8C22 6.477 17.523 3 12 3z"/>
+                </svg>
+                카카오채널 상담하기
+              </a>
+            </div>
 
           </div>
         </div>
