@@ -241,18 +241,18 @@ export default async function OrdersPage({
                 </p>
               </div>
 
-              <table className="w-full border-collapse text-[14px]">
+              <table className="w-full border-collapse text-[13px]">
                 <thead>
-                  <tr className="border-b border-line bg-bg text-[13px] text-ink-sub">
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문번호</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문자</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">연락처 / 이메일</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">결제</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상품</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">수령</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">상태</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-right font-semibold">금액</th>
-                    <th className="whitespace-nowrap px-5 py-3.5 text-left font-semibold">주문일시</th>
+                  <tr className="border-b border-line bg-bg text-[12px] text-ink-sub">
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold w-[96px]">주문번호</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold w-[90px]">주문자</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold w-[150px]">연락처 / 이메일</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold w-[60px]">결제</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold">상품</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold w-[80px]">수령</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold w-[72px]">상태</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-right font-semibold w-[100px]">금액</th>
+                    <th className="whitespace-nowrap px-3 py-3 text-left font-semibold w-[90px]">주문일시</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -268,42 +268,42 @@ export default async function OrdersPage({
 
                     return (
                       <tr key={o.serial} className="border-b border-line transition-colors hover:bg-[#fff8f6]">
-                        <td className="whitespace-nowrap px-5 py-4">
+                        <td className="whitespace-nowrap px-3 py-3.5">
                           <Link href={`/orders/${o.serial}`} className="font-black text-brand hover:underline">
                             {o.serial}
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap px-5 py-4">
+                        <td className="whitespace-nowrap px-3 py-3.5">
                           <p className="font-bold text-ink">{maskName(o.customerName)}</p>
-                          {o.company && <p className="mt-0.5 text-[12px] text-ink-sub">{o.company}</p>}
+                          {o.company && <p className="mt-0.5 text-[11px] text-ink-sub truncate max-w-[80px]">{o.company}</p>}
                         </td>
-                        <td className="whitespace-nowrap px-5 py-4">
+                        <td className="whitespace-nowrap px-3 py-3.5">
                           <p className="text-ink-sub">{maskPhone(o.customerPhone)}</p>
-                          <p className="mt-0.5 text-[12px] text-ink-del">{maskEmail(o.customerEmail)}</p>
+                          <p className="mt-0.5 text-[11px] text-ink-del">{maskEmail(o.customerEmail)}</p>
                         </td>
-                        <td className="whitespace-nowrap px-5 py-4">
-                          <span className={`inline-block rounded-full px-3 py-1 text-[12px] font-bold ${payCls}`}>
+                        <td className="whitespace-nowrap px-3 py-3.5">
+                          <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${payCls}`}>
                             {payLabel}
                           </span>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-3.5">
                           <Link href={`/orders/${o.serial}`}
-                            className="block max-w-[200px] truncate text-[14px] text-ink hover:text-brand hover:underline">
+                            className="block max-w-[160px] truncate text-[13px] text-ink hover:text-brand hover:underline">
                             {summary}
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap px-5 py-4 text-[13px] text-ink-sub">{delivery}</td>
-                        <td className="whitespace-nowrap px-5 py-4">
-                          <span className={`inline-block rounded-full px-3 py-1 text-[12px] font-bold ${badge.cls}`}>
+                        <td className="whitespace-nowrap px-3 py-3.5 text-[12px] text-ink-sub">{delivery}</td>
+                        <td className="whitespace-nowrap px-3 py-3.5">
+                          <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${badge.cls}`}>
                             {badge.label}
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-5 py-4 text-right">
+                        <td className="whitespace-nowrap px-3 py-3.5 text-right">
                           <span className="font-bold text-ink">
                             {Number(o.totalAmount).toLocaleString()}원
                           </span>
                         </td>
-                        <td className="whitespace-nowrap px-5 py-4 text-[13px] text-ink-del">
+                        <td className="whitespace-nowrap px-3 py-3.5 text-[12px] text-ink-del">
                           {new Date(o.createdAt).toLocaleString("ko-KR", {
                             month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
                           })}
