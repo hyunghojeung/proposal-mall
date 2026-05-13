@@ -29,7 +29,7 @@ const DISTRICTS = ["강남구", "종로구", "마포구", "서초구", "송파�
 
 function rName()  { return pick(LAST) + pick(FIRST); }
 function rPhone() { return `010-${rand(1000,9999)}-${rand(1000,9999)}`; }
-function rEmail(_n: string) {
+function rEmail() {
   const id = ["user", "contact", "order", "mail"][rand(0,3)];
   return `${id}${rand(10,99)}@${pick(DOMAINS)}`;
 }
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
         const total = sub + shipFee;
         const name  = rName();
         const phone = rPhone();
-        const email = rEmail(name);
+        const email = rEmail();
         const company = Math.random() > 0.4 ? pick(COMPANIES) : null;
         const serial = `Pro-${String(seq++).padStart(4,"0")}`;
 
