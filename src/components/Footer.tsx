@@ -4,7 +4,7 @@ export function Footer() {
   return (
     <footer className="mt-20 border-t border-line bg-bg">
       <div className="mx-auto max-w-page px-6 py-14">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <h2 className="text-[22px] font-black italic text-brand">제안서박스몰</h2>
             <p className="mt-3 text-[15px] leading-7 text-ink-sub">
@@ -56,6 +56,27 @@ export function Footer() {
                   공지사항
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-[16px] font-bold text-ink">BANK INFO</h3>
+            <ul className="mt-3 space-y-1.5 text-[14px] text-ink-sub">
+              <li className="font-semibold text-ink">우리은행 예금주: 정형호</li>
+              <li>208-08-4262-60</li>
+              <li className="pt-1">
+                상담:{" "}
+                <a href="mailto:blackcopy2@naver.com" className="text-brand hover:underline">
+                  blackcopy2@naver.com
+                </a>
+              </li>
+              <li className="pt-1">
+                웹하드:{" "}
+                <a href="https://webhard.co.kr" target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">
+                  webhard.co.kr
+                </a>
+              </li>
+              <li>ID: blackcopy / Pass: blackcopy</li>
             </ul>
           </div>
 
