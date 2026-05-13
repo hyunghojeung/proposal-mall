@@ -10,7 +10,14 @@ export function Footer() {
             <p className="mt-3 text-[15px] leading-7 text-ink-sub">
               B2B 제안서 인쇄·제본·박스 전문 쇼핑몰
               <br />
-              proposal.blackcopy.co.kr
+              <a
+                href="https://proposal.blackcopy.co.kr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand hover:underline"
+              >
+                proposal.blackcopy.co.kr
+              </a>
             </p>
             <div className="mt-4 space-y-3 border-t border-line pt-4">
               <div>
