@@ -29,7 +29,7 @@ const DISTRICTS = ["강남구", "종로구", "마포구", "서초구", "송파�
 
 function rName()  { return pick(LAST) + pick(FIRST); }
 function rPhone() { return `010-${rand(1000,9999)}-${rand(1000,9999)}`; }
-function rEmail(n: string) {
+function rEmail(_n: string) {
   const id = ["user", "contact", "order", "mail"][rand(0,3)];
   return `${id}${rand(10,99)}@${pick(DOMAINS)}`;
 }
