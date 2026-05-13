@@ -663,7 +663,7 @@ export function ContactView() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[14px] font-bold text-ink">전화 상담</p>
-                  <p className="mt-0.5 text-[12px] text-ink-sub">070-0000-0000 · 평일 09~18시</p>
+                  <p className="mt-0.5 text-[12px] text-ink-sub">010-4548-4848 · 평일 09~18시</p>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AAAAAA" strokeWidth="2" strokeLinecap="round">
                   <polyline points="9 18 15 12 9 6" />
