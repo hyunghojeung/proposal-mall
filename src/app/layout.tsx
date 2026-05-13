@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     type:        "website",
     images: [
       {
-        url:    "/og-image.jpg",
+        url:    "/og-image-v2.jpg",
         width:  1200,
         height: 630,
         alt:    "제안서박스몰 — 제안서 제작 전문 쇼핑몰",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     card:        "summary_large_image",
     title:       SITE_TITLE,
     description: SITE_DESC,
-    images:      ["/og-image.jpg"],
+    images:      ["/og-image-v2.jpg"],
   },
 };
 
