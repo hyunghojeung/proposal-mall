@@ -56,11 +56,29 @@ const CATEGORY_PARAMS: Record<ProductCategory, string> = {
 
 // ── 이미지 갤러리 ──────────────────────────────────────────
 function ImageGallery({ images }: { images: string[] }) {
-  const [active, setActive] = useState(0);
+  const [active, setActive]   = useState(0);
+  const scrollRef             = useRef<HTMLDivElement>(null);
+
+  function goTo(idx: number) {
+    const next = (idx + images.length) % images.length;
+    setActive(next);
+    // 모바일 스크롤 동기화
+    scrollRef.current?.scrollTo({
+      left: next * scrollRef.current.clientWidth,
+      behavior: "smooth",
+    });
+  }
+
+  // 모바일 스크롤 → active 동기화
+  function handleScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el  = e.currentTarget;
+    const idx = Math.round(el.scrollLeft / el.clientWidth);
+    if (idx !== active) setActive(idx);
+  }
 
   if (images.length === 0) {
     return (
-      <div className="flex w-full items-center justify-center rounded border border-line bg-bg h-[220px] md:h-[460px]">
+      <div className="flex h-[300px] w-full items-center justify-center rounded border border-line bg-bg md:h-[460px]">
         <span className="text-[15px] text-ink-sub">이미지 없음</span>
       </div>
     );
@@ -68,32 +86,111 @@ function ImageGallery({ images }: { images: string[] }) {
 
   return (
     <div>
-      {/* 메인 이미지 — 모바일 220px, 데스크탑 460px */}
-      <div className="w-full overflow-hidden rounded border border-line bg-bg h-[220px] md:h-[460px]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={images[active]}
-          alt="상품 이미지"
-          className="h-full w-full object-contain"
-        />
-      </div>
-      {images.length > 1 && (
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+      {/* ────────── 모바일: 좌우 스크롤 (md 미만) ────────── */}
+      <div className="md:hidden">
+        {/* 스크롤 컨테이너 */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex h-[300px] snap-x snap-mandatory overflow-x-auto scroll-smooth rounded border border-line bg-bg"
+          style={{ scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}
+        >
           {images.map((url, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setActive(i)}
-              className={`h-16 w-16 shrink-0 overflow-hidden rounded border-2 transition-colors md:h-20 md:w-20 ${
-                i === active ? "border-brand" : "border-line"
-              }`}
-            >
+            <div key={i} className="h-full w-full shrink-0 snap-center">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={url} alt={`썸네일 ${i + 1}`} className="h-full w-full object-cover" />
-            </button>
+              <img
+                src={url}
+                alt={`상품 이미지 ${i + 1}`}
+                className="h-full w-full object-contain"
+                draggable={false}
+              />
+            </div>
           ))}
         </div>
-      )}
+
+        {/* 점 인디케이터 */}
+        {images.length > 1 && (
+          <div className="mt-3 flex justify-center gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                aria-label={`이미지 ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all duration-200 ${
+                  i === active ? "w-6 bg-brand" : "w-1.5 bg-line hover:bg-ink-sub"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ────────── PC: 화살표 캐러셀 (md 이상) ────────── */}
+      <div className="hidden md:block">
+        {/* 메인 이미지 + 화살표 */}
+        <div className="group relative h-[460px] overflow-hidden rounded border border-line bg-bg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={active}
+            src={images[active]}
+            alt="상품 이미지"
+            className="h-full w-full object-contain transition-opacity duration-300"
+          />
+
+          {images.length > 1 && (
+            <>
+              {/* 왼쪽 화살표 */}
+              <button
+                type="button"
+                onClick={() => goTo(active - 1)}
+                aria-label="이전 이미지"
+                className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white/90 text-ink shadow-md opacity-0 transition-all duration-200 group-hover:opacity-100 hover:border-brand hover:bg-brand hover:text-white"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+
+              {/* 오른쪽 화살표 */}
+              <button
+                type="button"
+                onClick={() => goTo(active + 1)}
+                aria-label="다음 이미지"
+                className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-line bg-white/90 text-ink shadow-md opacity-0 transition-all duration-200 group-hover:opacity-100 hover:border-brand hover:bg-brand hover:text-white"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+
+              {/* 이미지 번호 (우하단) */}
+              <span className="absolute bottom-3 right-4 rounded-full bg-black/40 px-2.5 py-0.5 text-[12px] font-bold text-white">
+                {active + 1} / {images.length}
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* 썸네일 스트립 */}
+        {images.length > 1 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {images.map((url, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                className={`h-20 w-20 shrink-0 overflow-hidden rounded border-2 transition-colors ${
+                  i === active ? "border-brand" : "border-line hover:border-ink-sub"
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt={`썸네일 ${i + 1}`} className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
