@@ -56,14 +56,14 @@ export default async function Home() {
           <p className="mb-3 text-[15px] font-medium tracking-wide text-brand">
             B2B 제안서 제작 전문
           </p>
-          <h1 className="mb-4 text-[44px] font-black leading-[1.2] tracking-tight text-ink">
+          <h1 className="mb-4 break-keep text-[22px] font-black leading-[1.3] tracking-tight text-ink sm:text-[32px] md:text-[44px] md:leading-[1.2]">
             중요한 제안에 어울리는
             <br />
             <span className="text-brand">완성도 있는 제안서</span>를.
           </h1>
-          <p className="mb-8 text-[16px] leading-[1.9] text-ink-sub">
-            인쇄, 제본, 박스 제작까지 한 번에. 빠른 제작과 합리적인 가격으로
-            <br />
+          <p className="mb-8 break-keep text-[14px] leading-[1.8] text-ink-sub md:text-[16px] md:leading-[1.9]">
+            인쇄, 제본, 박스 제작까지 한 번에.<br className="md:hidden" /> 빠른 제작과 합리적인 가격으로
+            <br className="hidden md:block" />
             중요한 비즈니스 순간을 더 돋보이게 만들어 드립니다.
           </p>
           <Link
