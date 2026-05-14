@@ -82,7 +82,10 @@ export function ProductHeroCard({ product, index, total, flip = false }: Props) 
           }`}
         >
           {/* 이미지 영역 */}
-          <div className="relative flex flex-shrink-0 items-center justify-center md:w-[200px] lg:w-[240px]">
+          <Link
+            href={`/products/${product.slug}`}
+            className="relative flex flex-shrink-0 items-center justify-center md:w-[200px] lg:w-[240px]"
+          >
             {/* 상단 태그 pill */}
             {tags[0] && (
               <span className="absolute -top-3 left-0 z-10 whitespace-nowrap rounded-full border border-line bg-white px-3 py-1 text-[10px] font-bold text-ink-sub shadow-sm">
@@ -95,7 +98,7 @@ export function ProductHeroCard({ product, index, total, flip = false }: Props) 
               <img
                 src={product.thumbnail}
                 alt={product.name}
-                className="h-[180px] w-auto object-contain drop-shadow-sm lg:h-[220px]"
+                className="h-[180px] w-auto object-contain drop-shadow-sm transition-transform duration-200 hover:scale-105 lg:h-[220px]"
               />
             ) : (
               <div className="h-[180px] w-[180px] rounded-2xl border border-line bg-white/60" />
@@ -107,7 +110,7 @@ export function ProductHeroCard({ product, index, total, flip = false }: Props) 
                 {tags[1]}
               </span>
             )}
-          </div>
+          </Link>
 
           {/* 텍스트 영역 */}
           <div className="flex-1">
